@@ -4,16 +4,36 @@ import KOTOBA from './kotoba'
 import KANJI from './kanji'
 import BUNPO from './bunpo'
 
+// Normalisasi: id → string (sesuai skema data asli yang ber-id numerik),
+// field wajib selalu ada agar komponen tidak perlu guard.
+const norm = (e, material) => ({
+  frontSub: '',
+  reading: '',
+  group: '',
+  groupLabel: '',
+  ...e,
+  id: String(e.id),
+  material,
+})
+
 export const DATA = [
-  ...HIRAGANA.map((e) => ({ ...e, material: 'hiragana' })),
-  ...KATAKANA.map((e) => ({ ...e, material: 'katakana' })),
-  ...KOTOBA.map((e) => ({ ...e, material: 'kotoba' })),
-  ...KANJI.map((e) => ({ ...e, material: 'kanji' })),
-  ...BUNPO.map((e) => ({ ...e, material: 'bunpo' })),
+  ...HIRAGANA.map((e) => norm(e, 'hiragana')),
+  ...KATAKANA.map((e) => norm(e, 'katakana')),
+  ...KOTOBA.map((e) => norm(e, 'kotoba')),
+  ...KANJI.map((e) => norm(e, 'kanji')),
+  ...BUNPO.map((e) => norm(e, 'bunpo')),
 ]
 
 export const byMaterial = (material) => DATA.filter((e) => e.material === material)
 
-export const replicate = (n) => DATA.map((e) => ({ ...e, n }))
+// Daftar grup unik sesuai urutan kemunculan (untuk chip filter pelajaran).
+export function groupListOf(entries) {
+  const seen = []
+  for (const e of entries) {
+    const g = e.groupLabel || ''
+    if (g && !seen.includes(g)) seen.push(g)
+  }
+  return seen
+}
 
 export default DATA

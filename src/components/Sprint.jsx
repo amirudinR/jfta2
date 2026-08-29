@@ -1,123 +1,178 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { buildOptions } from '../lib/quiz'
-import { byMaterial } from '../data'
+import { shuffle } from '../lib/ui'
 
-const DURATION = 60
+const SPRINT_SIZE = 20
 
-// Sprint: pilihan ganda berbatas waktu, score + streak.
-export default function Sprint({ material }) {
-  const pool = useMemo(() => byMaterial(material), [material])
-  const [q, setQ] = useState(null)
-  const [score, setScore] = useState(0)
-  const [streak, setStreak] = useState(0)
-  const [best, setBest] = useState(0)
-  const [left, setLeft] = useState(DURATION)
-  const [choice, setChoice] = useState(null)
+// Sprint ala desain asli: 20 kartu, stopwatch naik, kartu "Belum hafal" diulang di akhir.
+// "Sudah hafal" → grade good; "Belum hafal" → grade again (SRS).
+export default function Sprint({ entries, cards, onGrade, material, direction = 'jp2id' }) {
+  const order = useMemo(() => shuffle(entries).slice(0, SPRINT_SIZE), [entries])
+
   const [running, setRunning] = useState(false)
+  const [queue, setQueue] = useState([])
+  const [pos, setPos] = useState(0)
+  const [flipped, setFlipped] = useState(false)
+  const [done, setDone] = useState({ ok: 0, ulang: 0 })
+  const [elapsed, setElapsed] = useState(0)
   const startAt = useRef(0)
 
-  const next = () => {
-    if (!pool.length) return
-    setChoice(null)
-    const e = pool[Math.floor(Math.random() * pool.length)]
-    const { label, options } = buildOptions(e, pool)
-    setQ({ entry: e, label, options })
-  }
+  useEffect(() => {
+    reset()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [material, entries])
 
   useEffect(() => {
-    setLeft(DURATION)
-    setScore(0); setStreak(0); setBest(0); setQ(null); setChoice(null); setRunning(false)
-  }, [material])
-
-  useEffect(() => {
-    let timer
-    if (running) {
-      timer = setInterval(() => {
-        const rem = Math.max(0, DURATION - Math.floor((Date.now() - startAt.current) / 1000))
-        setLeft(rem)
-        if (rem <= 0) setRunning(false)
-      }, 250)
-    }
-    return () => clearInterval(timer)
+    if (!running) return undefined
+    const t = setInterval(() => {
+      setElapsed(Math.floor((Date.now() - startAt.current) / 1000))
+    }, 250)
+    return () => clearInterval(t)
   }, [running])
 
-  const start = () => {
-    setScore(0); setStreak(0); setBest(0); setRunning(false); setLeft(DURATION)
-    startAt.current = Date.now()
-    setRunning(true)
-    next()
+  const reset = () => {
+    setRunning(false)
+    setQueue([])
+    setPos(0)
+    setFlipped(false)
+    setDone({ ok: 0, ulang: 0 })
+    setElapsed(0)
   }
 
-  const pick = (opt) => {
-    if (!running || choice || !q) return
-    setChoice(opt)
-    if (opt === q.label) {
-      setScore((s) => s + 1 + streak)
-      setStreak((s) => {
-        const ns = s + 1
-        setBest((b) => Math.max(b, ns))
-        return ns
-      })
-    } else {
-      setStreak(0)
-    }
+  const start = () => {
+    setQueue(order)
+    setPos(0)
+    setFlipped(false)
+    setDone({ ok: 0, ulang: 0 })
+    setElapsed(0)
+    startAt.current = Date.now()
+    setRunning(true)
   }
+
+  const reshuffle = () => {
+    reset()
+  }
+
+  const finish = () => {
+    setElapsed(Math.floor((Date.now() - startAt.current) / 1000))
+    setRunning(false)
+  }
+
+  const answer = (ok) => {
+    const entry = queue[pos]
+    if (!entry) return
+    onGrade(entry.id, ok ? 'good' : 'again', cards[entry.id] || null)
+    setDone((d) => (ok ? { ...d, ok: d.ok + 1 } : { ...d, ulang: d.ulang + 1 }))
+    const wasLast = pos + 1 >= queue.length
+    if (!ok) setQueue((qq) => [...qq, entry])
+    setFlipped(false)
+    if (wasLast && ok) finish()
+    else setPos((p) => p + 1)
+  }
+
+  const fmtTime = (s) =>
+    `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
 
   if (!running) {
     return (
-      <div className="card center">
-        <p style={{ fontSize: '2rem', margin: 0 }}>⚡</p>
+      <div className="panel">
+        <div className="big-emoji">⚡</div>
+        <h3>Sprint {SPRINT_SIZE} kartu</h3>
         <p>
-          Jawab sebanyak mungkin dalam <strong>{DURATION} detik</strong>.
-          <br />Benar beruntun memberi poin ekstra.
+          Balik kartu secepat mungkin. Kartu yang ditandai <b>Belum hafal</b> akan muncul lagi
+          di akhir antrean. Waktu berjalan naik (stopwatch).
         </p>
-        <div className="row">
-          <button className="btn primary" onClick={start}>Mulai Sprint</button>
-        </div>
-        {score > 0 ? (
-          <p className="mt">
-            {left === 0 ? 'Waktu habis! ' : ''}Skor terakhir: <strong>{score}</strong> · Streak terbaik: <strong>{best}</strong>
+        {elapsed > 0 ? (
+          <p>
+            Hasil terakhir: <span className="kin-count">{fmtTime(elapsed)}</span> · sudah hafal{' '}
+            <span className="kin-count">{done.ok}</span> · diulang{' '}
+            <span className="kin-count">{done.ulang}</span>
           </p>
         ) : null}
+        <div className="row mt no-print">
+          <button className="primary-btn" onClick={start} disabled={!order.length}>
+            Mulai Sprint
+          </button>
+          {elapsed > 0 ? (
+            <button className="reset-btn" onClick={reshuffle}>
+              Acak 20 baru
+            </button>
+          ) : null}
+        </div>
       </div>
     )
   }
 
-  if (!q) return null
+  const entry = queue[pos]
+  if (!entry) return null
+
+  const jp2id = direction === 'jp2id'
+  const front = jp2id ? entry.front : entry.backShort
+  const backMain = jp2id ? entry.backShort : entry.front
+  const backSub = jp2id ? entry.backFull : entry.reading || entry.frontSub
 
   return (
     <>
-      <div className="progress-grid" style={{ gridTemplateColumns: '1fr auto', marginBottom: '0.5rem' }}>
-        <span className="badge due">Waktu tersisa: {left}s</span>
-        <span className="badge ok">Skor {score} · 🔥{streak}</span>
+      <div className="meta-bar no-print">
+        <span className="meta-box">
+          ⏱ <b>{fmtTime(elapsed)}</b>
+        </span>
+        <span className="meta-box">
+          Kartu <b>{pos + 1}</b>/{queue.length}
+        </span>
+        <span className="meta-box">
+          Diulang <b>{done.ulang}</b>
+        </span>
+        <button className="meta-link" onClick={reshuffle}>
+          Acak 20 baru
+        </button>
       </div>
-      <div className="card">
-        <div className="kicker">Sebutkan artinya secepatnya!</div>
-        <div className="front" style={{ fontSize: '2.6rem' }}>
-          {q.entry.front}
-          {q.entry.reading ? <span className="small" style={{ fontSize: '1.2rem' }}>{q.entry.reading}</span> : null}
+
+      <div
+        className="quiz-card"
+        onClick={() => setFlipped((f) => !f)}
+        role="button"
+        tabIndex={0}
+        aria-label="Kartu sprint, ketuk untuk membalik"
+      >
+        <div className="card-top">Sprint · {entry.groupLabel || 'Umum'}</div>
+        <div className="card-body" style={{ padding: '14px 4px 10px' }}>
+          {!flipped ? (
+            <>
+              <div className="word" style={{ fontSize: 'clamp(2rem, 8.5vw, 2.8rem)' }}>
+                {front}
+              </div>
+              <div className="flip-hint">Ketuk untuk membalik</div>
+            </>
+          ) : (
+            <>
+              <div className="meaning">{backMain}</div>
+              {backSub ? <div className="meaning-sub">{backSub}</div> : null}
+            </>
+          )}
         </div>
-        <div className="row">
-          {q.options.map((opt) => {
-            let style = undefined
-            if (choice) {
-              if (opt === q.label) style = { borderColor: 'var(--ok)', color: 'var(--ok)' }
-              else if (opt === choice) style = { borderColor: 'var(--err)', color: 'var(--err)' }
-            }
-            return (
-              <button key={opt} className="btn" style={style} onClick={() => pick(opt)}>
-                {opt}
-              </button>
-            )
-          })}
-        </div>
-        {choice ? (
-          <p className={`center feedback mt ${choice === q.label ? 'correct' : 'wrong'}`}>
-            {choice === q.label ? 'Benar!' : `Salah → ${q.label}`}
-            <br />
-            <button className="btn primary" style={{ marginTop: '0.5rem' }} onClick={next}>Lanjut (Enter)</button>
-          </p>
-        ) : null}
+      </div>
+
+      <div className="actions mt no-print">
+        <button
+          className="act-btn"
+          style={{ color: '#e2937f' }}
+          onClick={(e) => {
+            e.stopPropagation()
+            answer(false)
+          }}
+        >
+          Belum hafal
+        </button>
+        <button
+          className="act-btn"
+          style={{ color: '#b9d4a1' }}
+          onClick={(e) => {
+            e.stopPropagation()
+            answer(true)
+          }}
+        >
+          Sudah hafal ✓
+        </button>
       </div>
     </>
   )

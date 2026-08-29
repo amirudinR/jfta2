@@ -1,17 +1,18 @@
 import { pickN } from './ui'
 
-export function answerOf(entry) {
-  return entry.backShort
+// Jawaban bergantung arah: jp2id → arti (backShort); id2jp → kata Jepang (front).
+export function answerOf(entry, direction = 'jp2id') {
+  return direction === 'id2jp' ? entry.front : entry.backShort
 }
 
-// 4 pilihan: 1 benar + 3 penggangu dari pool (backShort antar entri).
-export function buildOptions(entry, pool) {
-  const label = answerOf(entry)
+// 4 pilihan: 1 benar + 3 penggangu dari pool.
+export function buildOptions(entry, pool, direction = 'jp2id') {
+  const label = answerOf(entry, direction)
   const distract = pickN(
-    pool.filter((e) => e.id !== entry.id && answerOf(e) !== label),
+    pool.filter((e) => e.id !== entry.id && answerOf(e, direction) !== label),
     3,
   )
-  const options = [...distract.map(answerOf), label]
+  const options = [...distract.map((e) => answerOf(e, direction)), label]
   return {
     label,
     options: options.sort(() => Math.random() - 0.5),
