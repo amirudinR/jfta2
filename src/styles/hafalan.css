@@ -152,6 +152,40 @@
   color: var(--card-ink);
 }
 
+.hh-setting-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hh-setting-est {
+  font-size: 11px;
+  color: var(--card-soft);
+  font-family: var(--font-mono);
+}
+
+.hh-settings-info {
+  font-size: 12px;
+  color: var(--card-soft);
+  padding: 6px 10px;
+  background: var(--card-deep);
+  border-radius: 8px;
+}
+
+.hh-settings-summary {
+  font-size: 12px;
+  color: var(--card-soft);
+  line-height: 1.5;
+  padding: 8px 10px;
+  background: var(--card-deep);
+  border-radius: 8px;
+}
+
+.hh-settings-summary strong {
+  color: var(--kin);
+  font-family: var(--font-mono);
+}
+
 .hh-input-sm {
   width: 72px;
   text-align: center;

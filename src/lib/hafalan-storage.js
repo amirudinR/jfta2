@@ -1,17 +1,17 @@
 // Hafalan Harian — storage helpers & constants
 
 export const HAFALAN_MODES = [
-  { key: 'a2', label: 'JFT-A2', kanji: 'A2', kotobaSrc: 'kotoba', kanjiSrc: 'kanji' },
-  { key: 'n3', label: 'N3', kanji: 'N3', kotobaSrc: 'kotoba-n3', kanjiSrc: null },
-  { key: 'n2', label: 'N2', kanji: 'N2', kotobaSrc: 'kotoba-n2', kanjiSrc: null },
-  { key: 'n1', label: 'N1', kanji: 'N1', kotobaSrc: 'kotoba-n1', kanjiSrc: null },
+  { key: 'a2', label: 'JFT-A2', kanji: 'A2', kotobaSrc: 'kotoba', kanjiSrc: 'kanji', bunpouSrc: 'bunpo' },
+  { key: 'n3', label: 'N3', kanji: 'N3', kotobaSrc: 'kotoba-n3', kanjiSrc: null, bunpouSrc: null },
+  { key: 'n2', label: 'N2', kanji: 'N2', kotobaSrc: 'kotoba-n2', kanjiSrc: null, bunpouSrc: null },
+  { key: 'n1', label: 'N1', kanji: 'N1', kotobaSrc: 'kotoba-n1', kanjiSrc: null, bunpouSrc: null },
 ]
 
 export const DEFAULT_TARGETS = {
-  a2: { kotoba: 50, kanji: 25 },
-  n3: { kotoba: 40, kanji: 0 },
-  n2: { kotoba: 40, kanji: 0 },
-  n1: { kotoba: 40, kanji: 0 },
+  a2: { kotoba: 50, kanji: 25, bunpou: 5 },
+  n3: { kotoba: 40, kanji: 0, bunpou: 0 },
+  n2: { kotoba: 40, kanji: 0, bunpou: 0 },
+  n1: { kotoba: 40, kanji: 0, bunpou: 0 },
 }
 
 export const STORAGE_PREFIX = 'hh2'
@@ -36,15 +36,26 @@ export const setTargets = (v) => lsSet(`${STORAGE_PREFIX}-targets`, v)
 
 export const getHistory = (mode) => lsGet(`${STORAGE_PREFIX}-hist-${mode}`, {})
 
+function isDone(dayData, t) {
+  const kc = Object.values(dayData.kotoba || {}).filter(Boolean).length
+  const jc = Object.values(dayData.kanji || {}).filter(Boolean).length
+  const bc = Object.values(dayData.bunpou || {}).filter(Boolean).length
+  return kc >= t.kotoba
+    && ((!t.kanji) || jc >= t.kanji)
+    && ((!t.bunpou) || bc >= t.bunpou)
+}
+
 export function flushToHistory(mode, dayData) {
   if (!dayData?.date) return
   const targets = getTargets()
   const t = targets[mode] || DEFAULT_TARGETS[mode]
   const hist = getHistory(mode)
-  const kc = Object.values(dayData.kotoba || {}).filter(Boolean).length
-  const jc = Object.values(dayData.kanji || {}).filter(Boolean).length
-  const targetKanji = t.kanji || 0
-  hist[dayData.date] = { kotoba: kc, kanji: jc, done: kc >= t.kotoba && (targetKanji === 0 || jc >= targetKanji) }
+  hist[dayData.date] = {
+    kotoba: Object.values(dayData.kotoba || {}).filter(Boolean).length,
+    kanji: Object.values(dayData.kanji || {}).filter(Boolean).length,
+    bunpou: Object.values(dayData.bunpou || {}).filter(Boolean).length,
+    done: isDone(dayData, t),
+  }
   lsSet(`${STORAGE_PREFIX}-hist-${mode}`, hist)
 }
 
@@ -52,27 +63,31 @@ export function saveHistoryNow(mode, checked) {
   const targets = getTargets()
   const t = targets[mode] || DEFAULT_TARGETS[mode]
   const hist = getHistory(mode)
-  const kc = Object.values(checked.kotoba || {}).filter(Boolean).length
-  const jc = Object.values(checked.kanji || {}).filter(Boolean).length
-  const targetKanji = t.kanji || 0
-  hist[checked.date] = { kotoba: kc, kanji: jc, done: kc >= t.kotoba && (targetKanji === 0 || jc >= targetKanji) }
+  hist[checked.date] = {
+    kotoba: Object.values(checked.kotoba || {}).filter(Boolean).length,
+    kanji: Object.values(checked.kanji || {}).filter(Boolean).length,
+    bunpou: Object.values(checked.bunpou || {}).filter(Boolean).length,
+    done: isDone(checked, t),
+  }
   lsSet(`${STORAGE_PREFIX}-hist-${mode}`, hist)
 }
 
 export function getChecked(mode) {
-  const data = lsGet(`${STORAGE_PREFIX}-checked-${mode}`, { date: todayStr(), kotoba: {}, kanji: {} })
+  const data = lsGet(`${STORAGE_PREFIX}-checked-${mode}`, { date: todayStr(), kotoba: {}, kanji: {}, bunpou: {} })
   if (data.date !== todayStr()) {
     flushToHistory(mode, data)
-    const fresh = { date: todayStr(), kotoba: {}, kanji: {} }
+    const fresh = { date: todayStr(), kotoba: {}, kanji: {}, bunpou: {} }
     lsSet(`${STORAGE_PREFIX}-checked-${mode}`, fresh)
     return fresh
   }
+  // ponytail: migrate old checked without bunpou key
+  if (!data.bunpou) data.bunpou = {}
   return data
 }
 
 export const setCheckedStorage = (mode, data) => lsSet(`${STORAGE_PREFIX}-checked-${mode}`, data)
 
-export const getCustom = (mode) => lsGet(`${STORAGE_PREFIX}-custom-${mode}`, { kotoba: [], kanji: [] })
+export const getCustom = (mode) => lsGet(`${STORAGE_PREFIX}-custom-${mode}`, { kotoba: [], kanji: [], bunpou: [] })
 export const setCustomStorage = (mode, data) => lsSet(`${STORAGE_PREFIX}-custom-${mode}`, data)
 
 export function computeStreak(history) {

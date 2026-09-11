@@ -13,6 +13,34 @@ import { DetailModal } from './hafalan/DetailModal'
 import { SettingsPanel } from './hafalan/SettingsPanel'
 import { AddForm } from './hafalan/AddForm'
 
+function buildItems(material) {
+  if (!material) return []
+  return byMaterial(material).map((e, i) => ({
+    id: `b-${e.id}`, num: i + 1, front: e.front,
+    reading: e.frontSub || e.reading || '',
+    meaning: e.backShort, full: e.backFull, custom: false,
+  }))
+}
+
+function appendCustom(builtIn, customs) {
+  return [
+    ...builtIn,
+    ...(customs || []).map((e, i) => ({
+      id: `c-${i}`, num: builtIn.length + i + 1, front: e.front,
+      reading: e.reading, meaning: e.meaning, full: e.meaning,
+      custom: true, customIdx: i,
+    })),
+  ]
+}
+
+function dailySlice(src, dayPage, count) {
+  if (!src.length || count <= 0) return []
+  const start = (dayPage * count) % src.length
+  const items = []
+  for (let i = 0; i < count && i < src.length; i++) items.push(src[(start + i) % src.length])
+  return items
+}
+
 export default function HafalanHarian() {
   const [activeMode, setActiveMode] = useState('a2')
   const [tab, setTab] = useState('kotoba')
@@ -26,6 +54,7 @@ export default function HafalanHarian() {
 
   const modeInfo = HAFALAN_MODES.find(m => m.key === activeMode)
   const hasKanji = modeInfo?.kanjiSrc != null
+  const hasBunpou = modeInfo?.bunpouSrc != null
   const t = targets[activeMode] || DEFAULT_TARGETS[activeMode]
 
   const switchMode = useCallback((mode) => {
@@ -42,7 +71,7 @@ export default function HafalanHarian() {
     const check = () => {
       if (checked.date !== todayStr()) {
         flushToHistory(activeMode, checked)
-        const fresh = { date: todayStr(), kotoba: {}, kanji: {} }
+        const fresh = { date: todayStr(), kotoba: {}, kanji: {}, bunpou: {} }
         setChecked(fresh)
         setCheckedStorage(activeMode, fresh)
       }
@@ -51,44 +80,16 @@ export default function HafalanHarian() {
     return () => clearInterval(timer)
   }, [checked, activeMode])
 
-  // Build items from data
-  const kotobaAll = useMemo(() => {
-    if (!modeInfo) return []
-    return byMaterial(modeInfo.kotobaSrc).map((e, i) => ({
-      id: `b-${e.id}`, num: i + 1, front: e.front,
-      reading: e.frontSub || e.reading || '',
-      meaning: e.backShort, full: e.backFull, custom: false,
-    }))
-  }, [activeMode])
+  // Build items
+  const kotobaAll = useMemo(() => buildItems(modeInfo?.kotobaSrc), [activeMode])
+  const kanjiAll = useMemo(() => buildItems(modeInfo?.kanjiSrc), [activeMode])
+  const bunpouAll = useMemo(() => buildItems(modeInfo?.bunpouSrc), [activeMode])
 
-  const kanjiAll = useMemo(() => {
-    if (!modeInfo?.kanjiSrc) return []
-    return byMaterial(modeInfo.kanjiSrc).map((e, i) => ({
-      id: `b-${e.id}`, num: i + 1, front: e.front,
-      reading: e.reading || e.frontSub || '',
-      meaning: e.backShort, full: e.backFull, custom: false,
-    }))
-  }, [activeMode])
+  const kotobaWithCustom = useMemo(() => appendCustom(kotobaAll, custom.kotoba), [kotobaAll, custom])
+  const kanjiWithCustom = useMemo(() => appendCustom(kanjiAll, custom.kanji), [kanjiAll, custom])
+  const bunpouWithCustom = useMemo(() => appendCustom(bunpouAll, custom.bunpou), [bunpouAll, custom])
 
-  const kotobaWithCustom = useMemo(() => {
-    const cust = (custom.kotoba || []).map((e, i) => ({
-      id: `c-${i}`, num: kotobaAll.length + i + 1, front: e.front,
-      reading: e.reading, meaning: e.meaning, full: e.meaning,
-      custom: true, customIdx: i,
-    }))
-    return [...kotobaAll, ...cust]
-  }, [kotobaAll, custom])
-
-  const kanjiWithCustom = useMemo(() => {
-    const cust = (custom.kanji || []).map((e, i) => ({
-      id: `c-${i}`, num: kanjiAll.length + i + 1, front: e.front,
-      reading: e.reading, meaning: e.meaning, full: e.meaning,
-      custom: true, customIdx: i,
-    }))
-    return [...kanjiAll, ...cust]
-  }, [kanjiAll, custom])
-
-  // Daily slice: sequential rotation
+  // Day page for rotation
   const dayPage = useMemo(() => {
     const hist = getHistory(activeMode)
     const dates = Object.keys(hist).sort()
@@ -98,30 +99,19 @@ export default function HafalanHarian() {
     return Math.floor((today - first) / 86400000)
   }, [activeMode])
 
-  const kotobaSlice = useMemo(() => {
-    const src = kotobaWithCustom
-    if (!src.length || t.kotoba <= 0) return []
-    const start = (dayPage * t.kotoba) % src.length
-    const items = []
-    for (let i = 0; i < t.kotoba && i < src.length; i++) items.push(src[(start + i) % src.length])
-    return items
-  }, [kotobaWithCustom, dayPage, t.kotoba])
+  const kotobaSlice = useMemo(() => dailySlice(kotobaWithCustom, dayPage, t.kotoba), [kotobaWithCustom, dayPage, t.kotoba])
+  const kanjiSlice = useMemo(() => dailySlice(kanjiWithCustom, dayPage, t.kanji), [kanjiWithCustom, dayPage, t.kanji])
+  const bunpouSlice = useMemo(() => dailySlice(bunpouWithCustom, dayPage, t.bunpou || 0), [bunpouWithCustom, dayPage, t.bunpou])
 
-  const kanjiSlice = useMemo(() => {
-    const src = kanjiWithCustom
-    if (!src.length || t.kanji <= 0) return []
-    const start = (dayPage * t.kanji) % src.length
-    const items = []
-    for (let i = 0; i < t.kanji && i < src.length; i++) items.push(src[(start + i) % src.length])
-    return items
-  }, [kanjiWithCustom, dayPage, t.kanji])
-
-  // Counts
+  // Checked counts
   const kotobaCheckedCount = Object.values(checked.kotoba || {}).filter(Boolean).length
   const kanjiCheckedCount = Object.values(checked.kanji || {}).filter(Boolean).length
+  const bunpouCheckedCount = Object.values(checked.bunpou || {}).filter(Boolean).length
+
   const kotobaDone = kotobaCheckedCount >= t.kotoba
-  const kanjiDone = t.kanji <= 0 || kanjiCheckedCount >= t.kanji
-  const allDone = kotobaDone && kanjiDone
+  const kanjiDone = !t.kanji || kanjiCheckedCount >= t.kanji
+  const bunpouDone = !t.bunpou || bunpouCheckedCount >= t.bunpou
+  const allDone = kotobaDone && kanjiDone && bunpouDone
 
   const history = useMemo(() => getHistory(activeMode), [checked, activeMode])
   const streak = useMemo(() => computeStreak(history), [history])
@@ -154,8 +144,19 @@ export default function HafalanHarian() {
     setTargets(newTargets)
   }
 
-  const items = tab === 'kotoba' ? kotobaSlice : kanjiSlice
-  const checkedMap = tab === 'kotoba' ? checked.kotoba : checked.kanji
+  // Current tab data
+  const itemsMap = { kotoba: kotobaSlice, kanji: kanjiSlice, bunpou: bunpouSlice }
+  const totalMap = { kotoba: kotobaWithCustom, kanji: kanjiWithCustom, bunpou: bunpouWithCustom }
+  const items = itemsMap[tab] || []
+  const checkedMap = checked[tab] || {}
+
+  // Build reminder text
+  const reminderParts = [`${kotobaCheckedCount}/${t.kotoba} kotoba`]
+  if (hasKanji) reminderParts.push(`${kanjiCheckedCount}/${t.kanji} kanji`)
+  if (hasBunpou && t.bunpou > 0) reminderParts.push(`${bunpouCheckedCount}/${t.bunpou} bunpou`)
+
+  // Tab label for add form
+  const tabLabel = tab === 'kotoba' ? 'Kotoba' : tab === 'kanji' ? 'Kanji' : 'Bunpou'
 
   return (
     <div className="hh-root">
@@ -171,8 +172,7 @@ export default function HafalanHarian() {
 
       {showReminder && (
         <div className="hh-reminder">
-          Target belum tercapai! {kotobaCheckedCount}/{t.kotoba} kotoba
-          {hasKanji ? `, ${kanjiCheckedCount}/${t.kanji} kanji` : ''}
+          Target belum tercapai! {reminderParts.join(', ')}
         </div>
       )}
 
@@ -198,6 +198,7 @@ export default function HafalanHarian() {
       <div className="hh-stats">
         <ProgressBar current={kotobaCheckedCount} target={t.kotoba} label="Kotoba" />
         {hasKanji && <ProgressBar current={kanjiCheckedCount} target={t.kanji} label="Kanji" />}
+        {hasBunpou && t.bunpou > 0 && <ProgressBar current={bunpouCheckedCount} target={t.bunpou} label="Bunpou" />}
       </div>
 
       {/* Heatmap */}
@@ -209,13 +210,19 @@ export default function HafalanHarian() {
       {/* Tabs */}
       <div className="hh-tabs">
         <button className={`hh-tab ${tab === 'kotoba' ? 'active' : ''}`} onClick={() => setTab('kotoba')}>
-          ことば Kotoba
+          ことば
           <span className="hh-tab-badge">{kotobaCheckedCount}/{t.kotoba}</span>
         </button>
         {hasKanji && (
           <button className={`hh-tab ${tab === 'kanji' ? 'active' : ''}`} onClick={() => setTab('kanji')}>
-            漢字 Kanji
+            漢字
             <span className="hh-tab-badge">{kanjiCheckedCount}/{t.kanji}</span>
+          </button>
+        )}
+        {hasBunpou && t.bunpou > 0 && (
+          <button className={`hh-tab ${tab === 'bunpou' ? 'active' : ''}`} onClick={() => setTab('bunpou')}>
+            文法
+            <span className="hh-tab-badge">{bunpouCheckedCount}/{t.bunpou}</span>
           </button>
         )}
       </div>
@@ -255,13 +262,16 @@ export default function HafalanHarian() {
         <AddForm type={tab} onAdd={(item) => addCustom(tab, item)} onClose={() => setShowForm(null)} />
       ) : (
         <button className="hh-add-btn" onClick={() => setShowForm(tab)}>
-          <Plus size={16} /> Tambah {tab === 'kotoba' ? 'Kotoba' : 'Kanji'} Baru
+          <Plus size={16} /> Tambah {tabLabel} Baru
         </button>
       )}
 
       <div className="hh-info">
-        Target: {t.kotoba} kotoba{hasKanji ? ` + ${t.kanji} kanji` : ''} / hari · Reset 00:00 ·
-        Total: {tab === 'kotoba' ? kotobaWithCustom.length : kanjiWithCustom.length} item
+        Target: {t.kotoba} kotoba
+        {hasKanji ? ` + ${t.kanji} kanji` : ''}
+        {hasBunpou && t.bunpou > 0 ? ` + ${t.bunpou} bunpou` : ''}
+        {' '}/ hari · Reset 00:00 ·
+        Total: {(totalMap[tab] || []).length} item
       </div>
 
       {detailItem && (
