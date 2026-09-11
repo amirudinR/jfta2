@@ -1,256 +1,18 @@
-import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { byMaterial } from '../data'
+import { CheckSquare, Square, Plus, ChevronDown, ChevronUp, Trash2, Settings, Flame } from 'lucide-react'
 import {
-  CheckSquare, Square, Plus, X, ChevronDown, ChevronUp,
-  Trash2, Settings, Flame, Volume2, ChevronLeft,
-} from 'lucide-react'
+  HAFALAN_MODES, DEFAULT_TARGETS, REMINDER_HOUR,
+  todayStr, getTargets, setTargets, getHistory, getChecked,
+  setCheckedStorage, getCustom, setCustomStorage,
+  flushToHistory, saveHistoryNow, computeStreak,
+} from '../lib/hafalan-storage'
+import { Heatmap } from './hafalan/Heatmap'
+import { ProgressBar } from './hafalan/ProgressBar'
+import { DetailModal } from './hafalan/DetailModal'
+import { SettingsPanel } from './hafalan/SettingsPanel'
+import { AddForm } from './hafalan/AddForm'
 
-// ── Modes & their data sources ──
-const HAFALAN_MODES = [
-  { key: 'a2', label: 'JFT-A2', kanji: 'A2', kotobaSrc: 'kotoba', kanjiSrc: 'kanji' },
-  { key: 'n3', label: 'N3', kanji: 'N3', kotobaSrc: 'kotoba-n3', kanjiSrc: null },
-  { key: 'n2', label: 'N2', kanji: 'N2', kotobaSrc: 'kotoba-n2', kanjiSrc: null },
-  { key: 'n1', label: 'N1', kanji: 'N1', kotobaSrc: 'kotoba-n1', kanjiSrc: null },
-]
-
-const DEFAULT_TARGETS = { a2: { kotoba: 50, kanji: 25 }, n3: { kotoba: 40, kanji: 0 }, n2: { kotoba: 40, kanji: 0 }, n1: { kotoba: 40, kanji: 0 } }
-const STORAGE_PREFIX = 'hh2'
-const REMINDER_HOUR = 21
-
-// ── Storage helpers ──
-const todayStr = () => {
-  const d = new Date()
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
-
-const lsGet = (k, fallback) => { try { const r = localStorage.getItem(k); return r ? JSON.parse(r) : fallback } catch { return fallback } }
-const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)) } catch {} }
-
-const getTargets = () => lsGet(`${STORAGE_PREFIX}-targets`, DEFAULT_TARGETS)
-const setTargets = (v) => lsSet(`${STORAGE_PREFIX}-targets`, v)
-
-const getChecked = (mode) => {
-  const data = lsGet(`${STORAGE_PREFIX}-checked-${mode}`, { date: todayStr(), kotoba: {}, kanji: {} })
-  if (data.date !== todayStr()) {
-    // flush to history, reset
-    flushToHistory(mode, data)
-    const fresh = { date: todayStr(), kotoba: {}, kanji: {} }
-    lsSet(`${STORAGE_PREFIX}-checked-${mode}`, fresh)
-    return fresh
-  }
-  return data
-}
-const setCheckedStorage = (mode, data) => lsSet(`${STORAGE_PREFIX}-checked-${mode}`, data)
-
-const getHistory = (mode) => lsGet(`${STORAGE_PREFIX}-hist-${mode}`, {})
-
-function flushToHistory(mode, dayData) {
-  if (!dayData?.date) return
-  const targets = getTargets()
-  const t = targets[mode] || DEFAULT_TARGETS[mode]
-  const hist = getHistory(mode)
-  const kc = Object.values(dayData.kotoba || {}).filter(Boolean).length
-  const jc = Object.values(dayData.kanji || {}).filter(Boolean).length
-  const targetKanji = t.kanji || 0
-  hist[dayData.date] = { kotoba: kc, kanji: jc, done: kc >= t.kotoba && (targetKanji === 0 || jc >= targetKanji) }
-  lsSet(`${STORAGE_PREFIX}-hist-${mode}`, hist)
-}
-
-function saveHistoryNow(mode, checked) {
-  const targets = getTargets()
-  const t = targets[mode] || DEFAULT_TARGETS[mode]
-  const hist = getHistory(mode)
-  const kc = Object.values(checked.kotoba || {}).filter(Boolean).length
-  const jc = Object.values(checked.kanji || {}).filter(Boolean).length
-  const targetKanji = t.kanji || 0
-  hist[checked.date] = { kotoba: kc, kanji: jc, done: kc >= t.kotoba && (targetKanji === 0 || jc >= targetKanji) }
-  lsSet(`${STORAGE_PREFIX}-hist-${mode}`, hist)
-}
-
-const getCustom = (mode) => lsGet(`${STORAGE_PREFIX}-custom-${mode}`, { kotoba: [], kanji: [] })
-const setCustomStorage = (mode, data) => lsSet(`${STORAGE_PREFIX}-custom-${mode}`, data)
-
-// ── TTS ──
-function speak(text) {
-  if (!window.speechSynthesis) return
-  const u = new SpeechSynthesisUtterance(text)
-  u.lang = 'ja-JP'; u.rate = 0.85
-  window.speechSynthesis.cancel()
-  window.speechSynthesis.speak(u)
-}
-
-// ── Streak computation ──
-function computeStreak(history) {
-  let streak = 0
-  const d = new Date()
-  // check yesterday first, then backwards
-  for (let i = 1; i <= 365; i++) {
-    const check = new Date(d)
-    check.setDate(check.getDate() - i)
-    const key = `${check.getFullYear()}-${String(check.getMonth() + 1).padStart(2, '0')}-${String(check.getDate()).padStart(2, '0')}`
-    if (history[key]?.done) streak++
-    else break
-  }
-  // include today if done
-  const todayEntry = history[todayStr()]
-  if (todayEntry?.done) streak++
-  return streak
-}
-
-// ── Heatmap ──
-function Heatmap({ history, targets }) {
-  const days = []
-  const now = new Date()
-  for (let i = 29; i >= 0; i--) {
-    const d = new Date(now); d.setDate(d.getDate() - i)
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-    days.push({ key, d, entry: history[key] })
-  }
-  return (
-    <div className="hh-heatmap">
-      <div className="hh-heatmap-label">30 Hari Terakhir</div>
-      <div className="hh-heatmap-grid">
-        {days.map(({ key, d, entry }) => {
-          let cls = 'hh-hm-cell'
-          const isToday = key === todayStr()
-          if (entry?.done) cls += ' done'
-          else if (entry && (entry.kotoba > 0 || entry.kanji > 0)) cls += ' partial'
-          else if (!isToday) cls += ' miss'
-          if (isToday) cls += ' today'
-          return (
-            <div key={key} className={cls} title={`${key}: ${entry ? `${entry.kotoba}k + ${entry.kanji}j${entry.done ? ' ✓' : ''}` : isToday ? 'Hari ini' : '—'}`}>
-              <span className="hh-hm-day">{d.getDate()}</span>
-            </div>
-          )
-        })}
-      </div>
-      <div className="hh-heatmap-legend">
-        <span className="hh-hm-cell miss" style={{ width: 12, height: 12 }} /> Kosong
-        <span className="hh-hm-cell partial" style={{ width: 12, height: 12 }} /> Sebagian
-        <span className="hh-hm-cell done" style={{ width: 12, height: 12 }} /> Tercapai
-      </div>
-    </div>
-  )
-}
-
-// ── Progress Bar ──
-function ProgressBar({ current, target, label }) {
-  if (target <= 0) return null
-  const pct = Math.min(100, Math.round((current / target) * 100))
-  const full = current >= target
-  return (
-    <div className="hh-progress">
-      <div className="hh-progress-header">
-        <span className="hh-progress-label">{label}</span>
-        <span className={`hh-progress-count ${full ? 'full' : ''}`}>{current}/{target}</span>
-      </div>
-      <div className="hh-progress-track">
-        <div className={`hh-progress-fill ${full ? 'full' : ''}`} style={{ width: `${pct}%` }} />
-      </div>
-    </div>
-  )
-}
-
-// ── Detail Modal ──
-function DetailModal({ item, isChecked, onToggle, onClose }) {
-  useEffect(() => {
-    const handler = (e) => { if (e.key === 'Escape') onClose() }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
-  }, [onClose])
-
-  return (
-    <div className="hh-modal-overlay" onClick={onClose}>
-      <div className="hh-modal" onClick={e => e.stopPropagation()}>
-        <button className="hh-modal-close" onClick={onClose}><X size={20} /></button>
-
-        <div className="hh-modal-main">
-          <span className="hh-modal-num">#{item.num}</span>
-          <div className="hh-modal-front">{item.front}</div>
-          {item.reading && <div className="hh-modal-reading">{item.reading}</div>}
-          <div className="hh-modal-meaning">{item.full || item.meaning}</div>
-          {item.example && <div className="hh-modal-example">例: {item.example}</div>}
-        </div>
-
-        <div className="hh-modal-actions">
-          <button className="hh-modal-tts" onClick={() => speak(item.front)} title="Dengarkan">
-            <Volume2 size={20} />
-          </button>
-          <button className={`hh-modal-hafal ${isChecked ? 'checked' : ''}`} onClick={onToggle}>
-            {isChecked ? <CheckSquare size={22} /> : <Square size={22} />}
-            {isChecked ? 'Sudah Hafal' : 'Tandai Hafal'}
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ── Settings Panel ──
-function SettingsPanel({ mode, targets, onSave, onClose }) {
-  const t = targets[mode] || DEFAULT_TARGETS[mode]
-  const [kotoba, setKotoba] = useState(t.kotoba)
-  const [kanji, setKanji] = useState(t.kanji)
-  const hasKanji = HAFALAN_MODES.find(m => m.key === mode)?.kanjiSrc != null
-
-  return (
-    <div className="hh-settings">
-      <div className="hh-settings-head">
-        <span>Target Harian — {HAFALAN_MODES.find(m => m.key === mode)?.label}</span>
-        <button className="hh-close-btn" onClick={onClose}><X size={16} /></button>
-      </div>
-      <label className="hh-setting-row">
-        <span>Kotoba per hari</span>
-        <input type="number" min={1} max={200} value={kotoba} onChange={e => setKotoba(Math.max(1, +e.target.value || 1))} className="hh-input hh-input-sm" />
-      </label>
-      {hasKanji && (
-        <label className="hh-setting-row">
-          <span>Kanji per hari</span>
-          <input type="number" min={1} max={100} value={kanji} onChange={e => setKanji(Math.max(1, +e.target.value || 1))} className="hh-input hh-input-sm" />
-        </label>
-      )}
-      <button className="hh-add-submit" onClick={() => { onSave({ ...targets, [mode]: { kotoba, kanji: hasKanji ? kanji : 0 } }); onClose() }}>
-        Simpan Target
-      </button>
-    </div>
-  )
-}
-
-// ── Add Form ──
-function AddForm({ type, onAdd, onClose }) {
-  const [front, setFront] = useState('')
-  const [reading, setReading] = useState('')
-  const [meaning, setMeaning] = useState('')
-  const ref = useRef()
-  useEffect(() => { ref.current?.focus() }, [])
-
-  const submit = (e) => {
-    e.preventDefault()
-    if (!front.trim() || !meaning.trim()) return
-    onAdd({ front: front.trim(), reading: reading.trim(), meaning: meaning.trim() })
-    setFront(''); setReading(''); setMeaning('')
-    ref.current?.focus()
-  }
-
-  return (
-    <form className="hh-add-form" onSubmit={submit}>
-      <div className="hh-add-title">
-        Tambah {type === 'kotoba' ? 'Kotoba' : 'Kanji'} Baru
-        <button type="button" className="hh-close-btn" onClick={onClose}><X size={16} /></button>
-      </div>
-      <div className="hh-add-fields">
-        <input ref={ref} className="hh-input" placeholder={type === 'kotoba' ? '漢字 / ひらがな' : '漢字'} value={front} onChange={e => setFront(e.target.value)} />
-        <input className="hh-input" placeholder="Cara baca" value={reading} onChange={e => setReading(e.target.value)} />
-        <input className="hh-input" placeholder="Arti (Indonesia)" value={meaning} onChange={e => setMeaning(e.target.value)} />
-      </div>
-      <button type="submit" className="hh-add-submit" disabled={!front.trim() || !meaning.trim()}>
-        <Plus size={14} /> Tambah
-      </button>
-    </form>
-  )
-}
-
-// ── Main ──
 export default function HafalanHarian() {
   const [activeMode, setActiveMode] = useState('a2')
   const [tab, setTab] = useState('kotoba')
@@ -266,7 +28,6 @@ export default function HafalanHarian() {
   const hasKanji = modeInfo?.kanjiSrc != null
   const t = targets[activeMode] || DEFAULT_TARGETS[activeMode]
 
-  // Reload checked/custom when mode changes
   const switchMode = useCallback((mode) => {
     setActiveMode(mode)
     setChecked(getChecked(mode))
@@ -398,7 +159,7 @@ export default function HafalanHarian() {
 
   return (
     <div className="hh-root">
-      {/* ── Mode selector ── */}
+      {/* Mode selector */}
       <div className="hh-mode-bar">
         {HAFALAN_MODES.map(m => (
           <button key={m.key} className={`hh-mode-btn ${activeMode === m.key ? 'active' : ''}`} onClick={() => switchMode(m.key)}>
@@ -408,7 +169,6 @@ export default function HafalanHarian() {
         ))}
       </div>
 
-      {/* ── Reminder ── */}
       {showReminder && (
         <div className="hh-reminder">
           Target belum tercapai! {kotobaCheckedCount}/{t.kotoba} kotoba
@@ -416,10 +176,9 @@ export default function HafalanHarian() {
         </div>
       )}
 
-      {/* ── Done banner ── */}
       {allDone && <div className="hh-done-banner">Target hari ini tercapai! すごい！</div>}
 
-      {/* ── Header: streak + settings ── */}
+      {/* Streak + settings */}
       <div className="hh-header">
         <div className="hh-streak">
           <Flame size={18} className={streak > 0 ? 'hh-flame-on' : ''} />
@@ -431,24 +190,23 @@ export default function HafalanHarian() {
         </button>
       </div>
 
-      {/* ── Settings ── */}
       {showSettings && (
         <SettingsPanel mode={activeMode} targets={targets} onSave={saveTargets} onClose={() => setShowSettings(false)} />
       )}
 
-      {/* ── Progress bars ── */}
+      {/* Progress */}
       <div className="hh-stats">
         <ProgressBar current={kotobaCheckedCount} target={t.kotoba} label="Kotoba" />
         {hasKanji && <ProgressBar current={kanjiCheckedCount} target={t.kanji} label="Kanji" />}
       </div>
 
-      {/* ── Heatmap ── */}
+      {/* Heatmap */}
       <button className="hh-heatmap-toggle" onClick={() => setShowHeatmap(v => !v)}>
         Riwayat {showHeatmap ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
       </button>
       {showHeatmap && <Heatmap history={history} targets={t} />}
 
-      {/* ── Tabs (kotoba / kanji) ── */}
+      {/* Tabs */}
       <div className="hh-tabs">
         <button className={`hh-tab ${tab === 'kotoba' ? 'active' : ''}`} onClick={() => setTab('kotoba')}>
           ことば Kotoba
@@ -462,7 +220,7 @@ export default function HafalanHarian() {
         )}
       </div>
 
-      {/* ── Item List ── */}
+      {/* Item List */}
       <div className="hh-list">
         {items.map((item) => {
           const isChecked = !!checkedMap?.[item.id]
@@ -492,7 +250,7 @@ export default function HafalanHarian() {
         )}
       </div>
 
-      {/* ── Add Form ── */}
+      {/* Add Form */}
       {showForm === tab ? (
         <AddForm type={tab} onAdd={(item) => addCustom(tab, item)} onClose={() => setShowForm(null)} />
       ) : (
@@ -506,7 +264,6 @@ export default function HafalanHarian() {
         Total: {tab === 'kotoba' ? kotobaWithCustom.length : kanjiWithCustom.length} item
       </div>
 
-      {/* ── Detail Modal ── */}
       {detailItem && (
         <DetailModal
           item={detailItem}

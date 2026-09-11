@@ -1,0 +1,45 @@
+/* ---------- Kemampuan (dashboard) ---------- */
+.kp-dashboard {
+  max-width: 640px;
+}
+
+.kp-dashboard h1 {
+  letter-spacing: 0.02em;
+}
+
+.kp-stats-row {
+  grid-template-columns: repeat(4, 1fr) !important;
+}
+
+.kp-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+}
+
+.kp-stat-mastery {
+  grid-column: span 2;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.kp-material > div > div,
+.kp-groups > div > div {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
+}
+
+.kp-material h2,
+.kp-groups h2,
+.kp-activity h2,
+.kp-srs h2 {
+  margin-bottom: 4px;
+}
+
+.kp-activity,
+.kp-srs {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+}

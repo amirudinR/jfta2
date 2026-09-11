@@ -1,0 +1,175 @@
+/* ---------- Responsif ---------- */
+@media (max-width: 480px) {
+  .modebar {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .mode-btn {
+    font-size: 11px;
+    padding: 9px 3px;
+    gap: 4px;
+    flex-direction: column;
+  }
+
+  .mode-btn .mi {
+    font-size: 16px;
+  }
+
+  .kp-stats-row {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .kp-stat-mastery {
+    grid-column: span 2;
+  }
+
+  .kp-stat {
+    padding: 12px 8px !important;
+  }
+
+  .kp-stat > div:nth-child(2) {
+    font-size: 20px !important;
+  }
+
+  .kp-dashboard .kp-material > div > div > div,
+  .kp-dashboard .kp-groups > div > div > div {
+    flex-wrap: wrap;
+  }
+
+  .kp-dashboard .kp-material span,
+  .kp-dashboard .kp-groups span {
+    min-width: auto !important;
+  }
+
+  .opt {
+    font-size: 12.5px;
+    padding: 12px 6px;
+  }
+
+  .card-top {
+    font-size: 9px;
+    letter-spacing: 0.12em;
+  }
+
+  .stat-chips {
+    gap: 6px;
+  }
+
+  .stat {
+    padding: 8px 4px 6px;
+  }
+
+  .lrow {
+    gap: 8px;
+    padding: 9px 10px;
+  }
+
+  .lrow .rd {
+    display: none;
+  }
+}
+
+@media (max-width: 380px) {
+  .materibar {
+    gap: 4px;
+  }
+
+  .mat-btn {
+    padding: 8px 2px 6px;
+  }
+
+  .mat-btn .mj {
+    font-size: 13px;
+  }
+
+  .mat-btn .ml {
+    font-size: 8.5px;
+  }
+
+  .mode-btn {
+    font-size: 10px;
+  }
+
+  .mode-badge {
+    min-width: 16px;
+    height: 16px;
+    font-size: 9.5px;
+  }
+
+  .actions {
+    grid-template-columns: 40px 1fr 40px;
+  }
+
+  .grade-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .ctl-row {
+    flex-direction: column;
+  }
+
+  .pill-group {
+    width: 100%;
+  }
+
+  .pill {
+    flex: 1;
+    text-align: center;
+  }
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .card-wrap,
+  .lrow .chev,
+  .pbar-fill {
+    transition: none;
+  }
+}
+
+/* ---------- Print ---------- */
+@media print {
+  body {
+    background: #fff;
+    color: #000;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .topbar,
+  .materibar,
+  .modebar,
+  .controls,
+  .actions,
+  .grade-grid,
+  .progress-row,
+  .banner,
+  .quiz-stats,
+  .meta-bar {
+    display: none !important;
+  }
+
+  .card-face,
+  .quiz-card {
+    position: static;
+    background: #fff;
+    border: 1px solid #999;
+    box-shadow: none;
+    break-inside: avoid;
+    color: #000;
+  }
+
+  .lrow,
+  .detail {
+    background: #fff;
+    border-color: #bbb;
+    color: #000;
+  }
+
+  .lrow .fx,
+  .lrow .mn {
+    color: #000;
+  }
+}
