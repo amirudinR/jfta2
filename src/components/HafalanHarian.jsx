@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { byMaterial } from '../data'
-import { CheckSquare, Square, Plus, ChevronDown, ChevronUp, Trash2, Settings, Flame } from 'lucide-react'
+import { CheckSquare, Square, Plus, ChevronDown, ChevronUp, Trash2, Settings, Flame, BookText } from 'lucide-react'
 import {
   HAFALAN_MODES, DEFAULT_TARGETS, REMINDER_HOUR,
   todayStr, getTargets, setTargets, getHistory, getChecked,
@@ -41,7 +41,7 @@ function dailySlice(src, dayPage, count) {
   return items
 }
 
-export default function HafalanHarian() {
+export default function HafalanHarian({ onGoMateri }) {
   const [activeMode, setActiveMode] = useState('a2')
   const [tab, setTab] = useState('kotoba')
   const [targets, setTargetsState] = useState(() => getTargets())
@@ -263,6 +263,12 @@ export default function HafalanHarian() {
       ) : (
         <button className="hh-add-btn" onClick={() => setShowForm(tab)}>
           <Plus size={16} /> Tambah {tabLabel} Baru
+        </button>
+      )}
+
+      {onGoMateri && (
+        <button className="hh-add-btn" onClick={onGoMateri} style={{ marginTop: 4 }}>
+          <BookText size={16} /> Lihat Semua Materi
         </button>
       )}
 

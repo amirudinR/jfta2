@@ -13,6 +13,7 @@ import {
   BookCopy,
   Book,
   CalendarCheck,
+  BookText,
 } from 'lucide-react'
 import { MATERIALS, MODES } from '../data/materials'
 
@@ -37,6 +38,7 @@ export function MaterialBar({ active, onChange }) {
 const modeIcon = (key) => {
   const icons = {
     harian: <CalendarCheck size={14} />,
+    materi: <BookText size={14} />,
     kartu: <Sparkles size={14} />,
     kuis: <FileQuestion size={14} />,
     ulangi: <RotateCcw size={14} />,

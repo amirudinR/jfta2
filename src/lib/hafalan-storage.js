@@ -105,6 +105,31 @@ export function computeStreak(history) {
   return streak
 }
 
+// ── Persistent mastery (shared between Hafalan Harian & Daftar Materi) ──
+// Key: hh2-mastered  Value: { [modeKey]: { kotoba: {id: true}, kanji: {}, bunpou: {} } }
+export const getMastered = () => lsGet(`${STORAGE_PREFIX}-mastered`, {})
+export const setMasteredStorage = (v) => lsSet(`${STORAGE_PREFIX}-mastered`, v)
+
+export function toggleMastered(modeKey, category, id) {
+  const all = getMastered()
+  if (!all[modeKey]) all[modeKey] = {}
+  if (!all[modeKey][category]) all[modeKey][category] = {}
+  if (all[modeKey][category][id]) delete all[modeKey][category][id]
+  else all[modeKey][category][id] = true
+  setMasteredStorage(all)
+  return all
+}
+
+export function isMasteredItem(modeKey, category, id) {
+  const all = getMastered()
+  return !!all[modeKey]?.[category]?.[id]
+}
+
+export function countMastered(modeKey, category) {
+  const all = getMastered()
+  return Object.keys(all[modeKey]?.[category] || {}).length
+}
+
 export function speak(text) {
   if (!window.speechSynthesis) return
   const u = new SpeechSynthesisUtterance(text)

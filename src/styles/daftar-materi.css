@@ -1,0 +1,226 @@
+/* ============================================================
+   Daftar Materi
+   ============================================================ */
+
+.dm-root {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 24px;
+}
+
+.dm-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dm-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--kin);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  align-self: flex-start;
+}
+
+.dm-back:hover { text-decoration: underline; }
+
+.dm-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--page-ink);
+}
+
+/* Grand summary */
+.dm-grand {
+  font-size: 13px;
+  color: var(--page-soft);
+  padding: 10px 14px;
+  background: var(--panel);
+  border: 1px solid var(--panel-line);
+  border-radius: 10px;
+  text-align: center;
+}
+
+.dm-grand strong {
+  color: var(--kin);
+  font-family: var(--font-mono);
+}
+
+/* Progress row */
+.dm-progress-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dm-progress {
+  background: var(--card-face);
+  border: 1px solid var(--panel-line);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.dm-progress-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.dm-progress-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--card-soft);
+}
+
+.dm-progress-count {
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--card-ink);
+}
+
+/* Category header */
+.dm-cat-head {
+  font-size: 12px;
+  color: var(--page-soft);
+  padding: 4px 0;
+}
+
+/* Search + filters */
+.dm-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dm-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.dm-search-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--card-soft);
+  pointer-events: none;
+}
+
+.dm-search {
+  width: 100%;
+  padding: 10px 34px 10px 34px;
+  background: var(--card-face);
+  border: 1px solid var(--card-line);
+  border-radius: 10px;
+  color: var(--card-ink);
+  font-size: 14px;
+  font-family: var(--font-jp);
+  outline: none;
+  transition: border-color .2s;
+}
+
+.dm-search::placeholder { color: var(--card-soft); opacity: .5; }
+.dm-search:focus { border-color: var(--kin); }
+
+.dm-search-clear {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  color: var(--card-soft);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.dm-filters {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.dm-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--page-soft);
+}
+
+.dm-filter-btn {
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--panel-line);
+  background: none;
+  color: var(--page-soft);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.dm-filter-btn.active {
+  background: var(--kin);
+  border-color: var(--kin);
+  color: #fff;
+}
+
+.dm-sort-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--panel-line);
+  background: none;
+  color: var(--page-soft);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-mono);
+}
+
+.dm-sort-btn.active {
+  border-color: var(--kin);
+  color: var(--kin);
+}
+
+/* Pagination */
+.dm-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.dm-page-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--panel-line);
+  background: var(--panel);
+  color: var(--page-ink);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.dm-page-btn:hover:not(:disabled) { border-color: var(--kin); color: var(--kin); }
+.dm-page-btn:disabled { opacity: .3; cursor: not-allowed; }
+
+.dm-page-info {
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--page-soft);
+}

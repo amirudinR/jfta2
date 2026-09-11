@@ -25,6 +25,7 @@ import Referensi from './components/Referensi'
 import Kemampuan from './components/Kemampuan'
 import KotobaLevel from './components/KotobaLevel'
 import HafalanHarian from './components/HafalanHarian'
+import DaftarMateri from './components/DaftarMateri'
 import { recordStudy, getHistory, computeStreak } from './lib/history'
 
 export default function App() {
@@ -124,7 +125,9 @@ export default function App() {
   const renderBody = () => {
     switch (mode) {
       case 'harian':
-        return <HafalanHarian />
+        return <HafalanHarian onGoMateri={() => setMode('materi')} />
+      case 'materi':
+        return <DaftarMateri onGoHafalan={() => setMode('harian')} />
       case 'kartu':
         return (
           <Kartu
@@ -218,7 +221,7 @@ export default function App() {
         onToggleDark={() => setPrefs({ darkMode: !prefs.darkMode })}
       />
 
-      {mode === 'harian' || mode === 'kotoba-n3' || mode === 'kotoba-n2' || mode === 'kotoba-n1' ? null : (
+      {mode === 'harian' || mode === 'materi' || mode === 'kotoba-n3' || mode === 'kotoba-n2' || mode === 'kotoba-n1' ? null : (
         <MaterialBar active={material} onChange={setMaterial} />
       )}
 

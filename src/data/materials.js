@@ -11,6 +11,7 @@ export const MATERIALS = [
 
 export const MODES = [
   { key: 'harian', label: 'Hafalan Harian', icon: '📅' },
+  { key: 'materi', label: 'Daftar Materi', icon: '📖' },
   { key: 'kartu', label: 'Kartu', icon: '🎴' },
   { key: 'kuis', label: 'Kuis', icon: '📝' },
   { key: 'ulangi', label: 'Ulangi', icon: '🔁', badge: 'ulangi' },
