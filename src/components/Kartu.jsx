@@ -141,7 +141,7 @@ export default function Kartu({
 
   const doSpeak = (e) => {
     e.stopPropagation()
-    speak(entry.front)
+    speak(entry.reading || entry.front)
   }
 
   const faceCommon = (isBack) => (

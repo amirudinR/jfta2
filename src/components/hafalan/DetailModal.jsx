@@ -23,7 +23,7 @@ export function DetailModal({ item, isChecked, onToggle, onClose }) {
         </div>
 
         <div className="hh-modal-actions">
-          <button className="hh-modal-tts" onClick={() => speak(item.front)} title="Dengarkan">
+          <button className="hh-modal-tts" onClick={() => speak(item.reading || item.front)} title="Dengarkan">
             <Volume2 size={20} />
           </button>
           <button className={`hh-modal-hafal ${isChecked ? 'checked' : ''}`} onClick={onToggle}>

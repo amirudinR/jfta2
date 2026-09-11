@@ -1098,7 +1098,7 @@ export const KOTOBA = [
   // 第32課 — Makanan Jepang
   E(1029, '寿司', 'すし', 'sushi', 'ikan + nasi', 32),
   E(1030, '刺身', 'さしみ', 'sashimi', 'ikan mentah', 32),
-  E(1031, '天ぷら', '天ぷら', 'tempura', 'goreng tepung', 32),
+  E(1031, '天ぷら', 'てんぷら', 'tempura', 'goreng tepung', 32),
   E(1032, 'ラーメン', 'ラーメン', 'ramen', 'mi kuah', 32),
   E(1033, 'うどん', 'うどん', 'udon', 'mi tebal', 32),
   E(1034, 'そば', 'そば', 'soba', 'mi soba', 32),
