@@ -1,3 +1,5 @@
+import { Sun, Moon } from 'lucide-react'
+
 export default function Topbar({ stats, darkMode, onToggleDark }) {
   return (
     <header className="topbar">
@@ -7,7 +9,7 @@ export default function Topbar({ stats, darkMode, onToggleDark }) {
           <div className="brand">
             暗記帳<span className="brand-sub">アンキチョウ</span>
           </div>
-          <div className="tagline">Hafalan JFT-Basic A2 · kartu · kuis · ujian</div>
+          <div className="tagline">Hafalan Bahasa Jepang (A2–N1) · kartu · kuis · ujian</div>
         </div>
         <button
           className="icon-btn no-print"
@@ -15,7 +17,7 @@ export default function Topbar({ stats, darkMode, onToggleDark }) {
           title={darkMode ? 'Mode terang' : 'Mode gelap'}
           aria-label={darkMode ? 'Aktifkan mode terang' : 'Aktifkan mode gelap'}
         >
-          {darkMode ? '☀️' : '🌙'}
+          {darkMode ? <Sun size={18} /> : <Moon size={18} />}
         </button>
       </div>
       <div className="stat-chips">

@@ -55,12 +55,20 @@ export default function DaftarHafal({ entries, cards }) {
         onChange={(e) => setQuery(e.target.value)}
       />
 
-      {groups.map(([g, list]) => (
-        <div key={g}>
-          <div className="group-head">
-            <span className="gtag">{g}</span>
-            <span className="gcount">{list.length} kartu</span>
-          </div>
+      {groups.map(([g, list]) => {
+        const gMastered = list.filter((e) => isMastered(cards[e.id])).length
+        const gPct = Math.round((gMastered / list.length) * 100)
+        return (
+          <div key={g}>
+            <div className="group-head">
+              <span className="gtag">{g}</span>
+              <div className="gbar">
+                <div className="gbar-fill" style={{ width: `${gPct}%` }} />
+              </div>
+              <span className="gcount">
+                {gMastered}/{list.length} hafal · {gPct}%
+              </span>
+            </div>
           {list.map((e) => {
             const c = cards[e.id]
             const mastered = isMastered(c)
@@ -95,7 +103,8 @@ export default function DaftarHafal({ entries, cards }) {
             )
           })}
         </div>
-      ))}
+        )
+      })}
 
       {items.length === 0 ? <p className="muted">Tidak ada hasil untuk “{query}”.</p> : null}
     </>

@@ -4,6 +4,7 @@ import { isMastered } from '../lib/srs'
 import { kanaToRomaji } from '../lib/kana'
 import { speak } from '../lib/tts'
 import { materialOf, stampOf } from '../data/materials'
+import { Volume2, Languages } from 'lucide-react'
 
 const GRADES = [
   { key: 'again', label: 'Lupa', sub: 'ulang sekarang', cls: 'g-again' },
@@ -21,6 +22,7 @@ export default function Kartu({
   material,
   direction = 'jp2id',
   showRomaji = false,
+  onToggleRomaji = () => {},
   deckKey = 0,
   onlyLearning = false,
 }) {
@@ -145,7 +147,7 @@ export default function Kartu({
   const faceCommon = (isBack) => (
     <>
       <button className="speak-btn" onClick={doSpeak} title="Bunyikan (TTS)" aria-label="Bunyikan suara">
-        🔊
+        <Volume2 size={16} />
       </button>
       <span className="hanko-stamp">{stampOf(entry, material)}</span>
       <div className="card-top">
@@ -158,6 +160,7 @@ export default function Kartu({
             {backReading ? <div className="word-reading">{backReading}</div> : null}
             {!jp2id && entry.frontSub ? <div className="meaning-sub">{entry.frontSub}</div> : null}
             <div className="meaning-sub">{entry.backFull}</div>
+            {entry.mnenonic ? <div className="mnenonic">{entry.mnenonic}</div> : null}
             {!jp2id && romaji ? <div className="romaji-line">{romaji}</div> : null}
           </>
         ) : (
@@ -171,6 +174,14 @@ export default function Kartu({
           </>
         )}
       </div>
+      <button
+        className={`romaji-toggle ${showRomaji ? 'on' : ''}`}
+        onClick={(e) => { e.stopPropagation(); onToggleRomaji() }}
+        title={showRomaji ? 'Sembunyikan romaji' : 'Tampilkan romaji'}
+        aria-label={showRomaji ? 'Sembunyikan romaji' : 'Tampilkan romaji'}
+      >
+        <Languages size={14} />
+      </button>
       <div className="flip-hint">Ketuk untuk membalik · Spasi</div>
     </>
   )

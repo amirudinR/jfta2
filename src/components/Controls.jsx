@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Languages } from 'lucide-react'
 
 // Panel kontrol ala desain asli: arah kartu, romaji, chip pelajaran, terapkan & kocok.
 // Seleksi pelajaran bersifat draft — baru dikomit lewat "Terapkan & kocok ulang".
@@ -54,20 +55,14 @@ export default function Controls({
             ID→日本語
           </button>
         </div>
-        <div className="pill-group" role="group" aria-label="Tampilkan romaji">
-          <button
-            className={`pill ${!showRomaji ? 'on' : ''}`}
-            onClick={() => showRomaji && onToggleRomaji()}
-          >
-            Romaji: Off
-          </button>
-          <button
-            className={`pill ${showRomaji ? 'on' : ''}`}
-            onClick={() => !showRomaji && onToggleRomaji()}
-          >
-            On
-          </button>
-        </div>
+        <button
+          className={`pill romaji-pill ${showRomaji ? 'on' : ''}`}
+          onClick={onToggleRomaji}
+          aria-label="Tampilkan romaji"
+        >
+          <Languages size={14} />
+          <span>Romaji</span>
+        </button>
       </div>
 
       {groups.length > 1 ? (

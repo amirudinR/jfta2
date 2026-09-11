@@ -22,6 +22,10 @@ import Sprint from './components/Sprint'
 import Ujian from './components/Ujian'
 import DaftarHafal from './components/DaftarHafal'
 import Referensi from './components/Referensi'
+import Kemampuan from './components/Kemampuan'
+import KotobaLevel from './components/KotobaLevel'
+import HafalanHarian from './components/HafalanHarian'
+import { recordStudy, getHistory, computeStreak } from './lib/history'
 
 export default function App() {
   const [material, setMaterial] = useState('hiragana')
@@ -31,6 +35,7 @@ export default function App() {
   const [lessons, setLessons] = useState({}) // { [material]: null | [groupLabel] }
   const [deckVersion, setDeckVersion] = useState(0)
   const [resetArmed, setResetArmed] = useState(false)
+  const [historyTick, setHistoryTick] = useState(0)
 
   const storageOk = useMemo(() => storageAvailable(), [])
   const ttsOk = useMemo(() => ttsSupported(), [])
@@ -62,7 +67,16 @@ export default function App() {
 
   const handleGrade = (id, grade, pre) => {
     storeGrade(material, id, gradeCard(pre, grade))
+    recordStudy(material, id, grade, pre)
     setProgress(getProgress())
+    setHistoryTick((t) => t + 1)
+  }
+
+  const handleGradeN3 = (mat, id, grade, pre) => {
+    storeGrade(mat, id, gradeCard(pre, grade))
+    recordStudy(mat, id, grade, pre)
+    setProgress(getProgress())
+    setHistoryTick((t) => t + 1)
   }
 
   const handleToggleMastered = (id, card) => {
@@ -89,6 +103,11 @@ export default function App() {
     return { ulangi, hafal }
   }, [cards])
 
+  const history = useMemo(() => getHistory(), [historyTick, material])
+  const streak = useMemo(() => computeStreak(history), [history, historyTick])
+
+  const allEntriesRaw = useMemo(() => byMaterial('hiragana').concat(byMaterial('katakana'), byMaterial('kotoba'), byMaterial('kotoba-n3'), byMaterial('kotoba-n2'), byMaterial('kotoba-n1'), byMaterial('kanji'), byMaterial('bunpo')), [])
+
   const doReset = () => {
     if (!resetArmed) {
       setResetArmed(true)
@@ -104,6 +123,8 @@ export default function App() {
 
   const renderBody = () => {
     switch (mode) {
+      case 'harian':
+        return <HafalanHarian />
       case 'kartu':
         return (
           <Kartu
@@ -114,6 +135,7 @@ export default function App() {
             material={material}
             direction={prefs.direction}
             showRomaji={prefs.showRomaji}
+            onToggleRomaji={() => setPrefs({ showRomaji: !prefs.showRomaji })}
             deckKey={deckVersion}
           />
         )
@@ -149,6 +171,31 @@ export default function App() {
         return <Ujian entries={allEntries} cards={cards} direction={prefs.direction} />
       case 'daftar':
         return <DaftarHafal entries={allEntries} cards={cards} />
+      case 'kemampuan':
+        return (
+          <Kemampuan
+            entries={entries}
+            cards={cards}
+            material={material}
+            history={history}
+            streak={streak}
+            allEntries={allEntriesRaw}
+          />
+        )
+      case 'kotoba-n3':
+      case 'kotoba-n2':
+      case 'kotoba-n1':
+        return (
+          <KotobaLevel
+            material={mode}
+            label={mode === 'kotoba-n2' ? 'Kotoba N2' : mode === 'kotoba-n1' ? 'Kotoba N1' : 'Kotoba N3'}
+            hankoText={mode.replace('kotoba-n', '').toUpperCase()}
+            cards={progress.perMaterial[mode] || {}}
+            prefs={prefs}
+            onToggleRomaji={() => setPrefs({ showRomaji: !prefs.showRomaji })}
+            onGrade={handleGradeN3}
+          />
+        )
       case 'referensi':
         return (
           <Referensi
@@ -171,7 +218,9 @@ export default function App() {
         onToggleDark={() => setPrefs({ darkMode: !prefs.darkMode })}
       />
 
-      <MaterialBar active={material} onChange={setMaterial} />
+      {mode === 'harian' || mode === 'kotoba-n3' || mode === 'kotoba-n2' || mode === 'kotoba-n1' ? null : (
+        <MaterialBar active={material} onChange={setMaterial} />
+      )}
 
       <ModeBar active={mode} onChange={setMode} badgeCount={badgeCount} />
 
@@ -205,7 +254,7 @@ export default function App() {
           {!ttsOk ? ' TTS tidak didukung browser ini.' : ''}
         </span>
         <span>
-          Sumber: daftar kosakata &amp; kanji JFT-Basic A2 · 暗記帳 アンキチョウ
+          Sumber: kosakata JLPT (A2–N1) &amp; kanji &amp; tata bahasa · 暗記帳 アンキチョウ
         </span>
         <button className={`reset-btn no-print ${resetArmed ? 'armed' : ''}`} onClick={doReset}>
           {resetArmed ? 'Yakin? Klik lagi untuk reset' : 'Reset semua progres'}
