@@ -77,6 +77,24 @@
   .lrow .rd {
     display: none;
   }
+
+  .list-tools {
+    gap: 6px;
+  }
+
+  .view-switch button {
+    font-size: 11px;
+    padding: 6px 8px;
+  }
+
+  .kgrid {
+    grid-template-columns: repeat(auto-fill, minmax(86px, 1fr));
+    gap: 6px;
+  }
+
+  .gtile .gtile-front {
+    font-size: 28px;
+  }
 }
 
 @media (max-width: 380px) {

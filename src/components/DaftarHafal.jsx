@@ -6,6 +6,7 @@ import { fmtDue } from '../lib/ui'
 export default function DaftarHafal({ entries, cards }) {
   const [query, setQuery] = useState('')
   const [openId, setOpenId] = useState(null)
+  const [grid, setGrid] = useState(false)
 
   const items = useMemo(() => {
     const active = entries.filter((e) => cards[e.id])
@@ -48,12 +49,30 @@ export default function DaftarHafal({ entries, cards }) {
 
   return (
     <>
-      <input
-        className="search no-print"
-        placeholder="Cari kata, arti, atau pelajaran…"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
+      <div className="list-tools">
+        <input
+          className="search no-print"
+          placeholder="Cari kata, arti, atau pelajaran…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        <div className="view-switch no-print">
+          <button
+            type="button"
+            className={!grid ? 'active' : ''}
+            onClick={() => setGrid(false)}
+          >
+            ☰ Daftar
+          </button>
+          <button
+            type="button"
+            className={grid ? 'active' : ''}
+            onClick={() => setGrid(true)}
+          >
+            ▦ Kotak
+          </button>
+        </div>
+      </div>
 
       {groups.map(([g, list]) => {
         const gMastered = list.filter((e) => isMastered(cards[e.id])).length
@@ -69,39 +88,62 @@ export default function DaftarHafal({ entries, cards }) {
                 {gMastered}/{list.length} hafal · {gPct}%
               </span>
             </div>
-          {list.map((e) => {
-            const c = cards[e.id]
-            const mastered = isMastered(c)
-            const open = openId === e.id
-            return (
-              <div key={e.id}>
-                <div
-                  className={`lrow clickable ${open ? 'open' : ''}`}
-                  onClick={() => setOpenId(open ? null : e.id)}
-                >
-                  <span className="fx">{e.front}</span>
-                  {e.reading ? <span className="rd">{e.reading}</span> : null}
-                  <span className="mn">{e.backShort}</span>
-                  <span
-                    className="mark-btn on"
-                    style={{ cursor: 'default' }}
-                    title={mastered ? 'Dikuasai' : 'Belum dikuasai'}
+          {grid ? (
+            <div className="kgrid">
+              {list.map((e) => {
+                const c = cards[e.id]
+                const gMastered = isMastered(c)
+                return (
+                  <div
+                    key={e.id}
+                    className={`gtile${gMastered ? ' done' : ''}`}
+                    title={e.backFull}
                   >
-                    {mastered ? '✓' : '⏳'}
-                  </span>
-                  <span className="chev">▶</span>
-                </div>
-                {open ? (
-                  <div className="detail">
-                    {e.backFull}
-                    <span className="mono">
-                      {'\n'}Interval: {c.interval} hari · Jatuh tempo: {fmtDue(c.due)}
-                    </span>
+                    <span className="gtile-front">{e.front}</span>
+                    {e.reading || e.frontSub ? (
+                      <span className="gtile-rd">{e.reading || e.frontSub}</span>
+                    ) : null}
+                    <span className="gtile-mn">{e.backShort}</span>
+                    <span className="gtile-mark">{gMastered ? '✓' : '⏳'}</span>
                   </div>
-                ) : null}
-              </div>
-            )
-          })}
+                )
+              })}
+            </div>
+          ) : (
+            list.map((e) => {
+              const c = cards[e.id]
+              const mastered = isMastered(c)
+              const open = openId === e.id
+              return (
+                <div key={e.id}>
+                  <div
+                    className={`lrow clickable ${open ? 'open' : ''}`}
+                    onClick={() => setOpenId(open ? null : e.id)}
+                  >
+                    <span className="fx">{e.front}</span>
+                    {e.reading ? <span className="rd">{e.reading}</span> : null}
+                    <span className="mn">{e.backShort}</span>
+                    <span
+                      className="mark-btn on"
+                      style={{ cursor: 'default' }}
+                      title={mastered ? 'Dikuasai' : 'Belum dikuasai'}
+                    >
+                      {mastered ? '✓' : '⏳'}
+                    </span>
+                    <span className="chev">▶</span>
+                  </div>
+                  <div className={`detail-wrap${open ? ' open' : ''}`}>
+                    <div className="detail">
+                      {e.backFull}
+                      <span className="mono">
+                        {'\n'}Interval: {c.interval} hari · Jatuh tempo: {fmtDue(c.due)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )
+            })
+          )}
         </div>
         )
       })}
