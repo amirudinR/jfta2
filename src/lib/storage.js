@@ -3,7 +3,7 @@
 const KEY = 'hafalan-jft-a2-progress-v2'
 const KEY_V1 = 'hafalan-jft-a2-progress-v1'
 
-const DEFAULT_PREFS = { darkMode: false, showRomaji: false, direction: 'jp2id' }
+const DEFAULT_PREFS = { darkMode: false, showRomaji: false, direction: 'jp2id', font: 'maru' }
 
 const emptyState = () => ({ perMaterial: {}, prefs: { ...DEFAULT_PREFS }, updated: Date.now() })
 

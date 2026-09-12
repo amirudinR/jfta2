@@ -7,6 +7,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .hanko {
@@ -83,8 +84,53 @@
   margin-top: 2px;
 }
 
-.icon-btn {
+.tb-actions {
   margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.font-pick {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.font-pick-icon {
+  position: absolute;
+  left: 10px;
+  color: var(--page-soft);
+  pointer-events: none;
+}
+
+.font-select {
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: var(--page-ink);
+  background: var(--panel);
+  border: 1px solid var(--panel-line);
+  border-radius: 12px;
+  padding: 9px 26px 9px 32px;
+  height: 40px;
+  max-width: 152px;
+  cursor: pointer;
+  color-scheme: dark;
+}
+
+.font-select option {
+  color: var(--sumi);
+  background: var(--washi);
+  font-weight: 500;
+}
+
+.font-select:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.icon-btn {
   flex: none;
   width: 40px;
   height: 40px;

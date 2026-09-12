@@ -1,6 +1,7 @@
-import { Sun, Moon } from 'lucide-react'
+import { Sun, Moon, Type } from 'lucide-react'
+import { KANJI_FONTS } from '../lib/fonts'
 
-export default function Topbar({ stats, darkMode, onToggleDark }) {
+export default function Topbar({ stats, darkMode, onToggleDark, font, onFont }) {
   return (
     <header className="topbar">
       <div className="tb-row">
@@ -11,14 +12,32 @@ export default function Topbar({ stats, darkMode, onToggleDark }) {
           </div>
           <div className="tagline">Hafalan Bahasa Jepang (A2–N1) · kartu · kuis · ujian</div>
         </div>
-        <button
-          className="icon-btn no-print"
-          onClick={onToggleDark}
-          title={darkMode ? 'Mode terang' : 'Mode gelap'}
-          aria-label={darkMode ? 'Aktifkan mode terang' : 'Aktifkan mode gelap'}
-        >
-          {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-        </button>
+        <div className="tb-actions">
+          <div className="font-pick">
+            <Type size={14} className="font-pick-icon" aria-hidden="true" />
+            <select
+              className="font-select"
+              value={font}
+              onChange={(e) => onFont(e.target.value)}
+              aria-label="Pilih font kanji"
+              title="Font Kanji"
+            >
+              {KANJI_FONTS.map((f) => (
+                <option key={f.key} value={f.key} style={{ fontFamily: f.jp }}>
+                  {f.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button
+            className="icon-btn no-print"
+            onClick={onToggleDark}
+            title={darkMode ? 'Mode terang' : 'Mode gelap'}
+            aria-label={darkMode ? 'Aktifkan mode terang' : 'Aktifkan mode gelap'}
+          >
+            {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+        </div>
       </div>
       <div className="stat-chips">
         <div className="stat">

@@ -27,6 +27,7 @@ import KotobaLevel from './components/KotobaLevel'
 import HafalanHarian from './components/HafalanHarian'
 import DaftarMateri from './components/DaftarMateri'
 import { recordStudy, getHistory, computeStreak } from './lib/history'
+import { kanjiFontOf } from './lib/fonts'
 
 export default function App() {
   const [material, setMaterial] = useState('hiragana')
@@ -45,6 +46,14 @@ export default function App() {
   useEffect(() => {
     document.documentElement.classList.toggle('dark-mode', !!prefs.darkMode)
   }, [prefs.darkMode])
+
+  // Font kanji → override CSS variable --font-jp & --font-serif-jp.
+  useEffect(() => {
+    const f = kanjiFontOf(prefs.font)
+    const el = document.documentElement.style
+    el.setProperty('--font-jp', f.jp)
+    el.setProperty('--font-serif-jp', f.serif)
+  }, [prefs.font])
 
   useEffect(() => {
     setMode(MODES[0].key)
@@ -219,6 +228,8 @@ export default function App() {
         stats={stats}
         darkMode={prefs.darkMode}
         onToggleDark={() => setPrefs({ darkMode: !prefs.darkMode })}
+        font={prefs.font}
+        onFont={(font) => setPrefs({ font })}
       />
 
       {mode === 'harian' || mode === 'materi' || mode === 'kotoba-n3' || mode === 'kotoba-n2' || mode === 'kotoba-n1' ? null : (

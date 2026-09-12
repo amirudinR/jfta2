@@ -1,5 +1,15 @@
 /* ---------- Responsif ---------- */
 @media (max-width: 480px) {
+  .tb-actions {
+    gap: 6px;
+  }
+
+  .font-select {
+    max-width: 132px;
+    font-size: 11px;
+    padding: 9px 20px 9px 28px;
+  }
+
   .modebar {
     grid-template-columns: repeat(4, 1fr);
   }
@@ -70,6 +80,10 @@
 }
 
 @media (max-width: 380px) {
+  .font-select {
+    max-width: 118px;
+  }
+
   .materibar {
     gap: 4px;
   }
