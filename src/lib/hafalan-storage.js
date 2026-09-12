@@ -45,30 +45,36 @@ function isDone(dayData, t) {
     && ((!t.bunpou) || bc >= t.bunpou)
 }
 
-export function flushToHistory(mode, dayData) {
-  if (!dayData?.date) return
+function idsOf(map) {
+  return Object.keys(map || {}).filter((k) => map[k])
+}
+
+function historyRecord(dayData) {
   const targets = getTargets()
-  const t = targets[mode] || DEFAULT_TARGETS[mode]
-  const hist = getHistory(mode)
-  hist[dayData.date] = {
+  const t = targets[dayData.mode] || DEFAULT_TARGETS[dayData.mode]
+  return {
     kotoba: Object.values(dayData.kotoba || {}).filter(Boolean).length,
     kanji: Object.values(dayData.kanji || {}).filter(Boolean).length,
     bunpou: Object.values(dayData.bunpou || {}).filter(Boolean).length,
     done: isDone(dayData, t),
+    items: {
+      kotoba: idsOf(dayData.kotoba),
+      kanji: idsOf(dayData.kanji),
+      bunpou: idsOf(dayData.bunpou),
+    },
   }
+}
+
+export function flushToHistory(mode, dayData) {
+  if (!dayData?.date) return
+  const hist = getHistory(mode)
+  hist[dayData.date] = historyRecord({ ...dayData, mode })
   lsSet(`${STORAGE_PREFIX}-hist-${mode}`, hist)
 }
 
 export function saveHistoryNow(mode, checked) {
-  const targets = getTargets()
-  const t = targets[mode] || DEFAULT_TARGETS[mode]
   const hist = getHistory(mode)
-  hist[checked.date] = {
-    kotoba: Object.values(checked.kotoba || {}).filter(Boolean).length,
-    kanji: Object.values(checked.kanji || {}).filter(Boolean).length,
-    bunpou: Object.values(checked.bunpou || {}).filter(Boolean).length,
-    done: isDone(checked, t),
-  }
+  hist[checked.date] = historyRecord({ ...checked, mode })
   lsSet(`${STORAGE_PREFIX}-hist-${mode}`, hist)
 }
 

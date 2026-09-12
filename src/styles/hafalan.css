@@ -124,6 +124,74 @@
 
 .hh-settings-btn:hover { color: var(--page-ink); }
 
+.hh-exam-btn-label {
+  font-size: 12px;
+  margin-left: 4px;
+  white-space: nowrap;
+}
+
+.hh-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── Ujian Harian ── */
+.hh-exam {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.hh-exam .hh-settings-btn { align-self: flex-start; }
+
+.hh-exam-title { margin: 0; }
+
+.hh-day-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.hh-day-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: var(--panel);
+  border: 1px solid var(--panel-line);
+  border-radius: 12px;
+  padding: 8px 14px;
+  color: var(--page-soft);
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.hh-day-chip.active {
+  border-color: var(--kin);
+  color: var(--kin);
+  background: color-mix(in srgb, var(--kin) 12%, var(--panel));
+}
+
+.hh-day-label { font-size: 12px; }
+
+.hh-day-count {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--card-ink);
+}
+
+.hh-exam .hh-tabs { width: 100%; }
+
+.hh-exam-note {
+  margin: 0;
+  color: var(--page-soft);
+  text-align: center;
+}
+
 /* ── Settings Panel ── */
 .hh-settings {
   background: var(--card-face);

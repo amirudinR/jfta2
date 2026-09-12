@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { byMaterial } from '../data'
-import { CheckSquare, Square, Plus, ChevronDown, ChevronUp, Trash2, Settings, Flame, BookText } from 'lucide-react'
+import { CheckSquare, Square, Plus, ChevronDown, ChevronUp, Trash2, Settings, Flame, BookText, ListChecks } from 'lucide-react'
 import {
   HAFALAN_MODES, DEFAULT_TARGETS, REMINDER_HOUR,
   todayStr, getTargets, setTargets, getHistory, getChecked,
@@ -12,6 +12,7 @@ import { ProgressBar } from './hafalan/ProgressBar'
 import { DetailModal } from './hafalan/DetailModal'
 import { SettingsPanel } from './hafalan/SettingsPanel'
 import { AddForm } from './hafalan/AddForm'
+import { UjianHarian } from './hafalan/UjianHarian'
 
 function buildItems(material) {
   if (!material) return []
@@ -51,6 +52,7 @@ export default function HafalanHarian({ onGoMateri }) {
   const [showForm, setShowForm] = useState(null)
   const [showHeatmap, setShowHeatmap] = useState(false)
   const [detailItem, setDetailItem] = useState(null)
+  const [showExam, setShowExam] = useState(false)
 
   const modeInfo = HAFALAN_MODES.find(m => m.key === activeMode)
   const hasKanji = modeInfo?.kanjiSrc != null
@@ -160,6 +162,10 @@ export default function HafalanHarian({ onGoMateri }) {
 
   return (
     <div className="hh-root">
+      {showExam ? (
+        <UjianHarian onBack={() => setShowExam(false)} />
+      ) : (
+      <>
       {/* Mode selector */}
       <div className="hh-mode-bar">
         {HAFALAN_MODES.map(m => (
@@ -185,9 +191,14 @@ export default function HafalanHarian({ onGoMateri }) {
           <span className="hh-streak-num">{streak}</span>
           <span className="hh-streak-label">hari berturut</span>
         </div>
-        <button className="hh-settings-btn" onClick={() => setShowSettings(v => !v)}>
-          <Settings size={16} />
-        </button>
+        <div className="hh-header-actions">
+          <button className="hh-settings-btn" onClick={() => setShowExam(true)} title="Ujian Harian">
+            <ListChecks size={16} /> <span className="hh-exam-btn-label">Ujian Harian</span>
+          </button>
+          <button className="hh-settings-btn" onClick={() => setShowSettings(v => !v)}>
+            <Settings size={16} />
+          </button>
+        </div>
       </div>
 
       {showSettings && (
@@ -287,6 +298,8 @@ export default function HafalanHarian({ onGoMateri }) {
           onToggle={() => toggle(tab, detailItem.id)}
           onClose={() => setDetailItem(null)}
         />
+      )}
+      </>
       )}
     </div>
   )
