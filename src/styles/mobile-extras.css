@@ -1,0 +1,398 @@
+/* ============================================================
+   Bottom Navigation — fixed mobile nav
+   ============================================================ */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 900;
+  display: flex;
+  align-items: stretch;
+  background: rgba(12, 31, 47, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.bnav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 10px 4px 8px;
+  min-height: 56px;
+  border: none;
+  background: none;
+  color: var(--page-soft);
+  font-size: 10px;
+  font-weight: 500;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: color 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bnav-item.active {
+  color: var(--kin);
+}
+
+.bnav-item:active {
+  opacity: 0.7;
+}
+
+.bnav-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--page-soft);
+}
+
+.bnav-item.active .bnav-avatar {
+  border-color: var(--kin);
+}
+
+/* Desktop: hide bottom nav at >=769px */
+@media (min-width: 769px) {
+  .bottom-nav {
+    display: none;
+  }
+}
+
+/* Add bottom padding to stage when bottom nav is visible */
+@media (max-width: 768px) {
+  .stage {
+    padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* ============================================================
+   Profil Page
+   ============================================================ */
+.profil-page {
+  padding-top: 8px;
+}
+
+.profil-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--page-ink);
+  margin: 0 0 16px;
+}
+
+.profil-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.profil-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.profil-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--kin);
+}
+
+.profil-avatar-placeholder {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--panel);
+  border: 2px solid var(--panel-line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--page-soft);
+}
+
+.profil-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--page-ink);
+}
+
+.profil-email {
+  font-size: 12px;
+  color: var(--page-soft);
+  margin-top: 2px;
+}
+
+.profil-sync-note {
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 12px;
+  color: var(--moss);
+}
+
+.profil-guest {
+  text-align: center;
+}
+
+.profil-guest-icon {
+  color: var(--page-soft);
+  margin-bottom: 8px;
+}
+
+.profil-guest p {
+  font-size: 13px;
+  color: var(--page-soft);
+  margin: 0 0 16px;
+  line-height: 1.5;
+}
+
+.profil-login-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 13px 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--page-ink);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+  min-height: 48px;
+}
+
+.profil-login-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.profil-login-btn:active {
+  transform: translateY(1px);
+}
+
+.google-icon {
+  flex: none;
+}
+
+.profil-logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(193, 64, 42, 0.35);
+  background: rgba(193, 64, 42, 0.08);
+  color: #e2937f;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  min-height: 48px;
+}
+
+.profil-logout-btn:hover {
+  background: rgba(193, 64, 42, 0.15);
+}
+
+/* ============================================================
+   Review Salah — post-exam wrong answers review
+   ============================================================ */
+.review-salah {
+  position: relative;
+  padding-top: 8px;
+}
+
+.review-summary {
+  text-align: center;
+  margin-bottom: 20px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+}
+
+.review-score-ring {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.review-score-num {
+  font-family: var(--font-mono);
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--page-ink);
+}
+
+.review-score-label {
+  font-size: 13px;
+  color: var(--page-soft);
+}
+
+.review-diff {
+  margin: 8px 0 0;
+  font-size: 11px;
+  color: var(--page-soft);
+}
+
+.review-section-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #e2937f;
+  margin-bottom: 10px;
+}
+
+.review-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.review-item {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.review-item-q {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.review-num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--page-soft);
+  background: var(--panel);
+  padding: 2px 6px;
+  border-radius: 6px;
+  flex: none;
+}
+
+.review-question {
+  font-family: var(--font-jp);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--page-ink);
+}
+
+.review-reading {
+  font-size: 12px;
+  color: var(--page-soft);
+}
+
+.review-answers {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.review-wrong-answer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #e2937f;
+}
+
+.review-x-mark {
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.review-correct-answer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #b9d4a1;
+}
+
+.review-explanation {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 12px;
+  color: var(--page-soft);
+  line-height: 1.5;
+}
+
+.review-perfect {
+  text-align: center;
+  padding: 30px 20px;
+  color: #b9d4a1;
+}
+
+.review-perfect p {
+  margin: 8px 0 0;
+  font-size: 14px;
+}
+
+.review-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.review-actions .primary-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ============================================================
+   Motivation Card — dashboard quote
+   ============================================================ */
+.motiv-card {
+  position: relative;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(193, 148, 63, 0.15);
+  background: rgba(193, 148, 63, 0.04);
+  overflow: hidden;
+}
+
+.motiv-card::before {
+  content: '\201C';
+  position: absolute;
+  top: -4px;
+  left: 10px;
+  font-family: var(--font-serif-jp);
+  font-size: 48px;
+  color: rgba(193, 148, 63, 0.12);
+  line-height: 1;
+  pointer-events: none;
+}
+
+.motiv-text {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--page-ink);
+  font-style: italic;
+  margin: 0;
+  padding-left: 4px;
+}

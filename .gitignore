@@ -4,3 +4,8 @@ dist/
 *.log
 .vite/
 mcp_audit.db
+
+# Tooling lokal (Serena / opencode / arsip konteks)
+.serena/
+.context-archive/
+opencode.json

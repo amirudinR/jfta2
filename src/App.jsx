@@ -10,11 +10,14 @@ import {
   clearCard,
   resetProgress,
   storageAvailable,
+  saveProgress,
 } from './lib/storage'
 import { ttsSupported } from './lib/tts'
 import { MODES, materialOf } from './data/materials'
+import { QUOTES } from './data/quotes'
 import Topbar from './components/Topbar'
 import { MaterialBar, ModeBar } from './components/Bars'
+import BottomNav from './components/BottomNav'
 import Controls from './components/Controls'
 import Kartu from './components/Kartu'
 import Kuis from './components/Kuis'
@@ -26,28 +29,85 @@ import Kemampuan from './components/Kemampuan'
 import KotobaLevel from './components/KotobaLevel'
 import HafalanHarian from './components/HafalanHarian'
 import DaftarMateri from './components/DaftarMateri'
+import LevelSelect from './components/LevelSelect'
+import UjianBaru from './components/UjianBaru'
+import Profil from './components/Profil'
 import { recordStudy, getHistory, computeStreak } from './lib/history'
 import { kanjiFontOf } from './lib/fonts'
+import { useAuth } from './hooks/useAuth'
+import { syncToCloud, loadFromCloud, mergeProgress, saveUserProfile, saveExamResult } from './lib/cloud-sync'
+
+const LEVEL_LABELS = { a2: 'JFT-A2', n3: 'N3', n2: 'N2', n1: 'N1' }
+
+const LEVEL_KEY = 'ankichou-level'
+function getSavedLevel() {
+  try { return localStorage.getItem(LEVEL_KEY) } catch { return null }
+}
+function saveLevel(lv) {
+  try { localStorage.setItem(LEVEL_KEY, lv) } catch {}
+}
+
+function pickQuote() {
+  return QUOTES[Math.floor(Math.random() * QUOTES.length)]
+}
 
 export default function App() {
+  const { user, loading: authLoading, loginGoogle, logout } = useAuth()
+  const [level, setLevelState] = useState(() => getSavedLevel())
   const [material, setMaterial] = useState('hiragana')
   const [mode, setMode] = useState(MODES[0].key)
   const [progress, setProgress] = useState(() => getProgress())
   const [prefs, setPrefsState] = useState(() => getPrefs())
-  const [lessons, setLessons] = useState({}) // { [material]: null | [groupLabel] }
+  const [lessons, setLessons] = useState({})
   const [deckVersion, setDeckVersion] = useState(0)
   const [resetArmed, setResetArmed] = useState(false)
   const [historyTick, setHistoryTick] = useState(0)
+  const [quote] = useState(() => pickQuote())
+  const [cloudLoaded, setCloudLoaded] = useState(false)
 
   const storageOk = useMemo(() => storageAvailable(), [])
   const ttsOk = useMemo(() => ttsSupported(), [])
 
-  // Dark mode → class di <html> (sn anti-flash di index.html memakai key yang sama).
+  // ── Cloud sync: load on login ──
+  useEffect(() => {
+    if (!user || cloudLoaded) return
+    loadFromCloud(user.uid).then((cloud) => {
+      if (cloud) {
+        const local = getProgress()
+        const merged = mergeProgress(local, cloud)
+        saveProgress(merged)
+        setProgress(merged)
+      }
+      setCloudLoaded(true)
+    })
+    saveUserProfile(user)
+  }, [user, cloudLoaded])
+
+  // ── Cloud sync: push on progress change ──
+  useEffect(() => {
+    if (!user || !cloudLoaded) return
+    syncToCloud(user.uid, {
+      perMaterial: progress.perMaterial,
+      prefs: progress.prefs,
+      updated: progress.updated,
+    })
+  }, [progress, user, cloudLoaded])
+
+  const setLevel = (lv) => {
+    setLevelState(lv)
+    saveLevel(lv)
+    if (lv === 'a2') {
+      setMaterial('hiragana')
+      setMode(MODES[0].key)
+    } else {
+      setMode(`kotoba-${lv}`)
+    }
+  }
+
   useEffect(() => {
     document.documentElement.classList.toggle('dark-mode', !!prefs.darkMode)
   }, [prefs.darkMode])
 
-  // Font kanji → override CSS variable --font-jp & --font-serif-jp.
   useEffect(() => {
     const f = kanjiFontOf(prefs.font)
     const el = document.documentElement.style
@@ -100,6 +160,10 @@ export default function App() {
     setDeckVersion((v) => v + 1)
   }
 
+  const handleSaveExamResult = (result) => {
+    if (user) saveExamResult(user.uid, result)
+  }
+
   const info = materialOf(material)
   const stats = useMemo(() => {
     const s = computeStats(cards)
@@ -131,8 +195,35 @@ export default function App() {
     setResetArmed(false)
   }
 
+  // ── Bottom nav handler ──
+  const handleBottomNav = (key) => {
+    if (key === 'materi') {
+      setMode(MODES[0].key) // harian
+    } else {
+      setMode(key)
+    }
+  }
+
+  // ── Level selection gate ──
+  if (!level) {
+    return (
+      <div className="stage">
+        <LevelSelect onSelect={setLevel} />
+      </div>
+    )
+  }
+
   const renderBody = () => {
     switch (mode) {
+      case 'profil':
+        return (
+          <Profil
+            user={user}
+            loading={authLoading}
+            onLogin={loginGoogle}
+            onLogout={logout}
+          />
+        )
       case 'harian':
         return <HafalanHarian onGoMateri={() => setMode('materi')} />
       case 'materi':
@@ -181,6 +272,14 @@ export default function App() {
         )
       case 'ujian':
         return <Ujian entries={allEntries} cards={cards} direction={prefs.direction} />
+      case 'ujian-baru':
+        return (
+          <UjianBaru
+            level={level}
+            onBack={() => setMode('ujian')}
+            onSaveResult={handleSaveExamResult}
+          />
+        )
       case 'daftar':
         return <DaftarHafal entries={allEntries} cards={cards} />
       case 'kemampuan':
@@ -222,6 +321,10 @@ export default function App() {
     }
   }
 
+  const hideTopBars = mode === 'profil'
+  const hideMaterialBar = mode === 'harian' || mode === 'materi' || mode === 'ujian-baru' || mode === 'profil' || mode === 'kotoba-n3' || mode === 'kotoba-n2' || mode === 'kotoba-n1'
+  const showControls = mode === 'kartu' || mode === 'ulangi' || mode === 'kuis' || mode === 'sprint'
+
   return (
     <div className="stage">
       <Topbar
@@ -230,15 +333,28 @@ export default function App() {
         onToggleDark={() => setPrefs({ darkMode: !prefs.darkMode })}
         font={prefs.font}
         onFont={(font) => setPrefs({ font })}
+        level={level}
+        levelLabel={LEVEL_LABELS[level]}
+        onChangeLevel={() => setLevelState(null)}
+        user={user}
       />
 
-      {mode === 'harian' || mode === 'materi' || mode === 'kotoba-n3' || mode === 'kotoba-n2' || mode === 'kotoba-n1' ? null : (
+      {/* Motivational quote */}
+      {(mode === 'harian' || mode === 'kemampuan') ? (
+        <div className="motiv-card">
+          <p className="motiv-text">{quote}</p>
+        </div>
+      ) : null}
+
+      {hideMaterialBar ? null : (
         <MaterialBar active={material} onChange={setMaterial} />
       )}
 
-      <ModeBar active={mode} onChange={setMode} badgeCount={badgeCount} />
+      {hideTopBars ? null : (
+        <ModeBar active={mode} onChange={setMode} badgeCount={badgeCount} />
+      )}
 
-      {mode === 'kartu' || mode === 'ulangi' || mode === 'kuis' || mode === 'sprint' ? (
+      {showControls ? (
         <Controls
           material={material}
           groups={groups}
@@ -265,6 +381,7 @@ export default function App() {
       <footer className="foot">
         <span>
           Progres &amp; preferensi tersimpan otomatis di perangkat ini (localStorage).
+          {user ? ' Tersinkron ke akun Google.' : ''}
           {!ttsOk ? ' TTS tidak didukung browser ini.' : ''}
         </span>
         <span>
@@ -274,6 +391,8 @@ export default function App() {
           {resetArmed ? 'Yakin? Klik lagi untuk reset' : 'Reset semua progres'}
         </button>
       </footer>
+
+      <BottomNav active={mode} onChange={handleBottomNav} user={user} />
     </div>
   )
 }

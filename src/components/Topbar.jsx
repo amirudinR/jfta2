@@ -1,7 +1,7 @@
 import { Sun, Moon, Type } from 'lucide-react'
 import { KANJI_FONTS } from '../lib/fonts'
 
-export default function Topbar({ stats, darkMode, onToggleDark, font, onFont }) {
+export default function Topbar({ stats, darkMode, onToggleDark, font, onFont, level, levelLabel, onChangeLevel, user }) {
   return (
     <header className="topbar">
       <div className="tb-row">
@@ -13,6 +13,15 @@ export default function Topbar({ stats, darkMode, onToggleDark, font, onFont }) 
           <div className="tagline">Hafalan Bahasa Jepang (A2–N1) · kartu · kuis · ujian</div>
         </div>
         <div className="tb-actions">
+          {level && levelLabel ? (
+            <button
+              className="level-badge no-print"
+              onClick={onChangeLevel}
+              title="Ganti level"
+            >
+              {levelLabel}
+            </button>
+          ) : null}
           <div className="font-pick">
             <Type size={14} className="font-pick-icon" aria-hidden="true" />
             <select
@@ -37,6 +46,15 @@ export default function Topbar({ stats, darkMode, onToggleDark, font, onFont }) 
           >
             {darkMode ? <Sun size={18} /> : <Moon size={18} />}
           </button>
+          {user?.photoURL ? (
+            <img
+              src={user.photoURL}
+              alt={user.displayName || ''}
+              className="tb-avatar no-print"
+              referrerPolicy="no-referrer"
+              title={user.displayName || user.email || ''}
+            />
+          ) : null}
         </div>
       </div>
       <div className="stat-chips">

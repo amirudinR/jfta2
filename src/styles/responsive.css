@@ -1,3 +1,33 @@
+/* ---------- Touch-friendly: min 44px hit targets ---------- */
+.opt {
+  min-height: 44px;
+}
+
+.mode-btn {
+  min-height: 44px;
+}
+
+.mat-btn {
+  min-height: 44px;
+}
+
+.primary-btn {
+  min-height: 44px;
+}
+
+.ujian-chip {
+  min-height: 44px;
+}
+
+.ujian-diff {
+  min-height: 44px;
+}
+
+.icon-btn {
+  min-height: 44px;
+  min-width: 44px;
+}
+
 /* ---------- Responsif ---------- */
 @media (max-width: 480px) {
   .tb-actions {
@@ -95,6 +125,17 @@
   .gtile .gtile-front {
     font-size: 28px;
   }
+
+  /* Hide font-pick on narrow mobile to save space */
+  .font-pick {
+    display: none;
+  }
+
+  /* Topbar: compact avatar */
+  .tb-avatar {
+    width: 30px;
+    height: 30px;
+  }
 }
 
 @media (max-width: 380px) {
@@ -148,6 +189,23 @@
     flex: 1;
     text-align: center;
   }
+
+  /* Ujian difficulty grid: stack on tiny screens */
+  .ujian-diff-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ujian-diff {
+    flex-direction: row;
+    gap: 8px;
+    padding: 10px 14px;
+    text-align: left;
+    align-items: center;
+  }
+
+  .ujian-diff-desc {
+    text-align: left;
+  }
 }
 
 /* ---------- Reduced motion ---------- */
@@ -166,7 +224,8 @@
     color: #000;
   }
 
-  .no-print {
+  .no-print,
+  .bottom-nav {
     display: none !important;
   }
 

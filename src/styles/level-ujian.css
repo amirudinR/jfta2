@@ -1,0 +1,330 @@
+/* ============================================================
+   Level Select — landing page
+   ============================================================ */
+.level-select {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+}
+
+.level-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.level-title-jp {
+  font-family: var(--font-serif-jp);
+  font-size: clamp(2.4rem, 10vw, 3.6rem);
+  color: var(--kin);
+  display: block;
+  letter-spacing: 0.12em;
+  line-height: 1.2;
+}
+
+.level-title {
+  margin: 8px 0 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--page-ink);
+  letter-spacing: 0.04em;
+}
+
+.level-subtitle {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--page-soft);
+}
+
+.level-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.level-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 28px 14px 22px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.level-card:hover {
+  border-color: var(--lv-accent, var(--kin));
+  background: rgba(255, 255, 255, 0.07);
+  transform: translateY(-2px);
+}
+
+.level-card:active {
+  transform: translateY(0);
+}
+
+.level-kanji {
+  font-family: var(--font-serif-jp);
+  font-size: 2rem;
+  color: var(--lv-accent, var(--kin));
+  line-height: 1;
+}
+
+.level-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--page-ink);
+}
+
+.level-sub {
+  font-size: 11px;
+  color: var(--page-soft);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.level-foot {
+  margin-top: 28px;
+  font-size: 11.5px;
+  color: var(--page-soft);
+  text-align: center;
+}
+
+/* ============================================================
+   Ujian Baru — setup page
+   ============================================================ */
+.ujian-setup {
+  position: relative;
+  padding-top: 8px;
+}
+
+.ujian-setup-back {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: none;
+  border: none;
+  color: var(--page-soft);
+  cursor: pointer;
+  padding: 6px;
+}
+.ujian-setup-back:hover {
+  color: var(--kin);
+}
+
+.ujian-setup-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.ujian-setup-icon {
+  color: var(--kin);
+}
+.ujian-setup-header h2 {
+  margin: 8px 0 2px;
+  font-size: 18px;
+  color: var(--page-ink);
+}
+.ujian-setup-header p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--page-soft);
+}
+
+.ujian-section {
+  margin-bottom: 20px;
+}
+
+.ujian-section-label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--page-soft);
+  margin-bottom: 8px;
+}
+
+/* Chips (category + scope) */
+.ujian-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ujian-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--page-soft);
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s, color 0.12s;
+}
+
+.ujian-chip:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--page-ink);
+}
+
+.ujian-chip.active {
+  border-color: var(--kin);
+  background: rgba(193, 148, 63, 0.12);
+  color: var(--kin);
+  font-weight: 600;
+}
+
+.ujian-chip-icon {
+  font-family: var(--font-jp);
+  font-size: 14px;
+}
+
+/* Difficulty grid */
+.ujian-diff-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.ujian-diff {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 8px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s;
+}
+
+.ujian-diff:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.ujian-diff.active {
+  border-color: var(--kin);
+  background: rgba(193, 148, 63, 0.1);
+}
+
+.ujian-diff-icon {
+  font-size: 22px;
+  line-height: 1;
+  color: var(--page-soft);
+}
+.ujian-diff.active .ujian-diff-icon {
+  color: var(--kin);
+}
+
+.ujian-diff-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--page-ink);
+}
+
+.ujian-diff-desc {
+  font-size: 10.5px;
+  color: var(--page-soft);
+  text-align: center;
+  line-height: 1.35;
+}
+
+/* Date picker */
+.ujian-date-pick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.ujian-date-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--page-soft);
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s;
+}
+
+.ujian-date-chip:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.ujian-date-chip.active {
+  border-color: var(--kin);
+  background: rgba(193, 148, 63, 0.12);
+  color: var(--kin);
+}
+
+.ujian-date-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.ujian-no-dates {
+  font-size: 12px;
+  color: var(--page-soft);
+}
+
+/* Start row */
+.ujian-start-row {
+  text-align: center;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ujian-pool-info {
+  font-size: 13px;
+  color: var(--page-soft);
+  margin: 0 0 12px;
+}
+
+/* Link button (already used elsewhere but ensure it exists) */
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--kin);
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 8px 14px;
+}
+
+/* Level indicator in topbar */
+.level-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(193, 148, 63, 0.3);
+  background: rgba(193, 148, 63, 0.08);
+  color: var(--kin);
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.level-badge:hover {
+  background: rgba(193, 148, 63, 0.16);
+}
