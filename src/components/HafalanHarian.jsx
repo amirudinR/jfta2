@@ -1,6 +1,6 @@
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { byMaterial } from '../data'
-import { CheckSquare, Square, Plus, ChevronDown, ChevronUp, Trash2, Settings, Flame, BookText, ListChecks } from 'lucide-react'
+import { CheckSquare, Square, Plus, ChevronDown, ChevronUp, Trash2, Settings, Flame, BookText, ListChecks, History } from 'lucide-react'
 import {
   HAFALAN_MODES, DEFAULT_TARGETS, REMINDER_HOUR,
   todayStr, getTargets, setTargets, getHistory, getChecked,
@@ -42,12 +42,12 @@ function dailySlice(src, dayPage, count) {
   return items
 }
 
-export default function HafalanHarian({ onGoMateri }) {
-  const [activeMode, setActiveMode] = useState('a2')
+export default function HafalanHarian({ onGoMateri, onGoRecall, level = 'a2' }) {
+  const activeMode = level
   const [tab, setTab] = useState('kotoba')
   const [targets, setTargetsState] = useState(() => getTargets())
-  const [checked, setChecked] = useState(() => getChecked('a2'))
-  const [custom, setCustom] = useState(() => getCustom('a2'))
+  const [checked, setChecked] = useState(() => getChecked(level))
+  const [custom, setCustom] = useState(() => getCustom(level))
   const [showSettings, setShowSettings] = useState(false)
   const [showForm, setShowForm] = useState(null)
   const [showHeatmap, setShowHeatmap] = useState(false)
@@ -59,14 +59,14 @@ export default function HafalanHarian({ onGoMateri }) {
   const hasBunpou = modeInfo?.bunpouSrc != null
   const t = targets[activeMode] || DEFAULT_TARGETS[activeMode]
 
-  const switchMode = useCallback((mode) => {
-    setActiveMode(mode)
-    setChecked(getChecked(mode))
-    setCustom(getCustom(mode))
+  // Level berubah (dari LevelStrip global) → muat ulang data mode.
+  useEffect(() => {
+    setChecked(getChecked(activeMode))
+    setCustom(getCustom(activeMode))
     setTab('kotoba')
     setDetailItem(null)
     setShowForm(null)
-  }, [])
+  }, [activeMode])
 
   // Auto-reset at midnight
   useEffect(() => {
@@ -166,16 +166,6 @@ export default function HafalanHarian({ onGoMateri }) {
         <UjianHarian onBack={() => setShowExam(false)} />
       ) : (
       <>
-      {/* Mode selector */}
-      <div className="hh-mode-bar">
-        {HAFALAN_MODES.map(m => (
-          <button key={m.key} className={`hh-mode-btn ${activeMode === m.key ? 'active' : ''}`} onClick={() => switchMode(m.key)}>
-            <span className="hh-mode-kanji">{m.kanji}</span>
-            <span className="hh-mode-label">{m.label}</span>
-          </button>
-        ))}
-      </div>
-
       {showReminder && (
         <div className="hh-reminder">
           Target belum tercapai! {reminderParts.join(', ')}
@@ -195,6 +185,11 @@ export default function HafalanHarian({ onGoMateri }) {
           <button className="hh-settings-btn" onClick={() => setShowExam(true)} title="Ujian Harian">
             <ListChecks size={16} /> <span className="hh-exam-btn-label">Ujian Harian</span>
           </button>
+          {onGoRecall && (
+            <button className="hh-settings-btn" onClick={onGoRecall} title="Recall materi lama">
+              <History size={16} /> <span className="hh-exam-btn-label">Recall</span>
+            </button>
+          )}
           <button className="hh-settings-btn" onClick={() => setShowSettings(v => !v)}>
             <Settings size={16} />
           </button>

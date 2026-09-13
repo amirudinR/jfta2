@@ -68,8 +68,8 @@ function ProgressBar({ current, total, label }) {
   )
 }
 
-export default function DaftarMateri({ onGoHafalan }) {
-  const [activeMode, setActiveMode] = useState('a2')
+export default function DaftarMateri({ onGoHafalan, level = 'a2' }) {
+  const activeMode = level
   const [tab, setTab] = useState('kotoba')
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState('all') // all | hafal | belum
@@ -85,6 +85,12 @@ export default function DaftarMateri({ onGoHafalan }) {
 
   // Reset page on filter/search/tab/mode change
   useEffect(() => { setPage(1) }, [query, filter, sort, tab, activeMode])
+
+  // Level berubah dari LevelStrip global → reset tab & muat mastery terbaru.
+  useEffect(() => {
+    setTab('kotoba')
+    setMastered(getMastered())
+  }, [activeMode])
 
   // Build all items for current tab
   const allItems = useMemo(() => {
@@ -151,17 +157,6 @@ export default function DaftarMateri({ onGoHafalan }) {
           <ChevronLeft size={18} /> Hafalan Harian
         </button>
         <h2 className="dm-title">Daftar Materi</h2>
-      </div>
-
-      {/* Mode selector */}
-      <div className="hh-mode-bar">
-        {HAFALAN_MODES.map(m => (
-          <button key={m.key} className={`hh-mode-btn ${activeMode === m.key ? 'active' : ''}`}
-            onClick={() => { setActiveMode(m.key); setTab('kotoba'); setMastered(getMastered()) }}>
-            <span className="hh-mode-kanji">{m.kanji}</span>
-            <span className="hh-mode-label">{m.label}</span>
-          </button>
-        ))}
       </div>
 
       {/* Grand summary */}

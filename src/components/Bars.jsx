@@ -15,6 +15,7 @@ import {
   CalendarCheck,
   BookText,
   FlaskConical,
+  History,
 } from 'lucide-react'
 import { MATERIALS, MODES } from '../data/materials'
 
@@ -46,6 +47,7 @@ const modeIcon = (key) => {
     sprint: <Zap size={14} />,
     ujian: <Target size={14} />,
     'ujian-baru': <FlaskConical size={14} />,
+    recall: <History size={14} />,
     daftar: <List size={14} />,
     kemampuan: <BarChart3 size={14} />,
     'kotoba-n3': <BookMarked size={14} />,

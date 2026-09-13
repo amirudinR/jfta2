@@ -8,6 +8,13 @@ export function useAuth() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // DEV-only preview: ?preview=1 melewati login untuk QA/screenshot.
+    // import.meta.env.DEV === false di build produksi → cabang ini dihapus.
+    if (import.meta.env.DEV && window.location.search.includes('preview=1')) {
+      setUser({ uid: 'preview-user', displayName: 'Preview User', email: 'preview@local', photoURL: '' })
+      setLoading(false)
+      return undefined
+    }
     const unsub = onAuthStateChanged(auth, (u) => {
       setUser(u)
       setLoading(false)

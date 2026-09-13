@@ -18,6 +18,8 @@ import { QUOTES } from './data/quotes'
 import Topbar from './components/Topbar'
 import { MaterialBar, ModeBar } from './components/Bars'
 import BottomNav from './components/BottomNav'
+import LevelStrip from './components/LevelStrip'
+import LoginGate from './components/LoginGate'
 import Controls from './components/Controls'
 import Kartu from './components/Kartu'
 import Kuis from './components/Kuis'
@@ -29,15 +31,14 @@ import Kemampuan from './components/Kemampuan'
 import KotobaLevel from './components/KotobaLevel'
 import HafalanHarian from './components/HafalanHarian'
 import DaftarMateri from './components/DaftarMateri'
-import LevelSelect from './components/LevelSelect'
 import UjianBaru from './components/UjianBaru'
+import Recall from './components/Recall'
 import Profil from './components/Profil'
 import { recordStudy, getHistory, computeStreak } from './lib/history'
+import { addExamRecord } from './lib/exam-history'
 import { kanjiFontOf } from './lib/fonts'
 import { useAuth } from './hooks/useAuth'
 import { syncToCloud, loadFromCloud, mergeProgress, saveUserProfile, saveExamResult } from './lib/cloud-sync'
-
-const LEVEL_LABELS = { a2: 'JFT-A2', n3: 'N3', n2: 'N2', n1: 'N1' }
 
 const LEVEL_KEY = 'ankichou-level'
 function getSavedLevel() {
@@ -53,7 +54,7 @@ function pickQuote() {
 
 export default function App() {
   const { user, loading: authLoading, loginGoogle, logout } = useAuth()
-  const [level, setLevelState] = useState(() => getSavedLevel())
+  const [level, setLevelState] = useState(() => getSavedLevel() || 'a2')
   const [material, setMaterial] = useState('hiragana')
   const [mode, setMode] = useState(MODES[0].key)
   const [progress, setProgress] = useState(() => getProgress())
@@ -93,17 +94,6 @@ export default function App() {
     })
   }, [progress, user, cloudLoaded])
 
-  const setLevel = (lv) => {
-    setLevelState(lv)
-    saveLevel(lv)
-    if (lv === 'a2') {
-      setMaterial('hiragana')
-      setMode(MODES[0].key)
-    } else {
-      setMode(`kotoba-${lv}`)
-    }
-  }
-
   useEffect(() => {
     document.documentElement.classList.toggle('dark-mode', !!prefs.darkMode)
   }, [prefs.darkMode])
@@ -123,6 +113,11 @@ export default function App() {
     const next = { ...prefs, ...partial }
     setPrefsState(next)
     savePrefs(partial)
+  }
+
+  const setLevel = (lv) => {
+    setLevelState(lv)
+    saveLevel(lv)
   }
 
   const cards = progress.perMaterial[material] || {}
@@ -160,7 +155,9 @@ export default function App() {
     setDeckVersion((v) => v + 1)
   }
 
+  // Simpan hasil ujian: lokal + cloud (kalau login).
   const handleSaveExamResult = (result) => {
+    addExamRecord(result)
     if (user) saveExamResult(user.uid, result)
   }
 
@@ -195,20 +192,29 @@ export default function App() {
     setResetArmed(false)
   }
 
-  // ── Bottom nav handler ──
   const handleBottomNav = (key) => {
-    if (key === 'materi') {
-      setMode(MODES[0].key) // harian
-    } else {
-      setMode(key)
-    }
+    if (key === 'materi') setMode(MODES[0].key)
+    else setMode(key)
   }
 
-  // ── Level selection gate ──
-  if (!level) {
+  // ══════════════════════════════════════════════════════════
+  // Auth gate — wajib login sebelum masuk aplikasi.
+  // ══════════════════════════════════════════════════════════
+  if (authLoading) {
     return (
       <div className="stage">
-        <LevelSelect onSelect={setLevel} />
+        <div className="app-splash">
+          <div className="login-hanko">暗記</div>
+          <p className="muted">Memuat…</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div className="stage">
+        <LoginGate onLogin={loginGoogle} />
       </div>
     )
   }
@@ -225,9 +231,9 @@ export default function App() {
           />
         )
       case 'harian':
-        return <HafalanHarian onGoMateri={() => setMode('materi')} />
+        return <HafalanHarian level={level} onGoMateri={() => setMode('materi')} onGoRecall={() => setMode('recall')} />
       case 'materi':
-        return <DaftarMateri onGoHafalan={() => setMode('harian')} />
+        return <DaftarMateri level={level} onGoHafalan={() => setMode('harian')} />
       case 'kartu':
         return (
           <Kartu
@@ -280,6 +286,13 @@ export default function App() {
             onSaveResult={handleSaveExamResult}
           />
         )
+      case 'recall':
+        return (
+          <Recall
+            onBack={() => setMode('harian')}
+            onSaveResult={handleSaveExamResult}
+          />
+        )
       case 'daftar':
         return <DaftarHafal entries={allEntries} cards={cards} />
       case 'kemampuan':
@@ -321,8 +334,8 @@ export default function App() {
     }
   }
 
-  const hideTopBars = mode === 'profil'
-  const hideMaterialBar = mode === 'harian' || mode === 'materi' || mode === 'ujian-baru' || mode === 'profil' || mode === 'kotoba-n3' || mode === 'kotoba-n2' || mode === 'kotoba-n1'
+  const hideMaterialBar = ['harian', 'materi', 'ujian-baru', 'recall', 'profil', 'kotoba-n3', 'kotoba-n2', 'kotoba-n1'].includes(mode)
+  const hideLevelStrip = ['profil', 'referensi', 'ujian-baru', 'recall', 'kotoba-n3', 'kotoba-n2', 'kotoba-n1'].includes(mode)
   const showControls = mode === 'kartu' || mode === 'ulangi' || mode === 'kuis' || mode === 'sprint'
 
   return (
@@ -333,13 +346,12 @@ export default function App() {
         onToggleDark={() => setPrefs({ darkMode: !prefs.darkMode })}
         font={prefs.font}
         onFont={(font) => setPrefs({ font })}
-        level={level}
-        levelLabel={LEVEL_LABELS[level]}
-        onChangeLevel={() => setLevelState(null)}
         user={user}
+        onLogin={loginGoogle}
       />
 
-      {/* Motivational quote */}
+      {hideLevelStrip ? null : <LevelStrip active={level} onChange={setLevel} />}
+
       {(mode === 'harian' || mode === 'kemampuan') ? (
         <div className="motiv-card">
           <p className="motiv-text">{quote}</p>
@@ -350,7 +362,7 @@ export default function App() {
         <MaterialBar active={material} onChange={setMaterial} />
       )}
 
-      {hideTopBars ? null : (
+      {mode === 'profil' ? null : (
         <ModeBar active={mode} onChange={setMode} badgeCount={badgeCount} />
       )}
 
@@ -381,7 +393,7 @@ export default function App() {
       <footer className="foot">
         <span>
           Progres &amp; preferensi tersimpan otomatis di perangkat ini (localStorage).
-          {user ? ' Tersinkron ke akun Google.' : ''}
+          {user ? ` Tersinkron ke akun ${user.email || 'Google'}.` : ''}
           {!ttsOk ? ' TTS tidak didukung browser ini.' : ''}
         </span>
         <span>

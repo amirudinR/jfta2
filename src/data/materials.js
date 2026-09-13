@@ -18,6 +18,7 @@ export const MODES = [
   { key: 'sprint', label: 'Sprint', icon: '⚡' },
   { key: 'ujian', label: 'Ujian', icon: '🎯', badge: 'hafal' },
   { key: 'ujian-baru', label: 'Ujian Baru', icon: '🧪' },
+  { key: 'recall', label: 'Recall', icon: '🔄' },
   { key: 'daftar', label: 'Daftar Hafal', icon: '📋', badge: 'hafal' },
   { key: 'kemampuan', label: 'Kemampuan', icon: '📊' },
   { key: 'referensi', label: 'Daftar Lengkap', icon: '📚' },
