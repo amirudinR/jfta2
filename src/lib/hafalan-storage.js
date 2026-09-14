@@ -126,11 +126,6 @@ export function toggleMastered(modeKey, category, id) {
   return all
 }
 
-export function isMasteredItem(modeKey, category, id) {
-  const all = getMastered()
-  return !!all[modeKey]?.[category]?.[id]
-}
-
 export function countMastered(modeKey, category) {
   const all = getMastered()
   return Object.keys(all[modeKey]?.[category] || {}).length

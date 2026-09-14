@@ -1,7 +1,7 @@
 import { useMemo, useState, useRef } from 'react'
 import { ArrowLeft, Settings2 } from 'lucide-react'
 import { byMaterial } from '../data'
-import { buildOptions, buildOptionsHard, answerOf } from '../lib/quiz'
+import { buildOptions, buildOptionsHard } from '../lib/quiz'
 import { shuffle } from '../lib/ui'
 import { availableDays, listDayItems, friendlyDate } from '../lib/ujian-harian'
 import ReviewSalah from './ReviewSalah'

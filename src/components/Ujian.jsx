@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { isMastered } from '../lib/srs'
-import { buildOptions, answerOf } from '../lib/quiz'
+import { buildOptions } from '../lib/quiz'
 import { shuffle } from '../lib/ui'
 
 // Ujian: menguji kartu yang dikuasai (interval ≥ 21 hari).

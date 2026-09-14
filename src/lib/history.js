@@ -82,25 +82,3 @@ function dayStr(d) {
   const dd = String(d.getDate()).padStart(2, '0')
   return `${d.getFullYear()}-${mm}-${dd}`
 }
-
-export function clearHistory() {
-  try {
-    localStorage.removeItem(KEY)
-  } catch (e) {
-    /* abaikan */
-  }
-}
-
-export function getRecentDays(history, count = 7) {
-  const days = history && history.days ? history.days : {}
-  return Object.entries(days)
-    .map(([day, d]) => ({
-      day,
-      studied: d.studied || 0,
-      reviewed: d.reviewed || 0,
-      learned: d.learned || 0,
-      grades: { again: 0, hard: 0, good: 0, easy: 0, ...(d.grades || {}) },
-    }))
-    .sort((a, b) => (a.day < b.day ? -1 : 1))
-    .slice(-count)
-}

@@ -28,7 +28,3 @@ export function fmtDue(dueMs) {
   if (diffDays === 1) return 'Besok'
   return `${diffDays} hari lagi`
 }
-
-export function clsx(...parts) {
-  return parts.filter(Boolean).join(' ')
-}

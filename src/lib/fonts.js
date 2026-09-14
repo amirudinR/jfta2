@@ -45,8 +45,6 @@ export const KANJI_FONTS = [
   },
 ]
 
-export const DEFAULT_KANJI_FONT = 'maru'
-
 export function kanjiFontOf(key) {
   return KANJI_FONTS.find((f) => f.key === key) || KANJI_FONTS[0]
 }

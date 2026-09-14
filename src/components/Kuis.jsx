@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { buildOptions, answerOf } from '../lib/quiz'
+import { buildOptions } from '../lib/quiz'
 import { materialOf } from '../data/materials'
 
 // Kuis pilihan ganda — murni latihan, tidak mengubah progres SRS.

@@ -9,52 +9,6 @@
   padding-bottom: 24px;
 }
 
-/* ── Mode bar ── */
-.hh-mode-bar {
-  display: flex;
-  gap: 6px;
-  padding: 4px;
-  background: var(--panel);
-  border-radius: 12px;
-  border: 1px solid var(--panel-line);
-}
-
-.hh-mode-btn {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 10px 4px 8px;
-  background: none;
-  border: none;
-  border-radius: 9px;
-  color: var(--page-soft);
-  cursor: pointer;
-  transition: all .2s;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.hh-mode-btn.active {
-  background: var(--card-face);
-  color: var(--card-ink);
-  box-shadow: 0 1px 4px rgba(0,0,0,.15);
-}
-
-.hh-mode-kanji {
-  font-size: 16px;
-  font-weight: 800;
-  font-family: var(--font-mono);
-  line-height: 1;
-}
-
-.hh-mode-label {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-}
-
 /* ── Banners ── */
 .hh-reminder {
   background: linear-gradient(135deg, #c1402a, #9c3120);

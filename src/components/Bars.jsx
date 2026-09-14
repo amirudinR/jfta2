@@ -1,5 +1,4 @@
 import {
-  Library,
   FileQuestion,
   RotateCcw,
   Zap,
@@ -7,7 +6,6 @@ import {
   List,
   BookOpen,
   Sparkles,
-  GraduationCap,
   BarChart3,
   BookMarked,
   BookCopy,

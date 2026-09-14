@@ -88,10 +88,6 @@ export function savePrefs(partial) {
   return saveProgress(state)
 }
 
-export function getMaterialCards(material) {
-  return getProgress().perMaterial[material] || {}
-}
-
 export function storeGrade(material, id, card) {
   const state = getProgress()
   if (!state.perMaterial[material]) state.perMaterial[material] = {}
