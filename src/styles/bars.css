@@ -46,42 +46,101 @@
   color: rgba(255, 255, 255, 0.78);
 }
 
-/* ---------- Mode bar (latihan) — 6 tombol, 1 baris ---------- */
-.modebar {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 6px;
+/* ---------- Mode bar wrapper ---------- */
+.modebar-wrap {
   margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
+/* Divider antara group latihan & tools */
+.modebar-divider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 2px 0;
+}
+
+.modebar-divider::before,
+.modebar-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.modebar-divider span {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--page-soft);
+  opacity: 0.55;
+  white-space: nowrap;
+}
+
+/* ---------- Mode bar grid ---------- */
+.modebar {
+  display: grid;
+  gap: 6px;
+  /* default: 6-col (fallback) */
+  grid-template-columns: repeat(6, 1fr);
+}
+
+.modebar--4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* ---------- Mode button ---------- */
 .mode-btn {
   position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 10px 6px;
+  gap: 4px;
+  padding: 10px 6px 8px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
   color: var(--page-soft);
-  font-size: 12.5px;
+  font-size: 11px;
   font-weight: 600;
+  font-family: var(--font-ui);
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .mode-btn .mi {
-  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  transition: background 0.15s ease;
 }
 
 .mode-btn.active {
   background: var(--washi);
   border-color: transparent;
   color: var(--sumi);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
 }
 
+.mode-btn.active .mi {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.mode-btn:not(.active):hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+/* ---------- Badge ---------- */
 .mode-badge {
   position: absolute;
   top: -6px;
@@ -96,18 +155,13 @@
   background: var(--shu);
   color: #fff;
   font-family: var(--font-mono);
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 700;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 .mode-badge.empty {
-  background: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.14);
   color: var(--page-soft);
   box-shadow: none;
-}
-
-/* 4-column override untuk KotobaLevel tabs */
-.modebar--4 {
-  grid-template-columns: repeat(4, 1fr);
 }

@@ -352,13 +352,18 @@ export default function App() {
     }
   }
 
-  // Mode latihan: MaterialBar + ModeBar + Controls aktif
-  const LATIHAN_MODES = ['kartu', 'kuis', 'ulangi', 'sprint', 'daftar', 'referensi']
-  const isLatihanMode = LATIHAN_MODES.includes(mode)
+  // Semua mode yang hidup di bawah tab "Latihan" di BottomNav
+  const LATIHAN_TAB_MODES = [
+    'kartu', 'kuis', 'ulangi', 'sprint',   // latihan per-materi
+    'daftar', 'referensi', 'kemampuan', 'materi', // tools
+  ]
+  const isLatihanTab = LATIHAN_TAB_MODES.includes(mode)
 
-  const hideMaterialBar = !isLatihanMode
+  // MaterialBar hanya untuk mode latihan per-materi (bukan tools)
+  const PERMATERI_MODES = ['kartu', 'kuis', 'ulangi', 'sprint', 'daftar', 'referensi']
+  const hideMaterialBar = !PERMATERI_MODES.includes(mode)
   const hideLevelStrip = ['profil', 'ujian-baru', 'recall', 'kotoba-n3', 'kotoba-n2', 'kotoba-n1'].includes(mode)
-  const showModeBar = isLatihanMode
+  const showModeBar = isLatihanTab
   const showControls = mode === 'kartu' || mode === 'ulangi' || mode === 'kuis' || mode === 'sprint'
 
   // LevelStrip: klik N3/N2/N1 langsung buka KotobaLevel

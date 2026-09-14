@@ -9,22 +9,20 @@ export const MATERIALS = [
   { key: 'bunpo', label: 'Bunpo', kanji: '文法', kind: 'bunpo' },
 ]
 
-// Mode latihan — ditampilkan di ModeBar (bawah MaterialBar).
-// Navigasi utama (Hafalan, Ujian, Recall, Kemampuan, Profil) ada di BottomNav.
+// ModeBar dalam tab Latihan — 2 group:
+//   'latihan' = butuh MaterialBar (per-materi)
+//   'tools'   = halaman penuh, tidak butuh MaterialBar
 export const MODES = [
-  { key: 'kartu', label: 'Kartu', icon: '🎴' },
-  { key: 'kuis', label: 'Kuis', icon: '📝' },
-  { key: 'ulangi', label: 'Ulangi', icon: '🔁', badge: 'ulangi' },
-  { key: 'sprint', label: 'Sprint', icon: '⚡' },
-  { key: 'daftar', label: 'Hafal', icon: '📋', badge: 'hafal' },
-  { key: 'referensi', label: 'Daftar', icon: '📚' },
-]
-
-// Semua mode yang dikenal App.jsx (termasuk nav utama & standalone).
-export const ALL_MODES = [
-  'harian', 'materi', 'kartu', 'kuis', 'ulangi', 'sprint',
-  'ujian-baru', 'daftar', 'kemampuan', 'referensi',
-  'kotoba-n3', 'kotoba-n2', 'kotoba-n1', 'recall', 'profil',
+  // group: latihan (pakai MaterialBar)
+  { key: 'kartu',    label: 'Kartu',    group: 'latihan', badge: null },
+  { key: 'kuis',     label: 'Kuis',     group: 'latihan', badge: null },
+  { key: 'ulangi',   label: 'Ulangi',   group: 'latihan', badge: 'ulangi' },
+  { key: 'sprint',   label: 'Sprint',   group: 'latihan', badge: null },
+  // group: tools (halaman penuh)
+  { key: 'daftar',   label: 'Hafal',    group: 'tools',   badge: 'hafal' },
+  { key: 'referensi',label: 'Referensi',group: 'tools',   badge: null },
+  { key: 'kemampuan',label: 'Kemampuan',group: 'tools',   badge: null },
+  { key: 'materi',   label: 'Materi',   group: 'tools',   badge: null },
 ]
 
 export const materialOf = (key) => MATERIALS.find((m) => m.key === key)

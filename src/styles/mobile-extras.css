@@ -9,10 +9,10 @@
   z-index: 900;
   display: flex;
   align-items: stretch;
-  background: rgba(12, 31, 47, 0.92);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(10, 25, 40, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
@@ -24,33 +24,67 @@
   align-items: center;
   justify-content: center;
   gap: 3px;
-  padding: 10px 4px 8px;
+  padding: 10px 4px 6px;
   min-height: 56px;
   border: none;
   background: none;
-  color: var(--page-soft);
+  color: rgba(255, 255, 255, 0.38);
   font-size: 10px;
   font-weight: 500;
   font-family: var(--font-ui);
   cursor: pointer;
-  transition: color 0.12s;
+  transition: color 0.15s;
   -webkit-tap-highlight-color: transparent;
+  overflow: hidden;
 }
 
+/* Active indicator: pill di atas icon */
 .bnav-item.active {
   color: var(--kin);
 }
 
+.bnav-item.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 2.5px;
+  border-radius: 0 0 4px 4px;
+  background: var(--kin);
+}
+
+.bnav-icon-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 28px;
+}
+
+.bnav-label {
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+/* dot di bawah (hidden — pakai ::before saja) */
+.bnav-dot {
+  display: none;
+}
+
 .bnav-item:active {
-  opacity: 0.7;
+  opacity: 0.65;
 }
 
 .bnav-avatar {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   object-fit: cover;
-  border: 1.5px solid var(--page-soft);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
 }
 
 .bnav-item.active .bnav-avatar {
@@ -59,15 +93,15 @@
 
 .bnav-badge {
   position: absolute;
-  top: 4px;
-  left: calc(50% + 6px);
+  top: 0;
+  right: -2px;
   min-width: 16px;
   height: 16px;
   padding: 0 4px;
   border-radius: 99px;
   background: var(--shu);
   color: #fff;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
   line-height: 16px;
   text-align: center;
@@ -84,7 +118,7 @@
 /* Add bottom padding to stage when bottom nav is visible */
 @media (max-width: 768px) {
   .stage {
-    padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
   }
 }
 
