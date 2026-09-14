@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#c1402a" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <g transform="rotate(-6 50 50)" filter="url(#shadow)">
+    <rect x="5" y="5" width="90" height="90" rx="18" fill="#c1402a"/>
+    <text x="50" y="63" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP','Shippori Mincho B1',serif" font-size="42" font-weight="800" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">暗記</text>
+  </g>
+</svg>

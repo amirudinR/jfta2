@@ -37,6 +37,7 @@ import Profil from './components/Profil'
 import { recordStudy, getHistory, computeStreak } from './lib/history'
 import { addExamRecord } from './lib/exam-history'
 import { recallStats } from './lib/recall-queue'
+import { resetDailyProgress } from './lib/hafalan-storage'
 import { kanjiFontOf } from './lib/fonts'
 import { useAuth } from './hooks/useAuth'
 import { syncToCloud, loadFromCloud, mergeProgress, saveUserProfile, saveExamResult } from './lib/cloud-sync'
@@ -190,10 +191,14 @@ export default function App() {
       return
     }
     resetProgress()
+    resetDailyProgress()
     setProgress(getProgress())
     setLessons({})
     setDeckVersion((v) => v + 1)
+    setHistoryTick((t) => t + 1)
+    setQueueTick((t) => t + 1)
     setResetArmed(false)
+    setMode(MODES[0].key) // kembali ke Hafalan Harian → hari baru (checked kosong)
   }
 
   const handleBottomNav = (key) => {

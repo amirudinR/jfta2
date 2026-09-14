@@ -96,6 +96,23 @@ export const setCheckedStorage = (mode, data) => lsSet(`${STORAGE_PREFIX}-checke
 export const getCustom = (mode) => lsGet(`${STORAGE_PREFIX}-custom-${mode}`, { kotoba: [], kanji: [], bunpou: [] })
 export const setCustomStorage = (mode, data) => lsSet(`${STORAGE_PREFIX}-custom-${mode}`, data)
 
+// Reset semua data harian/riwayat (checked, history, custom, targets, mastery,
+// recall queue, exam history, study history) — dipanggil saat "Reset semua progres".
+// SRS card & preferensi di-reset terpisah oleh resetProgress() di lib/storage.
+export function resetDailyProgress() {
+  const removals = []
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i)
+    if (!k) continue
+    if (k.startsWith(`${STORAGE_PREFIX}-`)) removals.push(k) // hh2-*
+    else if (k === 'ankichou-exam-history') removals.push(k)
+    else if (k === 'hafalan-jft-a2-history-v1') removals.push(k)
+  }
+  for (const k of removals) {
+    try { localStorage.removeItem(k) } catch {}
+  }
+}
+
 export function computeStreak(history) {
   let streak = 0
   const d = new Date()
