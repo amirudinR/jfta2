@@ -38,12 +38,12 @@ function DetailModal({ item, isHafal, onToggle, onClose }) {
           <div className="hh-modal-meaning">{item.full || item.meaning}</div>
         </div>
         <div className="hh-modal-actions">
-          <button className="hh-modal-tts" onClick={() => speak(item.reading || item.front)} title="Dengarkan">
-            <Volume2 size={20} />
-          </button>
           <button className={`hh-modal-hafal ${isHafal ? 'checked' : ''}`} onClick={onToggle}>
             {isHafal ? <CheckSquare size={22} /> : <Square size={22} />}
             {isHafal ? 'Sudah Hafal' : 'Tandai Hafal'}
+          </button>
+          <button className="hh-modal-tts" onClick={() => speak(item.reading || item.front)} title="Dengarkan">
+            <Volume2 size={20} />
           </button>
         </div>
       </div>
