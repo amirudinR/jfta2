@@ -5,13 +5,6 @@ import {
   List,
   BookOpen,
   Sparkles,
-  BarChart3,
-  BookMarked,
-  BookCopy,
-  Book,
-  CalendarCheck,
-  BookText,
-  FlaskConical,
 } from 'lucide-react'
 import { MATERIALS, MODES } from '../data/materials'
 
@@ -36,19 +29,12 @@ export function MaterialBar({ active, onChange }) {
 
 const modeIcon = (key) => {
   const icons = {
-    harian: <CalendarCheck size={14} />,
-    materi: <BookText size={14} />,
-    kartu: <Sparkles size={14} />,
-    kuis: <FileQuestion size={14} />,
-    ulangi: <RotateCcw size={14} />,
-    sprint: <Zap size={14} />,
-    'ujian-baru': <FlaskConical size={14} />,
-    daftar: <List size={14} />,
-    kemampuan: <BarChart3 size={14} />,
-    'kotoba-n3': <BookMarked size={14} />,
-    'kotoba-n2': <BookCopy size={14} />,
-    'kotoba-n1': <Book size={14} />,
-    referensi: <BookOpen size={14} />,
+    kartu: <Sparkles size={15} />,
+    kuis: <FileQuestion size={15} />,
+    ulangi: <RotateCcw size={15} />,
+    sprint: <Zap size={15} />,
+    daftar: <List size={15} />,
+    referensi: <BookOpen size={15} />,
   }
   return icons[key] || null
 }
@@ -56,7 +42,7 @@ const modeIcon = (key) => {
 // badgeCount: { ulangi: n, hafal: n } — badge merah ala desain asli.
 export function ModeBar({ active, onChange, badgeCount = {} }) {
   return (
-    <div className="modebar no-print" role="group" aria-label="Pilih mode belajar">
+    <div className="modebar no-print" role="group" aria-label="Pilih mode latihan">
       {MODES.map((m) => {
         const n = m.badge ? badgeCount[m.badge] : null
         return (

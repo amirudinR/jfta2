@@ -13,7 +13,7 @@ import {
   saveProgress,
 } from './lib/storage'
 import { ttsSupported } from './lib/tts'
-import { MODES, materialOf } from './data/materials'
+import { materialOf } from './data/materials'
 import { QUOTES } from './data/quotes'
 import Topbar from './components/Topbar'
 import { MaterialBar, ModeBar } from './components/Bars'
@@ -57,7 +57,7 @@ export default function App() {
   const { user, loading: authLoading, loginGoogle, logout, loginError } = useAuth()
   const [level, setLevelState] = useState(() => getSavedLevel() || 'a2')
   const [material, setMaterial] = useState('hiragana')
-  const [mode, setMode] = useState(MODES[0].key)
+  const [mode, setMode] = useState('harian')
   const [progress, setProgress] = useState(() => getProgress())
   const [prefs, setPrefsState] = useState(() => getPrefs())
   const [lessons, setLessons] = useState({})
@@ -110,7 +110,7 @@ export default function App() {
   }, [prefs.font])
 
   useEffect(() => {
-    setMode(MODES[0].key)
+    setMode('harian')
   }, [])
 
   const setPrefs = (partial) => {
@@ -200,7 +200,7 @@ export default function App() {
     setHistoryTick((t) => t + 1)
     setQueueTick((t) => t + 1)
     setResetArmed(false)
-    setMode(MODES[0].key) // kembali ke Hafalan Harian → hari baru (checked kosong)
+    setMode('harian') // kembali ke Hafalan Harian → hari baru (checked kosong)
   }
 
   const handleBottomNav = (key) => {
@@ -352,9 +352,24 @@ export default function App() {
     }
   }
 
-  const hideMaterialBar = ['harian', 'materi', 'ujian-baru', 'recall', 'profil', 'kotoba-n3', 'kotoba-n2', 'kotoba-n1'].includes(mode)
-  const hideLevelStrip = ['profil', 'referensi', 'ujian-baru', 'recall', 'kotoba-n3', 'kotoba-n2', 'kotoba-n1'].includes(mode)
+  // Mode latihan: MaterialBar + ModeBar + Controls aktif
+  const LATIHAN_MODES = ['kartu', 'kuis', 'ulangi', 'sprint', 'daftar', 'referensi']
+  const isLatihanMode = LATIHAN_MODES.includes(mode)
+
+  const hideMaterialBar = !isLatihanMode
+  const hideLevelStrip = ['profil', 'ujian-baru', 'recall', 'kotoba-n3', 'kotoba-n2', 'kotoba-n1'].includes(mode)
+  const showModeBar = isLatihanMode
   const showControls = mode === 'kartu' || mode === 'ulangi' || mode === 'kuis' || mode === 'sprint'
+
+  // LevelStrip: klik N3/N2/N1 langsung buka KotobaLevel
+  const handleLevelChange = (lv) => {
+    if (lv === 'n3') { setMode('kotoba-n3'); return }
+    if (lv === 'n2') { setMode('kotoba-n2'); return }
+    if (lv === 'n1') { setMode('kotoba-n1'); return }
+    setLevel(lv)
+    // Kalau sedang di KotobaLevel, balik ke harian setelah ganti level
+    if (['kotoba-n3', 'kotoba-n2', 'kotoba-n1'].includes(mode)) setMode('harian')
+  }
 
   return (
     <div className="stage">
@@ -368,7 +383,7 @@ export default function App() {
         onLogin={loginGoogle}
       />
 
-      {hideLevelStrip ? null : <LevelStrip active={level} onChange={setLevel} />}
+      {hideLevelStrip ? null : <LevelStrip active={level} onChange={handleLevelChange} />}
 
       {(mode === 'harian' || mode === 'kemampuan') ? (
         <div className="motiv-card">
@@ -380,9 +395,9 @@ export default function App() {
         <MaterialBar active={material} onChange={setMaterial} />
       )}
 
-      {mode === 'profil' ? null : (
+      {showModeBar ? (
         <ModeBar active={mode} onChange={setMode} badgeCount={badgeCount} />
-      )}
+      ) : null}
 
       {showControls ? (
         <Controls

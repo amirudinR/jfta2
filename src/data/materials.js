@@ -9,20 +9,22 @@ export const MATERIALS = [
   { key: 'bunpo', label: 'Bunpo', kanji: '文法', kind: 'bunpo' },
 ]
 
+// Mode latihan — ditampilkan di ModeBar (bawah MaterialBar).
+// Navigasi utama (Hafalan, Ujian, Recall, Kemampuan, Profil) ada di BottomNav.
 export const MODES = [
-  { key: 'harian', label: 'Hafalan Harian', icon: '📅' },
-  { key: 'materi', label: 'Daftar Materi', icon: '📖' },
   { key: 'kartu', label: 'Kartu', icon: '🎴' },
   { key: 'kuis', label: 'Kuis', icon: '📝' },
   { key: 'ulangi', label: 'Ulangi', icon: '🔁', badge: 'ulangi' },
   { key: 'sprint', label: 'Sprint', icon: '⚡' },
-  { key: 'ujian-baru', label: 'Ujian', icon: '🧪' },
-  { key: 'daftar', label: 'Daftar Hafal', icon: '📋', badge: 'hafal' },
-  { key: 'kemampuan', label: 'Kemampuan', icon: '📊' },
-  { key: 'referensi', label: 'Daftar Lengkap', icon: '📚' },
-  { key: 'kotoba-n3', label: 'Kotoba N3', icon: 'N3' },
-  { key: 'kotoba-n2', label: 'Kotoba N2', icon: 'N2' },
-  { key: 'kotoba-n1', label: 'Kotoba N1', icon: 'N1' },
+  { key: 'daftar', label: 'Hafal', icon: '📋', badge: 'hafal' },
+  { key: 'referensi', label: 'Daftar', icon: '📚' },
+]
+
+// Semua mode yang dikenal App.jsx (termasuk nav utama & standalone).
+export const ALL_MODES = [
+  'harian', 'materi', 'kartu', 'kuis', 'ulangi', 'sprint',
+  'ujian-baru', 'daftar', 'kemampuan', 'referensi',
+  'kotoba-n3', 'kotoba-n2', 'kotoba-n1', 'recall', 'profil',
 ]
 
 export const materialOf = (key) => MATERIALS.find((m) => m.key === key)

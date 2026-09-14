@@ -106,7 +106,7 @@ export default function KotobaLevel({ material, label, hankoText, cards, prefs, 
         </div>
       </div>
 
-      <div className="modebar no-print" role="group" aria-label="Pilih tampilan">
+      <div className="modebar modebar--4 no-print" role="group" aria-label="Pilih tampilan">
         {TABS.map((t) => (
           <button key={t.key} className={`mode-btn ${tab === t.key ? 'active' : ''}`} onClick={() => setTab(t.key)} aria-pressed={tab === t.key}>
             <span className="mi" aria-hidden>{t.icon}</span>
