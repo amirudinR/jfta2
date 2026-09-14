@@ -1,7 +1,11 @@
 import { useMemo, useState } from 'react'
-import { isMastered, isDue, computeStats } from '../lib/srs'
+import { isDue, computeStats } from '../lib/srs'
 import { fmtInterval, fmtDue } from '../lib/ui'
 import { MATERIALS } from '../data/materials'
+import ProgressRing from './ui/ProgressRing'
+import StatsBar from './ui/StatsBar'
+import StatBox from './ui/StatBox'
+import { bucket } from '../lib/stats'
 
 const cardStyle = {
   background: 'var(--card-face)',
@@ -20,88 +24,6 @@ const labelStyle = {
 
 const sectionTitle = { fontSize: 16, fontWeight: 800, margin: 0, color: 'var(--card-ink)' }
 
-function Ring({ pct }) {
-  const r = 26
-  const c = 2 * Math.PI * r
-  const v = Math.min(Math.max(pct, 0), 100)
-  return (
-    <svg width="76" height="76" viewBox="0 0 76 76" style={{ flex: '0 0 auto' }}>
-      <circle cx="38" cy="38" r={r} fill="none" stroke="var(--panel-line)" strokeWidth="9" />
-      <circle
-        cx="38"
-        cy="38"
-        r={r}
-        fill="none"
-        stroke="var(--kin)"
-        strokeWidth="9"
-        strokeLinecap="round"
-        strokeDasharray={c}
-        strokeDashoffset={c * (1 - v / 100)}
-        transform="rotate(-90 38 38)"
-      />
-      <text x="38" y="43" textAnchor="middle" fontSize="15" fontWeight="700" fill="var(--card-ink)">
-        {Math.round(v)}%
-      </text>
-    </svg>
-  )
-}
-
-function bucket(list, cards) {
-  let started = 0
-  let mastered = 0
-  let learning = 0
-  let newCards = 0
-  const dues = []
-  for (const e of list) {
-    const c = cards[e.id]
-    if (!c) continue
-    started++
-    dues.push(c.due)
-    if (isMastered(c)) mastered++
-    else if (c.interval > 0) learning++
-    else if (c.reps === 0) newCards++
-  }
-  return {
-    started,
-    mastered,
-    learning,
-    newCards,
-    nextDue: dues.length ? Math.min(...dues) : null,
-  }
-}
-
-function Bar({ pct, color = 'var(--kin)' }) {
-  return (
-    <div
-      style={{
-        flex: 1,
-        height: 10,
-        background: 'var(--card-line)',
-        borderRadius: 5,
-        overflow: 'hidden',
-      }}
-    >
-      <div
-        style={{
-          width: `${Math.min(Math.max(pct, 0), 100)}%`,
-          height: '100%',
-          background: color,
-          borderRadius: 5,
-          transition: 'width .3s',
-        }}
-      />
-    </div>
-  )
-}
-
-function Stat({ label, value }) {
-  return (
-    <div style={{ background: 'var(--card-deep)', borderRadius: 10, padding: '10px 12px' }}>
-      <div style={{ fontSize: 22, fontWeight: 800 }}>{value}</div>
-      <div style={{ fontSize: 12, color: 'var(--card-soft)', marginTop: 2 }}>{label}</div>
-    </div>
-  )
-}
 
 export default function Kemampuan({ entries, cards, material, history, streak, allEntries }) {
   const [openMat, setOpenMat] = useState(null)
@@ -191,7 +113,7 @@ export default function Kemampuan({ entries, cards, material, history, streak, a
       >
         <div className="kp-stat kp-stat-mastery" style={cardStyle}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <Ring pct={stats.masteryPct} />
+            <ProgressRing pct={stats.masteryPct} />
             <div>
               <div style={labelStyle}>Dikuasai</div>
               <div style={{ fontSize: 14, marginTop: 4 }} title={fmtInterval(21, 1)}>
@@ -238,7 +160,7 @@ export default function Kemampuan({ entries, cards, material, history, streak, a
                   <span style={{ minWidth: 120, fontWeight: 700 }}>
                     {m.label} <span style={{ color: 'var(--card-soft)' }}>{m.kanji}</span>
                   </span>
-                  <Bar pct={m.pct} />
+                  <StatsBar pct={m.pct} />
                   <span style={{ minWidth: 44, textAlign: 'right', fontWeight: 700, color: 'var(--kin)' }}>
                     {m.pct}%
                   </span>
@@ -268,7 +190,7 @@ export default function Kemampuan({ entries, cards, material, history, streak, a
               <div key={g.name} style={cardStyle}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <span style={{ minWidth: 120, fontWeight: 700 }}>{g.name}</span>
-                  <Bar pct={g.pct} color="var(--moss)" />
+                  <StatsBar pct={g.pct} color="var(--moss)" />
                   <span style={{ minWidth: 44, textAlign: 'right', fontWeight: 700, color: 'var(--moss)' }}>
                     {g.pct}%
                   </span>
@@ -338,11 +260,11 @@ export default function Kemampuan({ entries, cards, material, history, streak, a
             marginTop: 10,
           }}
         >
-          <Stat label="Total ulasan" value={totalReviews} />
-          <Stat label="Ease rata-rata" value={avgEase} />
-          <Stat label="Sedang belajar" value={stats.learning} />
-          <Stat label="Dikuasai" value={stats.mastered} />
-          <Stat label="Kartu baru" value={stats.newCards} />
+          <StatBox label="Total ulasan" value={totalReviews} />
+          <StatBox label="Ease rata-rata" value={avgEase} />
+          <StatBox label="Sedang belajar" value={stats.learning} />
+          <StatBox label="Dikuasai" value={stats.mastered} />
+          <StatBox label="Kartu baru" value={stats.newCards} />
         </div>
       </section>
     </div>

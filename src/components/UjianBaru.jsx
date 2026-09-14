@@ -1,10 +1,12 @@
 import { useMemo, useState, useRef, useEffect } from 'react'
-import { ArrowLeft, Settings2 } from 'lucide-react'
 import { byMaterial } from '../data'
 import { buildOptions, buildOptionsHard } from '../lib/quiz'
 import { shuffle } from '../lib/ui'
-import { availableDays, listDayItems, friendlyDate } from '../lib/ujian-harian'
+import { availableDays, listDayItems } from '../lib/ujian-harian'
 import ReviewSalah from './ReviewSalah'
+import UjianSetup from './ujian/UjianSetup'
+import UjianSession from './ujian/UjianSession'
+import UjianSummary from './ujian/UjianSummary'
 
 const CATEGORIES = [
   { key: 'kotoba', label: 'Kotoba', icon: 'ことば' },
@@ -125,7 +127,6 @@ export default function UjianBaru({ level, onBack, onSaveResult }) {
   }
 
   const finishExam = () => {
-    // Save exam result to cloud if callback provided
     if (onSaveResult) {
       const diffLabel = DIFFICULTIES.find((d) => d.key === difficulty)?.label || ''
       onSaveResult({
@@ -142,170 +143,13 @@ export default function UjianBaru({ level, onBack, onSaveResult }) {
     setPhase('summary')
   }
 
-  // ── Setup ──
-  if (phase === 'setup') {
-    const canStart = pool.length >= 4
-    return (
-      <div className="ujian-setup">
-        <button className="ujian-setup-back" onClick={onBack} title="Kembali">
-          <ArrowLeft size={18} />
-        </button>
-
-        <div className="ujian-setup-header">
-          <Settings2 size={22} className="ujian-setup-icon" />
-          <h2>Ujian Baru</h2>
-          <p>Atur ujianmu sebelum mulai</p>
-        </div>
-
-        <div className="ujian-section">
-          <label className="ujian-section-label">Kategori Materi</label>
-          <div className="ujian-chips">
-            {availCats.map((c) => (
-              <button
-                key={c.key}
-                className={`ujian-chip ${category === c.key ? 'active' : ''}`}
-                onClick={() => setCategory(c.key)}
-              >
-                <span className="ujian-chip-icon">{c.icon}</span>
-                <span>{c.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="ujian-section">
-          <label className="ujian-section-label">Tingkat Kesulitan</label>
-          <div className="ujian-diff-grid">
-            {DIFFICULTIES.map((d) => (
-              <button
-                key={d.key}
-                className={`ujian-diff ${difficulty === d.key ? 'active' : ''}`}
-                onClick={() => setDifficulty(d.key)}
-              >
-                <span className="ujian-diff-icon">{d.icon}</span>
-                <span className="ujian-diff-label">{d.label}</span>
-                <span className="ujian-diff-desc">{d.desc}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="ujian-section">
-          <label className="ujian-section-label">Cakupan Materi</label>
-          <div className="ujian-chips">
-            <button className={`ujian-chip ${scope === 'all' ? 'active' : ''}`} onClick={() => setScope('all')}>
-              Semua materi
-            </button>
-            <button className={`ujian-chip ${scope === 'today' ? 'active' : ''}`} onClick={() => setScope('today')}>
-              Hari ini saja
-            </button>
-            <button className={`ujian-chip ${scope === 'dates' ? 'active' : ''}`} onClick={() => setScope('dates')}>
-              Pilih tanggal
-            </button>
-          </div>
-
-          {scope === 'dates' && (
-            <div className="ujian-date-pick">
-              {days.length ? (
-                days.map((d) => (
-                  <button
-                    key={d.date}
-                    className={`ujian-date-chip ${selectedDates.includes(d.date) ? 'active' : ''}`}
-                    onClick={() => toggleDate(d.date)}
-                  >
-                    <span>{d.date === days[0]?.date ? 'Hari Ini' : friendlyDate(d.date)}</span>
-                    <span className="ujian-date-count">{d.count}</span>
-                  </button>
-                ))
-              ) : (
-                <p className="ujian-no-dates">Belum ada riwayat belajar.</p>
-              )}
-            </div>
-          )}
-        </div>
-
-        <div className="ujian-start-row">
-          <p className="ujian-pool-info">
-            {canStart ? (
-              <>Soal tersedia: <span className="kin-count">{pool.length}</span> (maks 30 soal per sesi)</>
-            ) : (
-              'Minimal 4 soal diperlukan. Ubah filter di atas.'
-            )}
-          </p>
-          <button className="primary-btn" disabled={!canStart} onClick={start}>
-            Mulai Ujian
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  // ── Review Salah ──
-  if (phase === 'review') {
-    const diffLabel = DIFFICULTIES.find((d) => d.key === difficulty)?.label || ''
-    return (
-      <ReviewSalah
-        wrongItems={wrongRef.current}
-        score={score}
-        total={order.length}
-        difficulty={diffLabel}
-        onRetry={() => { setPhase('setup') }}
-        onBack={onBack}
-      />
-    )
-  }
-
-  // ── Summary ──
-  if (phase === 'summary') {
-    const total = order.length
-    const pct = total ? Math.round((score / total) * 100) : 0
-    const emoji = pct >= 85 ? '🏆' : pct >= 70 ? '👍' : '📚'
-    const note = pct >= 85
-      ? 'Luar biasa! Kamu benar-benar paham.'
-      : pct >= 70
-        ? 'Bagus, sedikit lagi sempurna!'
-        : 'Masih perlu latihan. Ulangi materinya ya.'
-    const diffLabel = DIFFICULTIES.find((d) => d.key === difficulty)?.label || ''
-    const hasWrong = wrongRef.current.length > 0
-    return (
-      <div className="panel">
-        <div className="big-emoji">{emoji}</div>
-        <h3>
-          {score}/{total} ({pct}%)
-        </h3>
-        <p>{note}</p>
-        <p className="muted" style={{ fontSize: 12 }}>Kesulitan: {diffLabel}</p>
-        <div className="row mt no-print" style={{ flexDirection: 'column', alignItems: 'center' }}>
-          {hasWrong ? (
-            <button className="primary-btn" onClick={() => setPhase('review')}>
-              Lihat Jawaban Salah ({wrongRef.current.length})
-            </button>
-          ) : null}
-          <button className={hasWrong ? 'link-btn' : 'primary-btn'} onClick={() => setPhase('setup')}>
-            Ujian lagi
-          </button>
-          <button className="link-btn" onClick={onBack}>
-            Kembali
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  // ── Scene ──
-  if (!entry) return null
-
-  const { label, options } = opts || { label: '', options: [] }
-  const question = entry.front
-  const diffTag = difficulty === 'sulit' ? ' · Sulit' : difficulty === 'mudah' ? ' · Mudah' : ''
-
   const pick = (opt) => {
     if (choice) return
     setChoice(opt)
+    const { label } = opts || {}
     if (opt === label) {
       setScore((s) => s + 1)
     } else {
-      // Track wrong answer
       wrongRef.current.push({
         question: entry.front,
         reading: entry.reading || entry.frontSub || '',
@@ -322,63 +166,69 @@ export default function UjianBaru({ level, onBack, onSaveResult }) {
     else setQ(q + 1)
   }
 
+  if (phase === 'setup') {
+    return (
+      <UjianSetup
+        availCats={availCats}
+        category={category}
+        setCategory={setCategory}
+        difficulty={difficulty}
+        setDifficulty={setDifficulty}
+        scope={scope}
+        setScope={setScope}
+        days={days}
+        selectedDates={selectedDates}
+        toggleDate={toggleDate}
+        pool={pool}
+        onStart={start}
+        onBack={onBack}
+        DIFFICULTIES={DIFFICULTIES}
+      />
+    )
+  }
+
+  if (phase === 'review') {
+    const diffLabel = DIFFICULTIES.find((d) => d.key === difficulty)?.label || ''
+    return (
+      <ReviewSalah
+        wrongItems={wrongRef.current}
+        score={score}
+        total={order.length}
+        difficulty={diffLabel}
+        onRetry={() => { setPhase('setup') }}
+        onBack={onBack}
+      />
+    )
+  }
+
+  if (phase === 'summary') {
+    return (
+      <UjianSummary
+        score={score}
+        order={order}
+        wrongRef={wrongRef}
+        difficulty={difficulty}
+        onRetry={() => setPhase('setup')}
+        onBack={onBack}
+        onShowReview={() => setPhase('review')}
+        DIFFICULTIES={DIFFICULTIES}
+      />
+    )
+  }
+
+  // scene
   return (
-    <>
-      <div className="quiz-stats no-print">
-        <span className="qstat">
-          Soal <b>{q + 1}</b>/{order.length}
-        </span>
-        <span className="qstat ok">
-          Benar <b>{score}</b>
-        </span>
-        <span className="qstat err">
-          Salah <b>{q - score}</b>
-        </span>
-        <span className="qstat" style={{ marginLeft: 'auto', fontSize: 11 }}>
-          {diffTag}
-        </span>
-      </div>
-
-      <div className="quiz-card">
-        <div className="card-top">
-          Ujian · {entry.groupLabel || entry.material || 'Umum'}
-        </div>
-        <div className="card-body" style={{ padding: '14px 4px 8px' }}>
-          <div className="word" style={{ fontSize: 'clamp(1.9rem, 8vw, 2.6rem)' }}>
-            {question}
-          </div>
-          {entry.reading ? <div className="word-reading">{entry.reading}</div> : null}
-          {entry.frontSub ? <div className="meaning-sub">{entry.frontSub}</div> : null}
-        </div>
-      </div>
-
-      <div className="opt-grid">
-        {options.map((opt) => {
-          let tone = ''
-          if (choice) {
-            if (opt === label) tone = 'correct'
-            else if (opt === choice) tone = 'wrong'
-          }
-          return (
-            <button key={opt} className={`opt ${tone}`} disabled={!!choice} onClick={() => pick(opt)}>
-              {opt}
-            </button>
-          )
-        })}
-      </div>
-
-      {choice ? (
-        <>
-          <p className={`mt ${choice === label ? 'feedback-ok' : 'feedback-err'}`}>
-            {choice === label ? 'Benar!' : `Salah — jawaban: ${label}`}
-          </p>
-          <div className="next-row no-print">
-            <button className="primary-btn" onClick={next}>
-              {q + 1 >= order.length ? 'Lihat hasil' : 'Lanjut'}
-            </button>
-          </div>
-        </>
-      ) : null}
-    </>
+    <UjianSession
+      entry={entry}
+      opts={opts}
+      choice={choice}
+      score={score}
+      q={q}
+      order={order}
+      difficulty={difficulty}
+      onPick={pick}
+      onNext={next}
+      DIFFICULTIES={DIFFICULTIES}
+    />
   )
 }

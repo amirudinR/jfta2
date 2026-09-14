@@ -1,0 +1,78 @@
+export default function UjianSession({
+  entry,
+  opts,
+  choice,
+  score,
+  q,
+  order,
+  difficulty,
+  onPick,
+  onNext,
+  DIFFICULTIES,
+}) {
+  if (!entry) return null
+
+  const { label, options } = opts || { label: '', options: [] }
+  const question = entry.front
+  const diffTag = difficulty === 'sulit' ? ' · Sulit' : difficulty === 'mudah' ? ' · Mudah' : ''
+
+  return (
+    <>
+      <div className="quiz-stats no-print">
+        <span className="qstat">
+          Soal <b>{q + 1}</b>/{order.length}
+        </span>
+        <span className="qstat ok">
+          Benar <b>{score}</b>
+        </span>
+        <span className="qstat err">
+          Salah <b>{q - score}</b>
+        </span>
+        <span className="qstat" style={{ marginLeft: 'auto', fontSize: 11 }}>
+          {diffTag}
+        </span>
+      </div>
+
+      <div className="quiz-card">
+        <div className="card-top">
+          Ujian · {entry.groupLabel || entry.material || 'Umum'}
+        </div>
+        <div className="card-body" style={{ padding: '14px 4px 8px' }}>
+          <div className="word" style={{ fontSize: 'clamp(1.9rem, 8vw, 2.6rem)' }}>
+            {question}
+          </div>
+          {entry.reading ? <div className="word-reading">{entry.reading}</div> : null}
+          {entry.frontSub ? <div className="meaning-sub">{entry.frontSub}</div> : null}
+        </div>
+      </div>
+
+      <div className="opt-grid">
+        {options.map((opt) => {
+          let tone = ''
+          if (choice) {
+            if (opt === label) tone = 'correct'
+            else if (opt === choice) tone = 'wrong'
+          }
+          return (
+            <button key={opt} className={`opt ${tone}`} disabled={!!choice} onClick={() => onPick(opt)}>
+              {opt}
+            </button>
+          )
+        })}
+      </div>
+
+      {choice ? (
+        <>
+          <p className={`mt ${choice === label ? 'feedback-ok' : 'feedback-err'}`}>
+            {choice === label ? 'Benar!' : `Salah — jawaban: ${label}`}
+          </p>
+          <div className="next-row no-print">
+            <button className="primary-btn" onClick={onNext}>
+              {q + 1 >= order.length ? 'Lihat hasil' : 'Lanjut'}
+            </button>
+          </div>
+        </>
+      ) : null}
+    </>
+  )
+}

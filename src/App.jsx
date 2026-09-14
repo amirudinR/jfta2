@@ -16,6 +16,7 @@ import { ttsSupported } from './lib/tts'
 import { materialOf } from './data/materials'
 import { QUOTES } from './data/quotes'
 import Topbar from './components/Topbar'
+import Sidebar from './components/Sidebar'
 import { MaterialBar, ModeBar } from './components/Bars'
 import BottomNav from './components/BottomNav'
 import LevelStrip from './components/LevelStrip'
@@ -37,8 +38,9 @@ import { recordStudy, getHistory, computeStreak } from './lib/history'
 import { addExamRecord } from './lib/exam-history'
 import { recallStats } from './lib/recall-queue'
 import { resetDailyProgress } from './lib/hafalan-storage'
-import { kanjiFontOf } from './lib/fonts'
 import { useAuth } from './hooks/useAuth'
+import { useCloudSync, usePushCloud } from './hooks/useCloudSync'
+import { useAppSettings } from './hooks/useAppSettings'
 import { syncToCloud, loadFromCloud, mergeProgress, saveUserProfile, saveExamResult } from './lib/cloud-sync'
 
 const LEVEL_KEY = 'ankichou-level'
@@ -65,49 +67,17 @@ export default function App() {
   const [resetArmed, setResetArmed] = useState(false)
   const [historyTick, setHistoryTick] = useState(0)
   const [quote] = useState(() => pickQuote())
-  const [cloudLoaded, setCloudLoaded] = useState(false)
   const [queueTick, setQueueTick] = useState(0)
   const [loginBusy, setLoginBusy] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const storageOk = useMemo(() => storageAvailable(), [])
   const ttsOk = useMemo(() => ttsSupported(), [])
 
-  // ── Cloud sync: load on login ──
-  useEffect(() => {
-    if (!user || cloudLoaded) return
-    loadFromCloud(user.uid).then((cloud) => {
-      if (cloud) {
-        const local = getProgress()
-        const merged = mergeProgress(local, cloud)
-        saveProgress(merged)
-        setProgress(merged)
-      }
-      setCloudLoaded(true)
-    })
-    saveUserProfile(user)
-  }, [user, cloudLoaded])
-
-  // ── Cloud sync: push on progress change ──
-  useEffect(() => {
-    if (!user || !cloudLoaded) return
-    syncToCloud(user.uid, {
-      perMaterial: progress.perMaterial,
-      prefs: progress.prefs,
-      tombstone: progress.tombstone,
-      updated: progress.updated,
-    })
-  }, [progress, user, cloudLoaded])
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark-mode', !!prefs.darkMode)
-  }, [prefs.darkMode])
-
-  useEffect(() => {
-    const f = kanjiFontOf(prefs.font)
-    const el = document.documentElement.style
-    el.setProperty('--font-jp', f.jp)
-    el.setProperty('--font-serif-jp', f.serif)
-  }, [prefs.font])
+  // Hooks modular — cloud sync & app settings
+  const { cloudLoaded } = useCloudSync(user, setProgress)
+  usePushCloud(user, cloudLoaded, progress)
+  useAppSettings(prefs)
 
   useEffect(() => {
     setMode('harian')
@@ -386,6 +356,16 @@ export default function App() {
         onFont={(font) => setPrefs({ font })}
         user={user}
         onLogin={loginGoogle}
+        onMenuOpen={() => setSidebarOpen(true)}
+      />
+
+      <Sidebar
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        active={mode}
+        onChange={(key) => { setMode(key); setSidebarOpen(false) }}
+        user={user}
+        recallDue={recallDue}
       />
 
       {hideLevelStrip ? null : <LevelStrip active={level} onChange={handleLevelChange} />}

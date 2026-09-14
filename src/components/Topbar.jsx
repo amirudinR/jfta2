@@ -1,7 +1,7 @@
-import { Sun, Moon, Type, LogIn } from 'lucide-react'
+import { Sun, Moon, Type, LogIn, Menu } from 'lucide-react'
 import { KANJI_FONTS } from '../lib/fonts'
 
-export default function Topbar({ stats, darkMode, onToggleDark, font, onFont, user, onLogin }) {
+export default function Topbar({ stats, darkMode, onToggleDark, font, onFont, user, onLogin, onMenuOpen }) {
   return (
     <header className="topbar">
       <div className="tb-row">
@@ -10,7 +10,7 @@ export default function Topbar({ stats, darkMode, onToggleDark, font, onFont, us
           <div className="brand">
             暗記帳<span className="brand-sub">アンキチョウ</span>
           </div>
-          <div className="tagline">Hafalan Bahasa Jepang (A2–N1) · kartu · kuis · ujian</div>
+          <div className="tagline">Hafalan Bahasa Jepang (A2-N1) · kartu · kuis · ujian</div>
         </div>
         <div className="tb-actions">
           <div className="font-pick">
@@ -51,6 +51,15 @@ export default function Topbar({ stats, darkMode, onToggleDark, font, onFont, us
               <span>Masuk</span>
             </button>
           ) : null}
+          {/* Hamburger — desktop only, dikontrol via CSS */}
+          <button
+            className="tb-hamburger no-print"
+            onClick={onMenuOpen}
+            aria-label="Buka menu navigasi"
+            title="Menu"
+          >
+            <Menu size={20} />
+          </button>
         </div>
       </div>
       <div className="stat-chips">
