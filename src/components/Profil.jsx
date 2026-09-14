@@ -2,6 +2,10 @@ import { LogOut, User as UserIcon } from 'lucide-react'
 import GoogleIcon from './GoogleIcon'
 
 export default function Profil({ user, loading, onLogin, onLogout }) {
+  const handleLogout = () => {
+    if (window.confirm('Yakin ingin keluar?')) onLogout()
+  }
+
   return (
     <div className="profil-page">
       <h2 className="profil-title">Profil</h2>
@@ -28,7 +32,7 @@ export default function Profil({ user, loading, onLogin, onLogout }) {
               Progress tersimpan & tersinkron ke akun Google-mu.
             </p>
           </div>
-          <button className="profil-logout-btn" onClick={onLogout}>
+          <button className="profil-logout-btn" onClick={handleLogout}>
             <LogOut size={16} />
             <span>Keluar</span>
           </button>

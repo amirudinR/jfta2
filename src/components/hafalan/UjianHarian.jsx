@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { ArrowLeft } from 'lucide-react'
+import { useMemo, useState, useEffect } from 'react'
+import { ArrowLeft, Check } from 'lucide-react'
 import { availableDays, listDayItems, friendlyDate } from '../../lib/ujian-harian'
 import { axisQuestionOf, buildOptionsAxis } from '../../lib/quiz'
 import { shuffle } from '../../lib/ui'
@@ -10,10 +10,21 @@ const AXES = [
   { key: 'arti', label: 'Dari Arti' },
 ]
 
+const CATS = [
+  { key: 'kotoba', label: 'Kotoba' },
+  { key: 'kanji', label: 'Kanji' },
+  { key: 'bunpou', label: 'Bunpou' },
+]
+const ALL_CATS = CATS.map((c) => c.key)
+
+const catOfId = (id) => String(id).split(':')[1]
+const MAX_QUESTIONS = 75
+
 // Ujian Harian: uji item yang dicentang pada satu tanggal (riwayat).
 export function UjianHarian({ onBack }) {
   const days = useMemo(() => availableDays(), [])
   const [date, setDate] = useState(() => days.length ? days[0].date : null)
+  const [cats, setCats] = useState(ALL_CATS)
   const [axis, setAxis] = useState('kanji')
   const [phase, setPhase] = useState('intro') // intro | scene | summary
   const [order, setOrder] = useState([])
@@ -21,15 +32,44 @@ export function UjianHarian({ onBack }) {
   const [choice, setChoice] = useState(null)
   const [score, setScore] = useState(0)
 
-  const pool = useMemo(() => (date ? listDayItems(date) : []), [date])
+  const allPool = useMemo(() => (date ? listDayItems(date) : []), [date])
+
+  // Reset category selection when date changes: only show available cats
+  useEffect(() => {
+    const present = new Set(allPool.map((it) => catOfId(it.id)))
+    setCats(ALL_CATS.filter((c) => present.has(c)))
+  }, [date, allPool])
+
+  const pool = useMemo(
+    () => allPool.filter((it) => cats.includes(catOfId(it.id))),
+    [allPool, cats],
+  )
+
+  // Breakdown counts for the selected date
+  const breakdown = useMemo(() => {
+    const counts = { kotoba: 0, kanji: 0, bunpou: 0 }
+    for (const it of allPool) {
+      const cat = catOfId(it.id)
+      if (counts[cat] !== undefined) counts[cat]++
+    }
+    return counts
+  }, [allPool])
+
   const entry = order[q]
   const opts = useMemo(
     () => (entry ? buildOptionsAxis(entry, pool, axis) : null),
     [entry, pool, axis],
   )
 
+  const toggleCat = (k) => {
+    setCats((prev) => {
+      if (prev.includes(k)) return prev.length > 1 ? prev.filter((c) => c !== k) : prev
+      return [...prev, k]
+    })
+  }
+
   const start = () => {
-    setOrder(shuffle(pool))
+    setOrder(shuffle(pool).slice(0, Math.min(pool.length, MAX_QUESTIONS)))
     setQ(0)
     setChoice(null)
     setScore(0)
@@ -37,7 +77,6 @@ export function UjianHarian({ onBack }) {
   }
 
   if (phase === 'intro') {
-    const picked = days.find((d) => d.date === date)
     return (
       <div className="hh-exam">
         <button className="hh-settings-btn" onClick={onBack} title="Kembali">
@@ -62,7 +101,29 @@ export function UjianHarian({ onBack }) {
               ))}
             </div>
 
-            <div className="hh-tabs">
+            <div className="ujian-section" style={{ marginTop: 10 }}>
+              <label className="ujian-section-label">Kategori</label>
+              <div className="ujian-chips">
+                {CATS.map((c) => {
+                  const avail = breakdown[c.key] > 0
+                  return (
+                    <button
+                      key={c.key}
+                      className={`ujian-chip ${cats.includes(c.key) ? 'active' : ''}`}
+                      onClick={() => toggleCat(c.key)}
+                      disabled={!avail}
+                      title={!avail ? 'Tidak ada item untuk kategori ini pada tanggal ini' : undefined}
+                    >
+                      {cats.includes(c.key) && avail ? <Check size={13} /> : null}
+                      <span>{c.label}</span>
+                      {avail ? <span className="ujian-chip-icon" style={{ marginLeft: 4 }}>{breakdown[c.key]}</span> : null}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className="hh-tabs" style={{ marginTop: 10 }}>
               {AXES.map((a) => (
                 <button
                   key={a.key}
@@ -75,13 +136,18 @@ export function UjianHarian({ onBack }) {
             </div>
 
             <p className="hh-exam-note">
-              Uji <span className="kin-count">{picked?.count || pool.length}</span> item yang kamu
-              centang {date === days[0].date ? 'hari ini' : `pada ${friendlyDate(date)}`},
+              {CATS
+                .filter((c) => cats.includes(c.key) && breakdown[c.key] > 0)
+                .map((c) => `${breakdown[c.key]} ${c.label.toLowerCase()}`)
+                .join(' + ')}{' '}
+              = <span className="kin-count">{pool.length}</span> soal
+              {date === days[0].date ? ' hari ini' : ` pada ${friendlyDate(date)}`},
               mode {axis === 'kanji' ? 'kanji → arti' : axis === 'hiragana' ? 'hiragana → arti' : 'arti → kanji'}.
+              {pool.length > MAX_QUESTIONS && <>{' '}(maks {MAX_QUESTIONS} soal)</>}
             </p>
 
             <div className="row mt no-print">
-              <button className="primary-btn" onClick={start}>
+              <button className="primary-btn" disabled={pool.length < 1} onClick={start}>
                 Mulai Ujian ({pool.length})
               </button>
             </div>
@@ -151,7 +217,7 @@ export function UjianHarian({ onBack }) {
           Benar <b>{score}</b>
         </span>
         <span className="qstat err">
-          Salah <b>{q + (choice ? 1 : 0) - score}</b>
+          Salah <b>{q - score}</b>
         </span>
       </div>
 

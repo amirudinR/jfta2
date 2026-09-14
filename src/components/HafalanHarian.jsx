@@ -136,6 +136,7 @@ export default function HafalanHarian({ onGoMateri, onGoRecall, level = 'a2' }) 
   }
 
   const removeCustom = (type, idx) => {
+    if (!window.confirm('Yakin ingin menghapus item ini?')) return
     const next = { ...custom, [type]: custom[type].filter((_, i) => i !== idx) }
     setCustom(next)
     setCustomStorage(activeMode, next)

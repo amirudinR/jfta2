@@ -54,7 +54,7 @@ function pickQuote() {
 }
 
 export default function App() {
-  const { user, loading: authLoading, loginGoogle, logout } = useAuth()
+  const { user, loading: authLoading, loginGoogle, logout, loginError } = useAuth()
   const [level, setLevelState] = useState(() => getSavedLevel() || 'a2')
   const [material, setMaterial] = useState('hiragana')
   const [mode, setMode] = useState(MODES[0].key)
@@ -109,7 +109,7 @@ export default function App() {
 
   useEffect(() => {
     setMode(MODES[0].key)
-  }, [material])
+  }, [])
 
   const setPrefs = (partial) => {
     const next = { ...prefs, ...partial }
@@ -197,8 +197,7 @@ export default function App() {
   }
 
   const handleBottomNav = (key) => {
-    if (key === 'materi') setMode(MODES[0].key)
-    else setMode(key)
+    setMode(key)
   }
 
   // ══════════════════════════════════════════════════════════
@@ -218,7 +217,7 @@ export default function App() {
   if (!user) {
     return (
       <div className="stage">
-        <LoginGate onLogin={loginGoogle} />
+        <LoginGate onLogin={loginGoogle} error={loginError} />
       </div>
     )
   }
@@ -286,7 +285,7 @@ export default function App() {
         return (
           <UjianBaru
             level={level}
-            onBack={() => setMode('ujian')}
+            onBack={() => setMode('harian')}
             onSaveResult={handleSaveExamResult}
           />
         )

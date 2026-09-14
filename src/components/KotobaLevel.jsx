@@ -23,6 +23,7 @@ export default function KotobaLevel({ material, label, hankoText, cards, prefs, 
   const allEntries = useMemo(() => byMaterial(material), [material])
   const [tab, setTab] = useState('kartu')
   const [lessons, setLessons] = useState(null)
+  const [draft, setDraft] = useState(null)
   const [deckVersion, setDeckVersion] = useState(0)
 
   const groups = useMemo(() => groupListOf(allEntries), [allEntries])
@@ -33,8 +34,8 @@ export default function KotobaLevel({ material, label, hankoText, cards, prefs, 
     return allEntries.filter((e) => set.has(e.groupLabel || ''))
   }, [allEntries, lessons])
 
-  const toggle = (g) => {
-    setLessons((prev) => {
+  const toggleDraft = (g) => {
+    setDraft((prev) => {
       const base = prev ? new Set(prev) : new Set(groups)
       if (base.has(g)) base.delete(g)
       else base.add(g)
@@ -42,8 +43,13 @@ export default function KotobaLevel({ material, label, hankoText, cards, prefs, 
     })
   }
 
-  const selectAll = () => setLessons(null)
-  const clearAll = () => setLessons(new Set())
+  const selectAll = () => setDraft(null)
+  const clearAll = () => setDraft(new Set())
+
+  const apply = () => {
+    setLessons(draft)
+    setDeckVersion((v) => v + 1)
+  }
 
   const hafalCount = useMemo(() => allEntries.filter((e) => isMastered(cards[e.id])).length, [allEntries, cards])
   const dueCount = useMemo(() => allEntries.filter((e) => cards[e.id] && !isMastered(cards[e.id]) && isDue(cards[e.id])).length, [allEntries, cards])
@@ -112,14 +118,17 @@ export default function KotobaLevel({ material, label, hankoText, cards, prefs, 
       {groups.length > 1 ? (
         <div className="kl-lessons no-print">
           <div className="lesson-chips">
-            <button className={`lchip ${lessons === null ? 'on' : ''}`} onClick={selectAll}>Semua</button>
+            <button className={`lchip ${draft === null ? 'on' : ''}`} onClick={selectAll}>Semua</button>
             {groups.map((g) => (
-              <button key={g} className={`lchip ${lessons && lessons.has(g) ? 'on' : ''}`} onClick={() => toggle(g)}>
+              <button key={g} className={`lchip ${draft && draft.has(g) ? 'on' : ''}`} onClick={() => toggleDraft(g)}>
                 {g}
               </button>
             ))}
-            {lessons ? <button className="ctl-link" onClick={clearAll}>Kosongkan</button> : null}
+            {draft ? <button className="ctl-link" onClick={clearAll}>Kosongkan</button> : null}
           </div>
+          <button className="apply-btn" onClick={apply}>
+            Terapkan &amp; kocok ulang
+          </button>
         </div>
       ) : null}
 

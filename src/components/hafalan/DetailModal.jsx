@@ -11,7 +11,7 @@ export function DetailModal({ item, isChecked, onToggle, onClose }) {
 
   return (
     <div className="hh-modal-overlay" onClick={onClose}>
-      <div className="hh-modal" onClick={e => e.stopPropagation()}>
+      <div className="hh-modal" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()}>
         <button className="hh-modal-close" onClick={onClose}><X size={20} /></button>
 
         <div className="hh-modal-main">

@@ -2,11 +2,12 @@ import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import { byMaterial } from '../data'
 import {
   Search, CheckSquare, Square, ChevronLeft, Filter,
-  ArrowUpDown, X, Volume2,
+  ArrowUpDown, X,
 } from 'lucide-react'
 import {
-  HAFALAN_MODES, getMastered, toggleMastered, countMastered, speak,
+  HAFALAN_MODES, getMastered, toggleMastered, countMastered,
 } from '../lib/hafalan-storage'
+import { DetailModal } from './hafalan/DetailModal'
 
 const PAGE_SIZE = 50
 
@@ -17,38 +18,6 @@ function buildItems(materialKey) {
     reading: e.frontSub || e.reading || '',
     meaning: e.backShort, full: e.backFull,
   }))
-}
-
-// ── Detail Modal (reuse same design as hafalan) ──
-function DetailModal({ item, isHafal, onToggle, onClose }) {
-  useEffect(() => {
-    const h = (e) => { if (e.key === 'Escape') onClose() }
-    window.addEventListener('keydown', h)
-    return () => window.removeEventListener('keydown', h)
-  }, [onClose])
-
-  return (
-    <div className="hh-modal-overlay" onClick={onClose}>
-      <div className="hh-modal" onClick={e => e.stopPropagation()}>
-        <button className="hh-modal-close" onClick={onClose}><X size={20} /></button>
-        <div className="hh-modal-main">
-          <span className="hh-modal-num">#{item.num}</span>
-          <div className="hh-modal-front">{item.front}</div>
-          {item.reading && <div className="hh-modal-reading">{item.reading}</div>}
-          <div className="hh-modal-meaning">{item.full || item.meaning}</div>
-        </div>
-        <div className="hh-modal-actions">
-          <button className={`hh-modal-hafal ${isHafal ? 'checked' : ''}`} onClick={onToggle}>
-            {isHafal ? <CheckSquare size={22} /> : <Square size={22} />}
-            {isHafal ? 'Sudah Hafal' : 'Tandai Hafal'}
-          </button>
-          <button className="hh-modal-tts" onClick={() => speak(item.reading || item.front)} title="Dengarkan">
-            <Volume2 size={20} />
-          </button>
-        </div>
-      </div>
-    </div>
-  )
 }
 
 // ── Progress Bar ──
@@ -263,7 +232,7 @@ export default function DaftarMateri({ onGoHafalan, level = 'a2' }) {
       {detailItem && (
         <DetailModal
           item={detailItem}
-          isHafal={!!masteredMap[detailItem.id]}
+          isChecked={!!masteredMap[detailItem.id]}
           onToggle={() => doToggle(detailItem.id)}
           onClose={() => setDetailItem(null)}
         />

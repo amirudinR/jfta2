@@ -14,8 +14,7 @@ export default function BottomNav({ active, onChange, user, recallDue = 0 }) {
       {TABS.map((t) => {
         const Icon = t.icon
         const isActive = active === t.key
-          || (t.key === 'materi' && ['harian', 'materi', 'kartu', 'kuis', 'ulangi', 'sprint', 'ujian', 'daftar', 'referensi', 'kotoba-n3', 'kotoba-n2', 'kotoba-n1'].includes(active))
-          || (t.key === 'ujian-baru' && active === 'ujian-baru')
+          || (t.key === 'materi' && active === 'harian')
           || (t.key === 'recall' && active === 'recall')
           || (t.key === 'kemampuan' && active === 'kemampuan')
           || (t.key === 'profil' && active === 'profil')

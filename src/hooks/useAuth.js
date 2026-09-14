@@ -6,6 +6,7 @@ import { auth, googleProvider } from '../lib/firebase'
 export function useAuth() {
   const [user, setUser] = useState(undefined) // undefined = loading, null = logged out
   const [loading, setLoading] = useState(true)
+  const [loginError, setLoginError] = useState(null)
 
   useEffect(() => {
     // DEV-only preview: ?preview=1 melewati login untuk QA/screenshot.
@@ -23,11 +24,19 @@ export function useAuth() {
   }, [])
 
   const loginGoogle = useCallback(async () => {
+    setLoginError(null)
     try {
       await signInWithPopup(auth, googleProvider)
     } catch (e) {
       // User closed popup or error
       console.error('Login error:', e.code)
+      if (e?.code === 'auth/popup-closed-by-user') {
+        setLoginError('Login dibatalkan. Coba lagi.')
+      } else if (e?.code === 'auth/popup-blocked') {
+        setLoginError('Popup login diblokir browser. Izinkan popup lalu coba lagi.')
+      } else {
+        setLoginError('Gagal masuk. Periksa koneksi lalu coba lagi.')
+      }
     }
   }, [])
 
@@ -35,5 +44,5 @@ export function useAuth() {
     await signOut(auth)
   }, [])
 
-  return { user, loading, loginGoogle, logout }
+  return { user, loading, loginGoogle, logout, loginError }
 }
