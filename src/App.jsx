@@ -36,6 +36,7 @@ import Recall from './components/Recall'
 import Profil from './components/Profil'
 import { recordStudy, getHistory, computeStreak } from './lib/history'
 import { addExamRecord } from './lib/exam-history'
+import { recallStats } from './lib/recall-queue'
 import { kanjiFontOf } from './lib/fonts'
 import { useAuth } from './hooks/useAuth'
 import { syncToCloud, loadFromCloud, mergeProgress, saveUserProfile, saveExamResult } from './lib/cloud-sync'
@@ -65,6 +66,7 @@ export default function App() {
   const [historyTick, setHistoryTick] = useState(0)
   const [quote] = useState(() => pickQuote())
   const [cloudLoaded, setCloudLoaded] = useState(false)
+  const [queueTick, setQueueTick] = useState(0)
 
   const storageOk = useMemo(() => storageAvailable(), [])
   const ttsOk = useMemo(() => ttsSupported(), [])
@@ -176,6 +178,8 @@ export default function App() {
 
   const history = useMemo(() => getHistory(), [historyTick, material])
   const streak = useMemo(() => computeStreak(history), [history, historyTick])
+
+  const recallDue = useMemo(() => recallStats().due, [queueTick, mode])
 
   const allEntriesRaw = useMemo(() => byMaterial('hiragana').concat(byMaterial('katakana'), byMaterial('kotoba'), byMaterial('kotoba-n3'), byMaterial('kotoba-n2'), byMaterial('kotoba-n1'), byMaterial('kanji'), byMaterial('bunpo')), [])
 
@@ -291,6 +295,7 @@ export default function App() {
           <Recall
             onBack={() => setMode('harian')}
             onSaveResult={handleSaveExamResult}
+            onQueueChange={() => setQueueTick((t) => t + 1)}
           />
         )
       case 'daftar':
@@ -404,7 +409,7 @@ export default function App() {
         </button>
       </footer>
 
-      <BottomNav active={mode} onChange={handleBottomNav} user={user} />
+      <BottomNav active={mode} onChange={handleBottomNav} user={user} recallDue={recallDue} />
     </div>
   )
 }

@@ -197,3 +197,196 @@
   padding: 7px 12px;
   font-size: 12px;
 }
+
+/* Kategori multi-pilih */
+.recall-hint {
+  font-weight: 400;
+  font-size: 10.5px;
+  color: var(--page-soft);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.recall-check {
+  margin-right: 5px;
+  vertical-align: -2px;
+}
+
+/* Kartu item yang perlu diulang (jatuh tempo) */
+.recall-due-card {
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(193, 64, 42, 0.28);
+  background: rgba(193, 64, 42, 0.07);
+}
+
+.recall-due-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--page-ink);
+}
+
+.recall-due-head b {
+  color: var(--shu);
+}
+
+.recall-due-cats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0 12px;
+}
+
+.recall-due-tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 99px;
+  background: var(--panel);
+  border: 1px solid var(--panel-line);
+  color: var(--page-soft);
+}
+
+.recall-due-btn {
+  width: 100%;
+}
+
+.recall-pending-note {
+  margin: 10px 0 0;
+  font-size: 11.5px;
+  color: var(--page-soft);
+  text-align: center;
+}
+
+/* Ringkasan progres per kategori */
+.recall-summary {
+  text-align: center;
+  padding: 10px 0 0;
+}
+
+.recall-summary-title {
+  margin: 0 0 6px;
+  font-size: 17px;
+  color: var(--page-ink);
+}
+
+.recall-score-line {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin-bottom: 18px;
+}
+
+.recall-score-big {
+  font-family: var(--font-mono);
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--kin);
+  line-height: 1;
+}
+
+.recall-cat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0 0 16px;
+  text-align: left;
+}
+
+.recall-cat-row {
+  display: grid;
+  grid-template-columns: 62px 1fr 44px 52px;
+  align-items: center;
+  gap: 10px;
+}
+
+.recall-cat-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--page-ink);
+}
+
+.recall-bar {
+  height: 8px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.09);
+  overflow: hidden;
+}
+
+.recall-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.3s;
+}
+
+.recall-bar i.ok {
+  background: var(--moss);
+}
+
+.recall-bar i.no {
+  background: var(--shu);
+}
+
+.recall-cat-num {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--page-soft);
+  text-align: right;
+}
+
+.recall-cat-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-align: center;
+  padding: 3px 0;
+  border-radius: 99px;
+}
+
+.recall-cat-badge.ok {
+  background: rgba(111, 143, 82, 0.22);
+  color: #b9d4a1;
+}
+
+.recall-cat-badge.no {
+  background: rgba(193, 64, 42, 0.2);
+  color: #e2937f;
+}
+
+.recall-note {
+  font-size: 12.5px;
+  line-height: 1.5;
+  margin: 0 0 4px;
+}
+
+.recall-note.ok {
+  color: #b9d4a1;
+}
+
+.recall-note.warn {
+  color: #e2937f;
+}
+
+.recall-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.recall-actions .primary-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (max-width: 420px) {
+  .recall-cat-row {
+    grid-template-columns: 54px 1fr 40px 46px;
+    gap: 8px;
+  }
+}

@@ -8,7 +8,7 @@ const TABS = [
   { key: 'profil', label: 'Profil', icon: User },
 ]
 
-export default function BottomNav({ active, onChange, user }) {
+export default function BottomNav({ active, onChange, user, recallDue = 0 }) {
   return (
     <nav className="bottom-nav no-print" role="tablist">
       {TABS.map((t) => {
@@ -32,6 +32,9 @@ export default function BottomNav({ active, onChange, user }) {
             ) : (
               <Icon size={20} />
             )}
+            {t.key === 'recall' && recallDue > 0 ? (
+              <span className="bnav-badge">{recallDue}</span>
+            ) : null}
             <span>{t.label}</span>
           </button>
         )
