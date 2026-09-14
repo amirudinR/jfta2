@@ -52,6 +52,16 @@ export default function Sprint({ entries, cards, onGrade, material, direction = 
     reset()
   }
 
+  // Saat sprint berjalan: acak ulang antrean di tempat tanpa menghentikan sesi.
+  const reshuffleLive = () => {
+    setQueue((qq) => shuffle(qq))
+    setPos(0)
+    setFlipped(false)
+    setDone({ ok: 0, ulang: 0 })
+    setElapsed(0)
+    startAt.current = Date.now()
+  }
+
   const finish = () => {
     setElapsed(Math.floor((Date.now() - startAt.current) / 1000))
     setRunning(false)
@@ -122,7 +132,7 @@ export default function Sprint({ entries, cards, onGrade, material, direction = 
         <span className="meta-box">
           Diulang <b>{done.ulang}</b>
         </span>
-        <button className="meta-link" onClick={reshuffle}>
+        <button className="meta-link" onClick={reshuffleLive}>
           Acak 20 baru
         </button>
       </div>

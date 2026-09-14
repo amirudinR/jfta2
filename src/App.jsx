@@ -24,7 +24,6 @@ import Controls from './components/Controls'
 import Kartu from './components/Kartu'
 import Kuis from './components/Kuis'
 import Sprint from './components/Sprint'
-import Ujian from './components/Ujian'
 import DaftarHafal from './components/DaftarHafal'
 import Referensi from './components/Referensi'
 import Kemampuan from './components/Kemampuan'
@@ -68,6 +67,7 @@ export default function App() {
   const [quote] = useState(() => pickQuote())
   const [cloudLoaded, setCloudLoaded] = useState(false)
   const [queueTick, setQueueTick] = useState(0)
+  const [loginBusy, setLoginBusy] = useState(false)
 
   const storageOk = useMemo(() => storageAvailable(), [])
   const ttsOk = useMemo(() => ttsSupported(), [])
@@ -93,6 +93,7 @@ export default function App() {
     syncToCloud(user.uid, {
       perMaterial: progress.perMaterial,
       prefs: progress.prefs,
+      tombstone: progress.tombstone,
       updated: progress.updated,
     })
   }, [progress, user, cloudLoaded])
@@ -193,6 +194,7 @@ export default function App() {
     resetProgress()
     resetDailyProgress()
     setProgress(getProgress())
+    setPrefsState(getPrefs())
     setLessons({})
     setDeckVersion((v) => v + 1)
     setHistoryTick((t) => t + 1)
@@ -220,9 +222,18 @@ export default function App() {
   }
 
   if (!user) {
+    const handleLogin = async () => {
+      if (loginBusy) return
+      setLoginBusy(true)
+      try {
+        await loginGoogle()
+      } finally {
+        setLoginBusy(false)
+      }
+    }
     return (
       <div className="stage">
-        <LoginGate onLogin={loginGoogle} error={loginError} />
+        <LoginGate onLogin={handleLogin} loading={loginBusy} error={loginError} />
       </div>
     )
   }
@@ -284,8 +295,6 @@ export default function App() {
             direction={prefs.direction}
           />
         )
-      case 'ujian':
-        return <Ujian entries={allEntries} cards={cards} direction={prefs.direction} />
       case 'ujian-baru':
         return (
           <UjianBaru

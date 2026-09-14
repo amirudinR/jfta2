@@ -4,13 +4,13 @@ const TABS = [
   { key: 'materi', label: 'Materi', icon: BookOpen },
   { key: 'ujian-baru', label: 'Ujian', icon: FlaskConical },
   { key: 'recall', label: 'Recall', icon: History },
-  { key: 'kemampuan', label: 'Progress', icon: BarChart3 },
+  { key: 'kemampuan', label: 'Kemampuan', icon: BarChart3 },
   { key: 'profil', label: 'Profil', icon: User },
 ]
 
 export default function BottomNav({ active, onChange, user, recallDue = 0 }) {
   return (
-    <nav className="bottom-nav no-print" role="tablist">
+    <nav className="bottom-nav no-print" aria-label="Navigasi utama">
       {TABS.map((t) => {
         const Icon = t.icon
         const isActive = active === t.key
@@ -23,8 +23,7 @@ export default function BottomNav({ active, onChange, user, recallDue = 0 }) {
             key={t.key}
             className={`bnav-item ${isActive ? 'active' : ''}`}
             onClick={() => onChange(t.key)}
-            role="tab"
-            aria-selected={isActive}
+            aria-current={isActive ? 'page' : undefined}
           >
             {t.key === 'profil' && user?.photoURL ? (
               <img src={user.photoURL} alt="" className="bnav-avatar" referrerPolicy="no-referrer" />

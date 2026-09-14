@@ -2,7 +2,6 @@ import {
   FileQuestion,
   RotateCcw,
   Zap,
-  Target,
   List,
   BookOpen,
   Sparkles,
@@ -13,19 +12,19 @@ import {
   CalendarCheck,
   BookText,
   FlaskConical,
-  History,
 } from 'lucide-react'
 import { MATERIALS, MODES } from '../data/materials'
 
 export function MaterialBar({ active, onChange }) {
   const list = MATERIALS.filter((m) => !m.standalone)
   return (
-    <div className="materibar no-print" role="tablist">
+    <div className="materibar no-print" role="group" aria-label="Pilih materi">
       {list.map((m) => (
         <button
           key={m.key}
           className={`mat-btn ${active === m.key ? 'active' : ''}`}
           onClick={() => onChange(m.key)}
+          aria-pressed={active === m.key}
         >
           <span className="mj">{m.kanji}</span>
           <span className="ml">{m.label}</span>
@@ -43,9 +42,7 @@ const modeIcon = (key) => {
     kuis: <FileQuestion size={14} />,
     ulangi: <RotateCcw size={14} />,
     sprint: <Zap size={14} />,
-    ujian: <Target size={14} />,
     'ujian-baru': <FlaskConical size={14} />,
-    recall: <History size={14} />,
     daftar: <List size={14} />,
     kemampuan: <BarChart3 size={14} />,
     'kotoba-n3': <BookMarked size={14} />,
@@ -59,7 +56,7 @@ const modeIcon = (key) => {
 // badgeCount: { ulangi: n, hafal: n } — badge merah ala desain asli.
 export function ModeBar({ active, onChange, badgeCount = {} }) {
   return (
-    <div className="modebar no-print" role="tablist">
+    <div className="modebar no-print" role="group" aria-label="Pilih mode belajar">
       {MODES.map((m) => {
         const n = m.badge ? badgeCount[m.badge] : null
         return (
@@ -67,6 +64,7 @@ export function ModeBar({ active, onChange, badgeCount = {} }) {
             key={m.key}
             className={`mode-btn ${active === m.key ? 'active' : ''}`}
             onClick={() => onChange(m.key)}
+            aria-pressed={active === m.key}
           >
             <span className="mi" aria-hidden>
               {modeIcon(m.key)}

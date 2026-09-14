@@ -59,6 +59,7 @@ export default function Recall({ onBack, onSaveResult, onQueueChange }) {
   const [result, setResult] = useState(null)
   const [queueTick, setQueueTick] = useState(0)
   const wrongRef = useRef([])
+  const wrongEntriesRef = useRef([])
 
   const stats = useMemo(() => recallStats(), [queueTick, phase])
   const duePool = useMemo(
@@ -118,6 +119,19 @@ export default function Recall({ onBack, onSaveResult, onQueueChange }) {
     setScore(0)
     setResult(null)
     wrongRef.current = []
+    wrongEntriesRef.current = []
+    setPhase('scene')
+  }
+
+  // "Ujian Lagi" dari review → ulangi hanya item yang sebelumnya salah.
+  const retryWrong = () => {
+    const deck = shuffle([...wrongEntriesRef.current])
+    setOrder(deck)
+    setQ(0)
+    setChoice(null)
+    setScore(0)
+    wrongRef.current = []
+    wrongEntriesRef.current = []
     setPhase('scene')
   }
 
@@ -127,6 +141,7 @@ export default function Recall({ onBack, onSaveResult, onQueueChange }) {
     setChoice(null)
     setScore(0)
     wrongRef.current = []
+    wrongEntriesRef.current = []
     setPhase('scene')
   }
 
@@ -318,7 +333,7 @@ export default function Recall({ onBack, onSaveResult, onQueueChange }) {
         score={order.length - wrongRef.current.length}
         total={order.length}
         difficulty="Recall"
-        onRetry={repeatAll}
+        onRetry={retryWrong}
         onBack={() => setPhase('summary')}
       />
     )
@@ -413,6 +428,7 @@ export default function Recall({ onBack, onSaveResult, onQueueChange }) {
       correctAnswer: label,
       explanation: entry.backFull || '',
     })
+    wrongEntriesRef.current.push(entry)
   }
 
   const next = () => {

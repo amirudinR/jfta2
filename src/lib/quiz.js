@@ -19,7 +19,7 @@ export function buildOptions(entry, pool, direction = 'jp2id', easyMode = false)
   const options = [...distract.map((e) => answerOf(e, direction)), label]
   return {
     label,
-    options: options.sort(() => Math.random() - 0.5),
+    options: shuffle(options),
   }
 }
 
@@ -83,6 +83,6 @@ export function buildOptionsAxis(entry, pool, axis) {
   const options = [...distract.map((e) => axisAnswerOf(e, axis)), label]
   return {
     label,
-    options: options.sort(() => Math.random() - 0.5),
+    options: shuffle(options),
   }
 }

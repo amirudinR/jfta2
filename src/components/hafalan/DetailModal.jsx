@@ -1,17 +1,41 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { X, Volume2, CheckSquare, Square } from 'lucide-react'
 import { speak } from '../../lib/hafalan-storage'
 
 export function DetailModal({ item, isChecked, onToggle, onClose }) {
+  const panelRef = useRef(null)
+
   useEffect(() => {
+    const panel = panelRef.current
+    const first = panel?.querySelector('.hh-modal-close')
+    first?.focus()
+
     const handler = (e) => { if (e.key === 'Escape') onClose() }
+    const trap = (e) => {
+      if (e.key !== 'Tab' || !panel) return
+      const focusables = [...panel.querySelectorAll('button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')]
+      if (!focusables.length) return
+      const firstEl = focusables[0]
+      const lastEl = focusables[focusables.length - 1]
+      if (e.shiftKey && document.activeElement === firstEl) {
+        e.preventDefault()
+        lastEl.focus()
+      } else if (!e.shiftKey && document.activeElement === lastEl) {
+        e.preventDefault()
+        firstEl.focus()
+      }
+    }
     window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
+    panel?.addEventListener('keydown', trap)
+    return () => {
+      window.removeEventListener('keydown', handler)
+      panel?.removeEventListener('keydown', trap)
+    }
   }, [onClose])
 
   return (
     <div className="hh-modal-overlay" onClick={onClose}>
-      <div className="hh-modal" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()}>
+      <div className="hh-modal" role="dialog" aria-modal="true" aria-label={item.front} ref={panelRef} onClick={e => e.stopPropagation()}>
         <button className="hh-modal-close" onClick={onClose}><X size={20} /></button>
 
         <div className="hh-modal-main">

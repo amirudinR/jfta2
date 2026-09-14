@@ -5,7 +5,12 @@ const KEY_V1 = 'hafalan-jft-a2-progress-v1'
 
 const DEFAULT_PREFS = { darkMode: false, showRomaji: false, direction: 'jp2id', font: 'maru' }
 
-const emptyState = () => ({ perMaterial: {}, prefs: { ...DEFAULT_PREFS }, updated: Date.now() })
+const emptyState = () => ({
+  perMaterial: {},
+  prefs: { ...DEFAULT_PREFS },
+  tombstone: {}, // { material: { id: timestampMs } } — kartu yang dihapus
+  updated: Date.now(),
+})
 
 // v1 (HTML asli): { reviewSets: {mat: [id]}, masteredSets: {mat: [id]}, showRomaji, darkMode }
 // id di v1 = indeks numerik per materi → disimpan sebagai String(id) di v2.
@@ -47,6 +52,7 @@ function load() {
       const state = JSON.parse(raw)
       state.perMaterial = state.perMaterial || {}
       state.prefs = { ...DEFAULT_PREFS, ...(state.prefs || {}) }
+      state.tombstone = state.tombstone || {}
       return state
     }
     const migrated = migrateV1()
@@ -92,6 +98,8 @@ export function storeGrade(material, id, card) {
   const state = getProgress()
   if (!state.perMaterial[material]) state.perMaterial[material] = {}
   state.perMaterial[material][String(id)] = card
+  // Kartu dihafalkan/ulang lagi → batal tombstone-nya.
+  if (state.tombstone[material]) delete state.tombstone[material][String(id)]
   return saveProgress(state)
 }
 
@@ -102,7 +110,11 @@ export function setCard(material, id, card) {
 export function clearCard(material, id) {
   const state = getProgress()
   if (state.perMaterial[material]) {
-    delete state.perMaterial[material][String(id)]
+    const sid = String(id)
+    delete state.perMaterial[material][sid]
+    // Tombstone: hindari kartu "muncul lagi" dari snapshot cloud yang lebih lama.
+    state.tombstone[material] = state.tombstone[material] || {}
+    state.tombstone[material][sid] = Date.now()
     return saveProgress(state)
   }
   return state

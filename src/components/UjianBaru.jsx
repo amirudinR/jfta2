@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef } from 'react'
+import { useMemo, useState, useRef, useEffect } from 'react'
 import { ArrowLeft, Settings2 } from 'lucide-react'
 import { byMaterial } from '../data'
 import { buildOptions, buildOptionsHard } from '../lib/quiz'
@@ -85,6 +85,7 @@ export default function UjianBaru({ level, onBack, onSaveResult }) {
   const [choice, setChoice] = useState(null)
   const [score, setScore] = useState(0)
   const wrongRef = useRef([]) // track wrong answers
+  const finishRan = useRef(false) // guard agar finishExam hanya dieksekusi sekali
 
   const entry = order[q]
   const direction = 'jp2id'
@@ -96,9 +97,19 @@ export default function UjianBaru({ level, onBack, onSaveResult }) {
     return buildOptions(entry, order, direction)
   }, [entry, order, direction, difficulty])
 
+  // Safety net: bila scene kehabisan kartu, selesaikan lewat efek — dilarang
+  // memanggil finishExam (yang menulis hasil) saat render berlangsung.
+  useEffect(() => {
+    if (phase !== 'scene' || order[q] || finishRan.current) return
+    finishRan.current = true
+    if (q > 0) finishExam()
+    else setPhase('setup')
+  }, [phase, order, q])
+
   const start = () => {
     const maxQ = Math.min(pool.length, 30)
     const deck = shuffle(pool).slice(0, maxQ)
+    finishRan.current = false
     setOrder(deck)
     setQ(0)
     setChoice(null)
@@ -282,10 +293,7 @@ export default function UjianBaru({ level, onBack, onSaveResult }) {
   }
 
   // ── Scene ──
-  if (!entry) {
-    if (q > 0) finishExam()
-    return null
-  }
+  if (!entry) return null
 
   const { label, options } = opts || { label: '', options: [] }
   const question = entry.front

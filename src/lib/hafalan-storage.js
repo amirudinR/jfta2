@@ -96,6 +96,14 @@ export const setCheckedStorage = (mode, data) => lsSet(`${STORAGE_PREFIX}-checke
 export const getCustom = (mode) => lsGet(`${STORAGE_PREFIX}-custom-${mode}`, { kotoba: [], kanji: [], bunpou: [] })
 export const setCustomStorage = (mode, data) => lsSet(`${STORAGE_PREFIX}-custom-${mode}`, data)
 
+// Id custom yang stabil — tidak berbasis indeks, jadi hapus item di tengah
+// daftar tidak menggeser referensi centang/riwayat/ujian harian.
+let customSeq = 0
+export function newCustomId() {
+  customSeq += 1
+  return `cc-${Date.now().toString(36)}-${customSeq}`
+}
+
 // Reset semua data harian/riwayat (checked, history, custom, targets, mastery,
 // recall queue, exam history, study history) — dipanggil saat "Reset semua progres".
 // SRS card & preferensi di-reset terpisah oleh resetProgress() di lib/storage.

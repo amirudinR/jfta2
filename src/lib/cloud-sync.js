@@ -53,7 +53,9 @@ export async function saveUserProfile(user) {
 export async function saveExamResult(uid, result) {
   if (!uid) return
   try {
-    const id = `${Date.now()}`
+    const id = typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
     const ref = doc(db, 'users', uid, 'exams', id)
     await setDoc(ref, { ...result, createdAt: serverTimestamp() })
   } catch (e) {
@@ -62,19 +64,41 @@ export async function saveExamResult(uid, result) {
 }
 
 // ── Merge strategy: cloud wins if newer, else local wins ──
+// Menghormati tombstone (kartu yang dihapus) dan menggabungkan prefs.
 export function mergeProgress(local, cloud) {
   if (!cloud) return local
   if (!local) return cloud
   // Compare updated timestamps
   const localTime = local.updated || 0
   const cloudTime = cloud.syncedAt?.toMillis?.() || cloud.updated || 0
-  if (cloudTime > localTime) {
-    // Cloud is newer — merge perMaterial
-    return {
-      ...local,
-      perMaterial: { ...local.perMaterial, ...cloud.perMaterial },
-      updated: cloudTime,
-    }
+  const cloudNewer = cloudTime > localTime
+
+  // Gabung peta kartu per materi (apa pun sisi yang lebih baru).
+  const materials = new Set([
+    ...Object.keys(local.perMaterial || {}),
+    ...Object.keys(cloud.perMaterial || {}),
+  ])
+  const perMaterial = {}
+  for (const m of materials) {
+    perMaterial[m] = { ...(local.perMaterial?.[m] || {}), ...(cloud.perMaterial?.[m] || {}) }
   }
-  return local
+
+  // Terapkan tombstone dari kedua sisi: kartu yang pernah dihapus tak boleh
+  // "muncul lagi" dari snapshot lama.
+  const tombstone = { ...(local.tombstone || {}), ...(cloud.tombstone || {}) }
+  for (const [m, ids] of Object.entries(tombstone)) {
+    for (const id of Object.keys(ids || {})) delete perMaterial[m]?.[id]
+  }
+
+  // Gabung prefs; sisi yang lebih baru menang atas nilai bertabrakan.
+  const prefs = cloudNewer
+    ? { ...(local.prefs || {}), ...(cloud.prefs || {}) }
+    : { ...(cloud.prefs || {}), ...(local.prefs || {}) }
+
+  return {
+    perMaterial,
+    prefs,
+    tombstone,
+    updated: Math.max(localTime, cloudTime),
+  }
 }

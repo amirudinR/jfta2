@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { buildOptions } from '../lib/quiz'
+import { shuffle } from '../lib/ui'
 import { materialOf } from '../data/materials'
 
 // Kuis pilihan ganda — murni latihan, tidak mengubah progres SRS.
 export default function Kuis({ entries, material, direction = 'jp2id' }) {
-  const order = useMemo(() => [...entries].sort(() => Math.random() - 0.5), [entries])
+  const order = useMemo(() => shuffle(entries), [entries])
   const [q, setQ] = useState(0)
   const [choice, setChoice] = useState(null)
   const [correct, setCorrect] = useState(0)

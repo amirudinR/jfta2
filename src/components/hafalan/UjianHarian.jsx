@@ -61,6 +61,11 @@ export function UjianHarian({ onBack }) {
     [entry, pool, axis],
   )
 
+  // Safety net: transisi ke summary lewat efek, bukan setState saat render.
+  useEffect(() => {
+    if (phase === 'scene' && !order[q]) setPhase('summary')
+  }, [phase, order, q])
+
   const toggleCat = (k) => {
     setCats((prev) => {
       if (prev.includes(k)) return prev.length > 1 ? prev.filter((c) => c !== k) : prev
@@ -186,10 +191,7 @@ export function UjianHarian({ onBack }) {
     )
   }
 
-  if (!entry) {
-    if (q > 0) setPhase('summary')
-    return null
-  }
+  if (!entry) return null
 
   const { label, options } = opts
   const question = axisQuestionOf(entry, axis)

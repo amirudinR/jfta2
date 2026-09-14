@@ -102,7 +102,7 @@ export default function Referensi({ entries, cards, isKana, onToggleMastered }) 
 
       {groups.length === 0 ? <p className="muted">Tidak ada hasil untuk “{query}”.</p> : null}
       <p className="muted no-print" style={{ fontSize: 11, marginTop: 10 }}>
-        Klik tile/baris untuk menandai hafal (masuk Ujian) atau menghapusnya.
+        Klik tile/baris untuk menandai hafal atau menghapusnya.
       </p>
     </>
   )

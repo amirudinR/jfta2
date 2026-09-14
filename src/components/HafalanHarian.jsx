@@ -5,7 +5,7 @@ import {
   HAFALAN_MODES, DEFAULT_TARGETS, REMINDER_HOUR,
   todayStr, getTargets, setTargets, getHistory, getChecked,
   setCheckedStorage, getCustom, setCustomStorage,
-  flushToHistory, saveHistoryNow, computeStreak,
+  flushToHistory, saveHistoryNow, computeStreak, newCustomId,
 } from '../lib/hafalan-storage'
 import { Heatmap } from './hafalan/Heatmap'
 import { ProgressBar } from './hafalan/ProgressBar'
@@ -27,7 +27,7 @@ function appendCustom(builtIn, customs) {
   return [
     ...builtIn,
     ...(customs || []).map((e, i) => ({
-      id: `c-${i}`, num: builtIn.length + i + 1, front: e.front,
+      id: e.id || `c-${i}`, num: builtIn.length + i + 1, front: e.front,
       reading: e.reading, meaning: e.meaning, full: e.meaning,
       custom: true, customIdx: i,
     })),
@@ -130,7 +130,8 @@ export default function HafalanHarian({ onGoMateri, onGoRecall, level = 'a2' }) 
   }
 
   const addCustom = (type, item) => {
-    const next = { ...custom, [type]: [...(custom[type] || []), item] }
+    const entry = { ...item, id: newCustomId() }
+    const next = { ...custom, [type]: [...(custom[type] || []), entry] }
     setCustom(next)
     setCustomStorage(activeMode, next)
   }

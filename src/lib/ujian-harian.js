@@ -22,9 +22,10 @@ function sourceKey(mode, category) {
 
 function findEntry(mode, category, rawId) {
   const srcKey = sourceKey(mode, category)
-  if (rawId.startsWith('c-')) {
-    const idx = Number(rawId.slice(2))
-    const custom = (getCustom(mode.key)[category] || [])[idx]
+  if (rawId.startsWith('c-') || rawId.startsWith('cc-')) {
+    const customs = getCustom(mode.key)[category] || []
+    // Id stabil (baru) dicari pas; id lama berbasis indeks c-0/c-1 sebagai fallback.
+    const custom = customs.find((c) => c.id === rawId) || customs[Number(rawId.slice(2))]
     if (!custom) return null
     return {
       front: custom.front,

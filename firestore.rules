@@ -29,13 +29,14 @@ service cloud.firestore {
 
     function validProgress() {
       return request.resource.data.keys().hasOnly(
-        ['perMaterial', 'prefs', 'updated', 'syncedAt']
-      );
+        ['perMaterial', 'prefs', 'tombstone', 'updated', 'syncedAt']
+      )
+        && request.resource.data.tombstone is map;
     }
 
     function validExam() {
       return request.resource.data.keys().hasOnly(
-        ['score', 'total', 'category', 'difficulty', 'difficultyLabel', 'level', 'wrongCount', 'date', 'createdAt']
+        ['score', 'total', 'category', 'difficulty', 'difficultyLabel', 'level', 'wrongCount', 'categories', 'date', 'createdAt']
       )
         && request.resource.data.score is number
         && request.resource.data.total is number

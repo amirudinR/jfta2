@@ -55,7 +55,7 @@ export default function Kartu({
 
   const nav = (d) => {
     setFlipped(false)
-    setIdx((i) => i + d)
+    setIdx((i) => Math.max(0, Math.min(i + d, deck.length)))
   }
 
   const handleGrade = (g) => {
@@ -67,9 +67,13 @@ export default function Kartu({
   }
 
   // Keyboard: Space/Enter flip · ←/→ navigasi · 1-4 grade saat terbalik.
+  // Jangan bajak Space/Enter saat fokus ada di tombol/elemen interaktif
+  // (mis. tombol grade/speak/roma) — biarkan aksi native berjalan.
   useEffect(() => {
     const h = (e) => {
-      if (e.target && ['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return
+      const tag = e.target?.tagName
+      const interactive = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'BUTTON' || tag === 'A'
+      if (interactive) return
       if (e.key === ' ' || e.key === 'Enter') {
         e.preventDefault()
         setFlipped((f) => !f)
