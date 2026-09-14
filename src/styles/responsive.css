@@ -217,6 +217,369 @@
   }
 }
 
+/* ============================================================
+   Desktop — ≥769px: wider layout, bigger type, multi-column
+   ============================================================ */
+@media (min-width: 769px) {
+  body {
+    font-size: 15px;
+  }
+
+  .stage {
+    max-width: 960px;
+    padding: 0 32px 48px;
+  }
+
+  /* ── Topbar ── */
+  .topbar {
+    padding-top: 28px;
+  }
+
+  .hanko {
+    width: 54px;
+    height: 54px;
+    font-size: 18px;
+    border-radius: 14px;
+  }
+
+  .brand {
+    font-size: 28px;
+  }
+
+  .brand-sub {
+    font-size: 12px;
+  }
+
+  .tagline {
+    font-size: 13px;
+  }
+
+  .stat-chips {
+    gap: 12px;
+    margin-top: 18px;
+  }
+
+  .stat {
+    padding: 14px 12px 10px;
+    border-radius: 14px;
+  }
+
+  .stat-num {
+    font-size: 22px;
+  }
+
+  .stat-lbl {
+    font-size: 10.5px;
+  }
+
+  /* ── Level Strip ── */
+  .level-strip {
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 16px;
+    padding: 6px;
+    gap: 8px;
+  }
+
+  /* ── Material bar ── */
+  .materibar {
+    gap: 10px;
+    margin: 18px 0 14px;
+  }
+
+  .mat-btn {
+    padding: 12px 8px 10px;
+    border-radius: 14px;
+    gap: 4px;
+  }
+
+  .mat-btn .mj {
+    font-size: 18px;
+  }
+
+  .mat-btn .ml {
+    font-size: 11px;
+  }
+
+  /* ── Mode bar ── */
+  .modebar {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .mode-btn {
+    padding: 12px 8px;
+    border-radius: 14px;
+    font-size: 13px;
+    gap: 7px;
+  }
+
+  .mode-btn .mi {
+    font-size: 15px;
+  }
+
+  /* ── Motivation card ── */
+  .motiv-card {
+    padding: 20px 24px;
+    max-width: 680px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .motiv-text {
+    font-size: 14.5px;
+  }
+
+  /* ── Hafalan Harian ── */
+  .hh-root {
+    gap: 16px;
+  }
+
+  .hh-stats {
+    gap: 14px;
+  }
+
+  .hh-progress {
+    padding: 16px 20px;
+    border-radius: 14px;
+  }
+
+  .hh-progress-label {
+    font-size: 13px;
+  }
+
+  .hh-progress-count {
+    font-size: 20px;
+  }
+
+  .hh-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .hh-row {
+    padding: 14px 16px;
+    border-radius: 12px;
+  }
+
+  .hh-jp {
+    font-size: 20px;
+  }
+
+  .hh-meaning {
+    font-size: 14px;
+  }
+
+  .hh-tabs {
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 12px;
+  }
+
+  .hh-tab {
+    padding: 14px 12px;
+    font-size: 15px;
+  }
+
+  /* ── Heatmap ── */
+  .hh-heatmap {
+    padding: 18px 22px;
+    border-radius: 14px;
+  }
+
+  .hh-heatmap-grid {
+    grid-template-columns: repeat(15, 1fr);
+    gap: 5px;
+  }
+
+  /* ── Detail Modal desktop center ── */
+  .hh-modal {
+    max-width: 520px;
+  }
+
+  .hh-modal-front {
+    font-size: 56px;
+  }
+
+  .hh-modal-reading {
+    font-size: 22px;
+  }
+
+  .hh-modal-meaning {
+    font-size: 20px;
+  }
+
+  /* ── Ujian Harian ── */
+  .hh-exam {
+    gap: 16px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .hh-exam-title {
+    font-size: 22px;
+  }
+
+  .big-emoji {
+    font-size: 56px;
+  }
+
+  /* ── Quiz / Kuis ── */
+  .quiz-card {
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .opt-grid {
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .quiz-stats {
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .next-row {
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ── Flashcard (Kartu) ── */
+  .card-wrap {
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .actions {
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .grade-grid {
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ── Daftar Materi / List ── */
+  .lrow {
+    padding: 14px 16px;
+    border-radius: 12px;
+  }
+
+  /* ── Controls ── */
+  .controls {
+    max-width: 680px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ── Settings panel ── */
+  .hh-settings {
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 20px;
+    border-radius: 14px;
+  }
+
+  /* ── Add form ── */
+  .hh-add-form {
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ── Ujian Baru / Recall ── */
+  .recall-root {
+    max-width: 680px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .review-salah {
+    max-width: 680px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ── Kemampuan (stats dashboard) ── */
+  .kp-stats-row {
+    gap: 12px;
+  }
+
+  .kp-stat {
+    padding: 18px 14px;
+    border-radius: 14px;
+  }
+
+  /* ── Footer ── */
+  .foot {
+    margin-top: 36px;
+    padding-top: 20px;
+    font-size: 12.5px;
+    flex-direction: row;
+    justify-content: space-between;
+    text-align: left;
+  }
+
+  .reset-btn {
+    font-size: 12.5px;
+    padding: 8px 18px;
+  }
+
+  /* ── Profil ── */
+  .profil-page {
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .profil-card {
+    padding: 28px;
+    border-radius: 18px;
+  }
+
+  .profil-name {
+    font-size: 18px;
+  }
+
+  /* ── Login gate ── */
+  .login-gate-card {
+    max-width: 420px;
+    padding: 40px 32px;
+    border-radius: 24px;
+  }
+
+  .login-title {
+    font-size: 30px;
+  }
+
+  .login-hanko {
+    width: 64px;
+    height: 64px;
+    font-size: 22px;
+    border-radius: 16px;
+  }
+
+  /* ── KotobaLevel ── */
+  .kl-hero-title {
+    font-size: 22px;
+  }
+}
+
 /* ---------- Print ---------- */
 @media print {
   body {
