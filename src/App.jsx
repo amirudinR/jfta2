@@ -41,7 +41,7 @@ import { resetDailyProgress } from './lib/hafalan-storage'
 import { useAuth } from './hooks/useAuth'
 import { useCloudSync, usePushCloud } from './hooks/useCloudSync'
 import { useAppSettings } from './hooks/useAppSettings'
-import { syncToCloud, loadFromCloud, mergeProgress, saveUserProfile, saveExamResult } from './lib/cloud-sync'
+import { saveExamResult } from './lib/cloud-sync'
 
 const LEVEL_KEY = 'ankichou-level'
 function getSavedLevel() {

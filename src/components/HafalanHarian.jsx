@@ -44,7 +44,7 @@ function dailySlice(src, dayPage, count) {
 
 export default function HafalanHarian({ onGoMateri, onGoRecall, level = 'a2' }) {
   const activeMode = level
-  const [tab, setTab] = useState('kotoba')
+  const [tab, _setTab] = useState('kotoba')
   const [targets, setTargetsState] = useState(() => getTargets())
   const [checked, setChecked] = useState(() => getChecked(level))
   const [custom, setCustom] = useState(() => getCustom(level))
@@ -53,7 +53,12 @@ export default function HafalanHarian({ onGoMateri, onGoRecall, level = 'a2' }) 
   const [showHeatmap, setShowHeatmap] = useState(false)
   const [detailItem, setDetailItem] = useState(null)
   const [showExam, setShowExam] = useState(false)
-  const [confirmDeleteKey, setConfirmDeleteKey] = useState(null) // { type, idx } — B6: inline confirm
+  const [confirmDeleteKey, setConfirmDeleteKey] = useState(null)
+
+  const setTab = (t) => {
+    _setTab(t)
+    setConfirmDeleteKey(null) // reset confirm saat ganti tab
+  }
 
   const modeInfo = HAFALAN_MODES.find(m => m.key === activeMode)
   const hasKanji = modeInfo?.kanjiSrc != null
@@ -64,7 +69,7 @@ export default function HafalanHarian({ onGoMateri, onGoRecall, level = 'a2' }) 
   useEffect(() => {
     setChecked(getChecked(activeMode))
     setCustom(getCustom(activeMode))
-    setTab('kotoba')
+    _setTab('kotoba')
     setDetailItem(null)
     setShowForm(null)
   }, [activeMode])

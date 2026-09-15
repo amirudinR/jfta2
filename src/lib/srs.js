@@ -20,7 +20,9 @@ export function isMastered(card) {
 export function gradeCard(card, grade) {
   const c = { ...defaultCard(), ...(card || {}) }
   const now = Date.now()
-  const firstPass = c.reps === 0
+  // firstPass hanya benar jika kartu belum pernah dipelajari sama sekali (lapses=0 juga)
+  // kartu lapsed (again) punya reps:0 tapi lapses>0 — bukan firstPass
+  const firstPass = c.reps === 0 && (c.lapses ?? 0) === 0
 
   switch (grade) {
     case 'again':

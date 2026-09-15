@@ -39,9 +39,20 @@ export function useCloudSync(user, setProgress) {
 export function usePushCloud(user, cloudLoaded, progress) {
   // C3 fix: debounce 3 detik agar sesi latihan intensif tidak spam Firestore write
   const timerRef = useRef(null)
+  // Skip push pertama tepat setelah cloud load selesai (data baru saja dari cloud, tidak perlu push balik)
+  const justLoadedRef = useRef(false)
+
+  useEffect(() => {
+    if (cloudLoaded) justLoadedRef.current = true
+  }, [cloudLoaded])
 
   useEffect(() => {
     if (!user || !cloudLoaded) return
+    // Skip sekali — tepat setelah load selesai
+    if (justLoadedRef.current) {
+      justLoadedRef.current = false
+      return
+    }
 
     clearTimeout(timerRef.current)
     timerRef.current = setTimeout(() => {
