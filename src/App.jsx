@@ -38,7 +38,7 @@ import { addExamRecord } from './lib/exam-history'
 import { recallStats } from './lib/recall-queue'
 import { resetDailyProgress } from './lib/hafalan-storage'
 import { useAuth } from './hooks/useAuth'
-import { useCloudSync, usePushCloud } from './hooks/useCloudSync'
+import { useLiveSync } from './hooks/useLiveSync'
 import { useAppSettings } from './hooks/useAppSettings'
 import { saveExamResult } from './lib/cloud-sync'
 import {
@@ -63,12 +63,38 @@ export default function App() {
   const [loginBusy, setLoginBusy] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
+  // ── Scroll memory per halaman ──
+  // Setiap ganti mode, posisi scroll halaman lama disimpan (sessionStorage,
+  // survive remount & reload), lalu posisi halaman baru dipulihkan.
+  const pageKey = (m, lv) => (m === 'harian' ? `${m}:${lv}` : m)
+  const readScroll = (k) => {
+    try { return Number(sessionStorage.getItem(`hh:scroll:${k}`)) || 0 } catch { return 0 }
+  }
+  const changeMode = (key) => {
+    if (key === mode) return
+    try { sessionStorage.setItem(`hh:scroll:${pageKey(mode, level)}`, String(window.scrollY)) } catch {}
+    setMode(key)
+  }
+  useEffect(() => {
+    const k = pageKey(mode, level)
+    const saved = readScroll(k)
+    const raf = requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, saved)))
+    return () => cancelAnimationFrame(raf)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, level])
+
   const storageOk = useMemo(() => storageAvailable(), [])
   const ttsOk = useMemo(() => ttsSupported(), [])
 
-  // Hooks modular — cloud sync & app settings
-  const { cloudLoaded } = useCloudSync(user, setProgress)
-  usePushCloud(user, cloudLoaded, progress)
+  // Hooks modular — live cloud sync & app settings
+  // Setelah merge cloud → lokal, segarkan state yang berasal dari localStorage.
+  const handleCloudApplied = () => {
+    setProgress(getProgress())
+    setPrefsState(getPrefs())
+    setHistoryTick((t) => t + 1)
+    setQueueTick((t) => t + 1)
+  }
+  useLiveSync(user, handleCloudApplied)
   useAppSettings(prefs)
 
   const setPrefs = (partial) => {
@@ -152,11 +178,11 @@ export default function App() {
     setHistoryTick((t) => t + 1)
     setQueueTick((t) => t + 1)
     setResetArmed(false)
-    setMode('harian') // kembali ke Hafalan Harian → hari baru (checked kosong)
+    changeMode('harian') // kembali ke Hafalan Harian → hari baru (checked kosong)
   }
 
   const handleBottomNav = (key) => {
-    setMode(key)
+    changeMode(key)
   }
 
   // ══════════════════════════════════════════════════════════
@@ -202,9 +228,9 @@ export default function App() {
           />
         )
       case 'harian':
-        return <HafalanHarian level={level} onGoMateri={() => setMode('materi')} onGoRecall={() => setMode('recall')} />
+        return <HafalanHarian level={level} onGoMateri={() => changeMode('materi')} onGoRecall={() => changeMode('recall')} />
       case 'materi':
-        return <DaftarMateri level={level} onGoHafalan={() => setMode('harian')} />
+        return <DaftarMateri level={level} onGoHafalan={() => changeMode('harian')} />
       case 'kartu':
         return (
           <Kartu
@@ -251,14 +277,14 @@ export default function App() {
         return (
           <UjianBaru
             level={level}
-            onBack={() => setMode('harian')}
+            onBack={() => changeMode('harian')}
             onSaveResult={handleSaveExamResult}
           />
         )
       case 'recall':
         return (
           <Recall
-            onBack={() => setMode('harian')}
+            onBack={() => changeMode('harian')}
             onSaveResult={handleSaveExamResult}
             onQueueChange={() => setQueueTick((t) => t + 1)}
           />
@@ -315,12 +341,12 @@ export default function App() {
 
   // LevelStrip: klik N3/N2/N1 langsung buka KotobaLevel
   const handleLevelChange = (lv) => {
-    if (lv === 'n3') { setMode('kotoba-n3'); return }
-    if (lv === 'n2') { setMode('kotoba-n2'); return }
-    if (lv === 'n1') { setMode('kotoba-n1'); return }
+    if (lv === 'n3') { changeMode('kotoba-n3'); return }
+    if (lv === 'n2') { changeMode('kotoba-n2'); return }
+    if (lv === 'n1') { changeMode('kotoba-n1'); return }
     setLevel(lv)
     // Kalau sedang di KotobaLevel, balik ke harian setelah ganti level
-    if (KOTOBA_MODES.includes(mode)) setMode('harian')
+    if (KOTOBA_MODES.includes(mode)) changeMode('harian')
   }
 
   return (
@@ -341,7 +367,7 @@ export default function App() {
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         active={mode}
-        onChange={(key) => { setMode(key); setSidebarOpen(false) }}
+        onChange={(key) => { changeMode(key); setSidebarOpen(false) }}
         user={user}
         recallDue={recallDue}
       />
@@ -359,7 +385,7 @@ export default function App() {
       )}
 
       {showModeBar ? (
-        <ModeBar active={mode} onChange={setMode} badgeCount={badgeCount} />
+        <ModeBar active={mode} onChange={changeMode} badgeCount={badgeCount} />
       ) : null}
 
       {showControls ? (

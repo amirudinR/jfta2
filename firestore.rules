@@ -6,6 +6,7 @@ rules_version = '2';
 //   users/{uid}                      -> profil (displayName, email, photoURL, lastLogin)
 //   users/{uid}/progress/main        -> progress belajar (perMaterial, prefs, updated, syncedAt)
 //   users/{uid}/exams/{examId}       -> riwayat ujian (score, total, category, difficulty, ...)
+//   users/{uid}/hh/{key}             -> data live-sync (data, updated, syncedAt)
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -44,6 +45,13 @@ service cloud.firestore {
         && request.resource.data.total <= 500;
     }
 
+    // Data live-sync: { data: apapun, updated: epoch ms, syncedAt: serverTimestamp }.
+    function validHh() {
+      return request.resource.data.keys().hasOnly(['data', 'updated', 'syncedAt'])
+        && request.resource.data.updated is number
+        && request.resource.data.updated > 0;
+    }
+
     match /users/{uid} {
       allow read: if isOwner(uid);
       allow create, update: if isOwner(uid) && validProfile();
@@ -59,6 +67,14 @@ service cloud.firestore {
         allow create: if isOwner(uid) && validExam();
         // Riwayat ujian bersifat append-only: tidak boleh diubah/dihapus dari client.
         allow update, delete: if false;
+      }
+
+      // Semua dokumen live-sync di bawah users/{uid}/hh (termasuk subkoleksi
+      // checked/history/custom per mode) — hanya pemilik yang boleh akses.
+      match /hh/{allPaths=**} {
+        allow read: if isOwner(uid);
+        allow create, update: if isOwner(uid) && validHh();
+        allow delete: if isOwner(uid);
       }
     }
 

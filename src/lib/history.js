@@ -1,3 +1,5 @@
+import { publishStoreChange } from './sync-events'
+
 const KEY = 'hafalan-jft-a2-history-v1'
 
 const emptyHistory = () => ({ days: {}, updated: 0 })
@@ -30,6 +32,7 @@ export function recordStudy(material, id, grade, state) {
   } catch (e) {
     /* abaikan */
   }
+  publishStoreChange(KEY)
   return history
 }
 

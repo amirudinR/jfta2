@@ -1,4 +1,6 @@
 // Riwayat ujian lokal (localStorage). Pelengkap cloud saveExamResult.
+import { publishStoreChange } from './sync-events'
+
 const KEY = 'ankichou-exam-history'
 
 function getExamHistory() {
@@ -16,6 +18,7 @@ export function addExamRecord(record) {
   list.unshift({ ...record, savedAt: Date.now() })
   // Batasi 200 entri terakhir agar tidak membengkak.
   try { localStorage.setItem(KEY, JSON.stringify(list.slice(0, 200))) } catch {}
+  publishStoreChange(KEY)
   return list
 }
 

@@ -1,5 +1,7 @@
 // Persistensi progres SRS + preferensi ke localStorage, dengan migrasi dari v1.
 
+import { publishStoreChange } from './sync-events'
+
 const KEY = 'hafalan-jft-a2-progress-v2'
 const KEY_V1 = 'hafalan-jft-a2-progress-v1'
 
@@ -82,6 +84,7 @@ export function saveProgress(state) {
   } catch (e) {
     console.warn('[storage] Gagal menyimpan ke localStorage (penuh / private mode?).', e)
   }
+  publishStoreChange(KEY)
 }
 
 export function getPrefs() {

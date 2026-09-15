@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { X, Volume2, CheckSquare, Square } from 'lucide-react'
 import { speak } from '../../lib/tts'
 
@@ -11,6 +12,10 @@ export function DetailModal({ item, isChecked, onToggle, onClose }) {
     // preventScroll: jangan biarkan browser scroll dokumen saat focus
     // (modal masih animasi slide-up / di bawah viewport pada saat mount).
     first?.focus({ preventScroll: true })
+
+    // Kunci scroll body selama modal terbuka (bottom-sheet mobile).
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
 
     const handler = (e) => { if (e.key === 'Escape') onClose() }
     const trap = (e) => {
@@ -30,12 +35,13 @@ export function DetailModal({ item, isChecked, onToggle, onClose }) {
     window.addEventListener('keydown', handler)
     panel?.addEventListener('keydown', trap)
     return () => {
+      document.body.style.overflow = prevOverflow
       window.removeEventListener('keydown', handler)
       panel?.removeEventListener('keydown', trap)
     }
   }, [onClose])
 
-  return (
+  return createPortal(
     <div className="hh-modal-overlay" onClick={onClose}>
       <div className="hh-modal" role="dialog" aria-modal="true" aria-label={item.front} ref={panelRef} onClick={e => e.stopPropagation()}>
         <button className="hh-modal-close" onClick={onClose}><X size={20} /></button>
@@ -58,6 +64,7 @@ export function DetailModal({ item, isChecked, onToggle, onClose }) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

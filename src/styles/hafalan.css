@@ -648,6 +648,8 @@ html.dark-mode .hh-row.checked {
   position: relative;
   overflow-y: auto;
   animation: hh-slide-up .25s ease;
+  /* Aman dari home indicator (iPhone berponi) — tombol aksi tidak tertutup */
+  padding-bottom: calc(32px + env(safe-area-inset-bottom));
 }
 
 @keyframes hh-slide-up {

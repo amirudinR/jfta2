@@ -7,6 +7,7 @@ import {
   flushToHistory, saveHistoryNow, computeStreak, newCustomId,
 } from '../lib/hafalan-storage'
 import { buildItems, appendCustom, dailySlice } from '../lib/hafalan-items'
+import { onSyncApplied } from '../lib/sync-events'
 
 export function useHafalan({ level = 'a2' }) {
   const activeMode = level
@@ -38,6 +39,15 @@ export function useHafalan({ level = 'a2' }) {
     _setTab('kotoba')
     setDetailItem(null)
     setShowForm(null)
+  }, [activeMode])
+
+  // Data datang dari cloud (perangkat lain) → baca ulang dari localStorage.
+  useEffect(() => {
+    return onSyncApplied(() => {
+      setChecked(getChecked(activeMode))
+      setCustom(getCustom(activeMode))
+      setTargetsState(getTargets())
+    })
   }, [activeMode])
 
   // Auto-reset at midnight

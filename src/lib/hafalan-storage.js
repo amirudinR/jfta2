@@ -1,5 +1,7 @@
 // Hafalan Harian — storage helpers & constants
 
+import { publishStoreChange } from './sync-events'
+
 export const HAFALAN_MODES = [
   { key: 'a2', label: 'JFT-A2', kanji: 'A2', kotobaSrc: 'kotoba', kanjiSrc: 'kanji', bunpouSrc: 'bunpo' },
   { key: 'n3', label: 'N3', kanji: 'N3', kotobaSrc: 'kotoba-n3', kanjiSrc: null, bunpouSrc: null },
@@ -29,6 +31,8 @@ export const lsGet = (k, fallback) => {
 
 export const lsSet = (k, v) => {
   try { localStorage.setItem(k, JSON.stringify(v)) } catch {}
+  // Beri sinyal perubahan lokal → engine live-sync kirim ke cloud (kalau online).
+  publishStoreChange(k)
 }
 
 export const getTargets = () => lsGet(`${STORAGE_PREFIX}-targets`, DEFAULT_TARGETS)

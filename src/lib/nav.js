@@ -1,6 +1,7 @@
 // Konstanta navigasi & mode aplikasi.
 
 import { QUOTES } from '../data/quotes'
+import { publishStoreChange } from './sync-events'
 
 export const LEVEL_KEY = 'ankichou-level'
 
@@ -10,6 +11,7 @@ export function getSavedLevel() {
 
 export function saveLevel(lv) {
   try { localStorage.setItem(LEVEL_KEY, lv) } catch {}
+  publishStoreChange(LEVEL_KEY)
 }
 
 export function pickQuote() {

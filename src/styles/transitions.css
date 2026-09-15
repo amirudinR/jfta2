@@ -25,7 +25,14 @@
 }
 
 .page-transition {
-  animation: page-in 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  /* 'backwards' (bukan 'both'): keyframe akhir TIDAK dipertahankan,
+     jadi transform translateY(0) tidak melekat permanen. Sebuah transform
+     yang menempel akan jadi containing-block bagi position:fixed (mis.
+     modal) — membuat overlay modal ter-pin ke wrapper, bukan viewport. */
+  animation: page-in 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94) backwards;
+  /* Cegah scroll-anchoring browser melompat ke bawah saat konten remount
+     (ganti mode) pada daftar panjang mobile. */
+  overflow-anchor: none;
 }
 
 /* Sidebar slide backdrop */
