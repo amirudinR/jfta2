@@ -92,17 +92,17 @@ export const SYNC_STORES = [
   { key: 'ankichou-level', path: (uid) => `users/${uid}/hh/level`, merge: lww },
   ...dynamic(
     (m) => `hh2-checked-${m}`,
-    (u, mk) => `users/${u}/hh/checked/${mk}`,
+    (u, mk) => `users/${u}/hh/checked-${mk}`,
     mergeChecked,
   ),
   ...dynamic(
     (m) => `hh2-hist-${m}`,
-    (u, mk) => `users/${u}/hh/history/${mk}`,
+    (u, mk) => `users/${u}/hh/history-${mk}`,
     mergeDays,
   ),
   ...dynamic(
     (m) => `hh2-custom-${m}`,
-    (u, mk) => `users/${u}/hh/custom/${mk}`,
+    (u, mk) => `users/${u}/hh/custom-${mk}`,
     mergeCustom,
   ),
 ]
