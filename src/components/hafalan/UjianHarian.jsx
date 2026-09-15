@@ -18,7 +18,6 @@ const CATS = [
 const ALL_CATS = CATS.map((c) => c.key)
 
 const catOfId = (id) => String(id).split(':')[1]
-const MAX_QUESTIONS = 75
 
 // Ujian Harian: uji item yang dicentang pada satu tanggal (riwayat).
 export function UjianHarian({ onBack }) {
@@ -74,7 +73,7 @@ export function UjianHarian({ onBack }) {
   }
 
   const start = () => {
-    setOrder(shuffle(pool).slice(0, Math.min(pool.length, MAX_QUESTIONS)))
+    setOrder(shuffle(pool))
     setQ(0)
     setChoice(null)
     setScore(0)
@@ -148,7 +147,6 @@ export function UjianHarian({ onBack }) {
               = <span className="kin-count">{pool.length}</span> soal
               {date === days[0].date ? ' hari ini' : ` pada ${friendlyDate(date)}`},
               mode {axis === 'kanji' ? 'kanji → arti' : axis === 'hiragana' ? 'hiragana → arti' : 'arti → kanji'}.
-              {pool.length > MAX_QUESTIONS && <>{' '}(maks {MAX_QUESTIONS} soal)</>}
             </p>
 
             <div className="row mt no-print">

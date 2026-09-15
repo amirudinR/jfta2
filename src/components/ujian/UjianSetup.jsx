@@ -100,7 +100,7 @@ export default function UjianSetup({
       <div className="ujian-start-row">
         <p className="ujian-pool-info">
           {canStart ? (
-            <>Soal tersedia: <span className="kin-count">{pool.length}</span> (maks 30 soal per sesi)</>
+            <>Soal tersedia: <span className="kin-count">{pool.length}</span> soal</>
           ) : (
             'Minimal 4 soal diperlukan. Ubah filter di atas.'
           )}

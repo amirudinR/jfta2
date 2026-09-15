@@ -109,8 +109,7 @@ export default function UjianBaru({ level, onBack, onSaveResult }) {
   }, [phase, order, q])
 
   const start = () => {
-    const maxQ = Math.min(pool.length, 30)
-    const deck = shuffle(pool).slice(0, maxQ)
+    const deck = shuffle(pool)
     finishRan.current = false
     setOrder(deck)
     setQ(0)

@@ -406,7 +406,9 @@ export default function App() {
         </div>
       ) : null}
 
-      {renderBody()}
+      <div key={mode} className="page-transition">
+        {renderBody()}
+      </div>
 
       <footer className="foot">
         <span>
