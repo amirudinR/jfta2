@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import {
   CalendarCheck, GraduationCap, FlaskConical,
   History, User, X, BarChart3,
@@ -24,9 +24,17 @@ export default function Sidebar({ open, onClose, active, onChange, user, recallD
     return () => window.removeEventListener('keydown', handler)
   }, [open, onClose])
 
-  // Kunci scroll body saat sidebar terbuka
+  // E6 fix: simpan scroll position, restore saat sidebar tutup
+  const scrollYRef = useRef(0)
   useEffect(() => {
-    document.body.style.overflow = open ? 'hidden' : ''
+    if (open) {
+      scrollYRef.current = window.scrollY
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+      // restore posisi scroll
+      window.scrollTo(0, scrollYRef.current)
+    }
     return () => { document.body.style.overflow = '' }
   }, [open])
 

@@ -62,6 +62,7 @@ function load() {
     }
   } catch (e) {
     /* abaikan: storage penuh / private mode */
+    console.warn('[storage] Gagal load localStorage, mulai dari state kosong.', e)
   }
   return emptyState()
 }
@@ -79,9 +80,8 @@ export function saveProgress(state) {
   try {
     localStorage.setItem(KEY, JSON.stringify(state))
   } catch (e) {
-    /* abaikan */
+    console.warn('[storage] Gagal menyimpan ke localStorage (penuh / private mode?).', e)
   }
-  return state
 }
 
 export function getPrefs() {

@@ -20,11 +20,8 @@ export default function BottomNav({ active, onChange, user, recallDue = 0 }) {
       {TABS.map((t) => {
         const Icon = t.icon
         const isActive =
-          active === t.key ||
-          (t.key === 'harian'  && active === 'harian') ||
           (t.key === 'latihan' && LATIHAN_MODES.includes(active)) ||
-          (t.key === 'recall'  && active === 'recall') ||
-          (t.key === 'profil'  && active === 'profil')
+          active === t.key
 
         // Tab Latihan → masuk ke mode kartu (default latihan)
         const handleClick = () => {

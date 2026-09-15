@@ -53,6 +53,7 @@ export default function HafalanHarian({ onGoMateri, onGoRecall, level = 'a2' }) 
   const [showHeatmap, setShowHeatmap] = useState(false)
   const [detailItem, setDetailItem] = useState(null)
   const [showExam, setShowExam] = useState(false)
+  const [confirmDeleteKey, setConfirmDeleteKey] = useState(null) // { type, idx } — B6: inline confirm
 
   const modeInfo = HAFALAN_MODES.find(m => m.key === activeMode)
   const hasKanji = modeInfo?.kanjiSrc != null
@@ -137,7 +138,13 @@ export default function HafalanHarian({ onGoMateri, onGoRecall, level = 'a2' }) 
   }
 
   const removeCustom = (type, idx) => {
-    if (!window.confirm('Yakin ingin menghapus item ini?')) return
+    // B6 fix: inline confirm — tidak pakai window.confirm() yang memblok UI
+    const key = `${type}-${idx}`
+    if (confirmDeleteKey?.key !== key) {
+      setConfirmDeleteKey({ key, type, idx })
+      return
+    }
+    setConfirmDeleteKey(null)
     const next = { ...custom, [type]: custom[type].filter((_, i) => i !== idx) }
     setCustom(next)
     setCustomStorage(activeMode, next)
@@ -242,21 +249,35 @@ export default function HafalanHarian({ onGoMateri, onGoRecall, level = 'a2' }) 
           return (
             <div key={item.id} className={`hh-row ${isChecked ? 'checked' : ''}`}>
               <span className="hh-num">{item.num}</span>
-              <div className="hh-content" onClick={() => setDetailItem(item)}>
+              {/* E2 fix: div → button agar keyboard accessible */}
+              <button
+                className="hh-content"
+                onClick={() => setDetailItem(item)}
+                aria-label={`Lihat detail ${item.front}`}
+              >
                 <div className="hh-front">
                   <span className="hh-jp">{item.front}</span>
                   {item.reading && <span className="hh-reading">{item.reading}</span>}
                 </div>
                 <div className="hh-meaning">{item.meaning}</div>
-              </div>
+              </button>
               <button className={`hh-check-btn ${isChecked ? 'checked' : ''}`} onClick={() => toggle(tab, item.id)}>
                 {isChecked ? <CheckSquare size={28} /> : <Square size={28} />}
               </button>
-              {item.custom && (
-                <button className="hh-del-custom" onClick={() => removeCustom(tab, item.customIdx)} title="Hapus">
-                  <Trash2 size={14} />
-                </button>
-              )}
+              {item.custom && (() => {
+                const key = `${tab}-${item.customIdx}`
+                const isConfirming = confirmDeleteKey?.key === key
+                return (
+                  <button
+                    className={`hh-del-custom ${isConfirming ? 'confirming' : ''}`}
+                    onClick={() => removeCustom(tab, item.customIdx)}
+                    title={isConfirming ? 'Klik lagi untuk hapus' : 'Hapus'}
+                  >
+                    <Trash2 size={14} />
+                    {isConfirming && <span style={{ fontSize: 10, marginLeft: 2 }}>Yakin?</span>}
+                  </button>
+                )
+              })()}
             </div>
           )
         })}

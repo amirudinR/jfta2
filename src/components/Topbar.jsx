@@ -1,7 +1,7 @@
 import { Sun, Moon, Type, LogIn, Menu } from 'lucide-react'
 import { KANJI_FONTS } from '../lib/fonts'
 
-export default function Topbar({ stats, darkMode, onToggleDark, font, onFont, user, onLogin, onMenuOpen }) {
+export default function Topbar({ stats, darkMode, onToggleDark, font, onFont, user, onLogin, onMenuOpen, showStats = true }) {
   return (
     <header className="topbar">
       <div className="tb-row">
@@ -62,6 +62,7 @@ export default function Topbar({ stats, darkMode, onToggleDark, font, onFont, us
           </button>
         </div>
       </div>
+      {showStats && (
       <div className="stat-chips">
         <div className="stat">
           <span className="stat-num">{stats.total}</span>
@@ -76,6 +77,7 @@ export default function Topbar({ stats, darkMode, onToggleDark, font, onFont, us
           <span className="stat-lbl">Hafal</span>
         </div>
       </div>
+      )}
     </header>
   )
 }

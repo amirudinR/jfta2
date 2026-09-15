@@ -436,9 +436,27 @@ html.dark-mode .hh-row.checked {
   flex: 1;
   min-width: 0;
   cursor: pointer;
+  /* E2 fix: reset button style agar tampak sama seperti div sebelumnya */
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  font-family: inherit;
+  color: inherit;
 }
 
 .hh-content:active { opacity: .7; }
+
+/* B6: inline confirm state untuk tombol hapus */
+.hh-del-custom.confirming {
+  opacity: 1;
+  background: rgba(193, 64, 42, 0.15);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--shu);
+}
 
 .hh-front {
   display: flex;

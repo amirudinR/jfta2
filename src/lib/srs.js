@@ -67,6 +67,8 @@ export function computeStats(cards) {
   const mastered = entries.filter(([, c]) => isMastered(c)).length
   const due = entries.filter(([, c]) => isDue(c)).length
   const learning = entries.filter(([, c]) => c && c.interval > 0 && c.interval < 21).length
-  const newCards = entries.filter(([, c]) => c && c.interval === 0 && c.reps === 0).length
+  // C5 fix: kartu lapsed (grade again) punya reps:0 interval:0 tapi lapses>0
+  // bedakan dari kartu benar-benar baru (lapses:0)
+  const newCards = entries.filter(([, c]) => c && c.interval === 0 && c.reps === 0 && (c.lapses ?? 0) === 0).length
   return { total, mastered, due, learning, newCards, masteryPct: total ? Math.round((mastered / total) * 100) : 0 }
 }

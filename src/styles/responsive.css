@@ -46,9 +46,13 @@
   }
 
   .mode-btn {
-    font-size: 10px;
+    font-size: 12px; /* pertahankan min 12px di mobile */
     padding: 9px 3px 7px;
     gap: 3px;
+  }
+
+  .mat-btn .ml {
+    font-size: 12px; /* pertahankan min 12px */
   }
 
   .mode-btn .mi {

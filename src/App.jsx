@@ -79,10 +79,6 @@ export default function App() {
   usePushCloud(user, cloudLoaded, progress)
   useAppSettings(prefs)
 
-  useEffect(() => {
-    setMode('harian')
-  }, [])
-
   const setPrefs = (partial) => {
     const next = { ...prefs, ...partial }
     setPrefsState(next)
@@ -104,14 +100,8 @@ export default function App() {
   }, [allEntries, selectedLessons])
   const groups = useMemo(() => groupListOf(allEntries), [allEntries])
 
-  const handleGrade = (id, grade, pre) => {
-    storeGrade(material, id, gradeCard(pre, grade))
-    recordStudy(material, id, grade, pre)
-    setProgress(getProgress())
-    setHistoryTick((t) => t + 1)
-  }
-
-  const handleGradeN3 = (mat, id, grade, pre) => {
+  // B4 fix: satu fungsi grade untuk semua materi (termasuk kotoba-n3/n2/n1)
+  const handleGrade = (mat, id, grade, pre) => {
     storeGrade(mat, id, gradeCard(pre, grade))
     recordStudy(mat, id, grade, pre)
     setProgress(getProgress())
@@ -228,7 +218,7 @@ export default function App() {
           <Kartu
             entries={entries}
             cards={cards}
-            onGrade={handleGrade}
+            onGrade={(id, grade, pre) => handleGrade(material, id, grade, pre)}
             onReshuffle={() => setDeckVersion((v) => v + 1)}
             material={material}
             direction={prefs.direction}
@@ -242,7 +232,7 @@ export default function App() {
           <Kartu
             entries={entries}
             cards={cards}
-            onGrade={handleGrade}
+            onGrade={(id, grade, pre) => handleGrade(material, id, grade, pre)}
             onReshuffle={() => setDeckVersion((v) => v + 1)}
             material={material}
             direction={prefs.direction}
@@ -260,7 +250,7 @@ export default function App() {
           <Sprint
             entries={entries}
             cards={cards}
-            onGrade={handleGrade}
+            onGrade={(id, grade, pre) => handleGrade(material, id, grade, pre)}
             material={material}
             direction={prefs.direction}
           />
@@ -305,7 +295,7 @@ export default function App() {
             cards={progress.perMaterial[mode] || {}}
             prefs={prefs}
             onToggleRomaji={() => setPrefs({ showRomaji: !prefs.showRomaji })}
-            onGrade={handleGradeN3}
+            onGrade={handleGrade}
           />
         )
       case 'referensi':
@@ -357,6 +347,7 @@ export default function App() {
         user={user}
         onLogin={loginGoogle}
         onMenuOpen={() => setSidebarOpen(true)}
+        showStats={!hideMaterialBar}
       />
 
       <Sidebar
