@@ -1,176 +1,101 @@
 import { useMemo, useState } from 'react'
-import { isDue, computeStats } from '../lib/srs'
+import { computeStats } from '../lib/srs'
 import { fmtInterval, fmtDue } from '../lib/ui'
-import { MATERIALS } from '../data/materials'
+import {
+  dueCount, totalStudied, avgEase, totalReviews,
+  perMaterialStats, groupStats, weekActivity,
+} from '../lib/stats'
 import ProgressRing from './ui/ProgressRing'
 import StatsBar from './ui/StatsBar'
 import StatBox from './ui/StatBox'
-import { bucket } from '../lib/stats'
-
-const cardStyle = {
-  background: 'var(--card-face)',
-  border: '1px solid var(--panel-line)',
-  borderRadius: 12,
-  padding: 16,
-}
-
-const labelStyle = {
-  color: 'var(--card-soft)',
-  fontSize: 12,
-  fontWeight: 600,
-  textTransform: 'uppercase',
-  letterSpacing: '.05em',
-}
-
-const sectionTitle = { fontSize: 16, fontWeight: 800, margin: 0, color: 'var(--card-ink)' }
 
 
 export default function Kemampuan({ entries, cards, material, history, streak, allEntries }) {
   const [openMat, setOpenMat] = useState(null)
 
-  const cardsArr = useMemo(() => Object.values(cards || {}), [cards])
   const stats = useMemo(() => computeStats(cards), [cards])
-
-  const dueToday = useMemo(() => cardsArr.filter((c) => isDue(c)).length, [cardsArr])
-
-  const totalStudied = useMemo(
-    () => cardsArr.filter((c) => c && (c.reps > 0 || c.interval > 0)).length,
-    [cardsArr],
+  const dueToday = useMemo(() => dueCount(cards), [cards])
+  const totalStudiedCount = useMemo(() => totalStudied(cards), [cards])
+  const avgEaseVal = useMemo(() => avgEase(cards), [cards])
+  const reviewsCount = useMemo(() => totalReviews(history), [history])
+  const perMaterial = useMemo(
+    () => perMaterialStats(allEntries, cards, material),
+    [allEntries, cards, material],
   )
-
-  const avgEase = useMemo(() => {
-    const a = cardsArr.filter((c) => c && c.reps > 0)
-    if (!a.length) return 0
-    return Math.round((a.reduce((s, c) => s + c.ease, 0) / a.length) * 100) / 100
-  }, [cardsArr])
-
-  const totalReviews = useMemo(() => {
-    const d = (history && history.days) || {}
-    return Object.values(d).reduce((s, day) => s + (day.reviewed || 0), 0)
-  }, [history])
-
-  const perMaterial = useMemo(() => {
-    const byMat = new Map()
-    for (const e of allEntries || []) {
-      const m = e.material || material
-      if (!byMat.has(m)) byMat.set(m, [])
-      byMat.get(m).push(e)
-    }
-    return MATERIALS.map((m) => {
-      const list = byMat.get(m.key) || []
-      const b = bucket(list, cards)
-      return { ...m, ...b, total: list.length, pct: list.length ? Math.round((b.started / list.length) * 100) : 0 }
-    })
-  }, [allEntries, cards, material])
-
-  const groups = useMemo(() => {
-    const map = new Map()
-    for (const e of entries || []) {
-      const g = e.groupLabel || 'Umum'
-      if (!map.has(g)) map.set(g, [])
-      map.get(g).push(e)
-    }
-    return [...map.entries()].map(([name, list]) => {
-      const b = bucket(list, cards)
-      return { name, total: list.length, ...b, pct: list.length ? Math.round((b.mastered / list.length) * 100) : 0 }
-    })
-  }, [entries, cards])
-
-  const activity = useMemo(() => {
-    const d = (history && history.days) || {}
-    const out = []
-    const today = new Date()
-    for (let i = 6; i >= 0; i--) {
-      const dt = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i)
-      const key =
-        `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`
-      const rec = d[key]
-      out.push({
-        key,
-        label: dt.toLocaleDateString('id-ID', { weekday: 'short' }),
-        count: rec ? rec.studied || 0 : 0,
-      })
-    }
-    return out
-  }, [history])
+  const groups = useMemo(() => groupStats(entries, cards), [entries, cards])
+  const activity = useMemo(() => weekActivity(history), [history])
 
   const anyActivity = activity.some((a) => a.count > 0)
   const maxCount = Math.max(1, ...activity.map((a) => a.count))
 
   return (
-    <div
-      className="kp-dashboard"
-      style={{ display: 'grid', gap: 18, color: 'var(--card-ink)', padding: '8px 0 32px' }}
-    >
-      <header style={{ textAlign: 'center', padding: '8px 0 2px' }}>
-        <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: 'var(--page-ink)' }}>Kemampuan</h1>
-        <p style={{ margin: '4px 0 0', color: 'var(--page-soft)' }}>Statistik belajarmu</p>
+    <div className="kp-dashboard">
+      <header className="kp-dash-header">
+        <h1 className="kp-dash-title">Kemampuan</h1>
+        <p className="kp-dash-sub">Statistik belajarmu</p>
       </header>
 
-      <div
-        className="kp-stats-row"
-        style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 }}
-      >
-        <div className="kp-stat kp-stat-mastery" style={cardStyle}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <div className="kp-stats-row">
+        <div className="kp-stat kp-stat-mastery kp-card">
+          <div className="kp-stat-main">
             <ProgressRing pct={stats.masteryPct} />
             <div>
-              <div style={labelStyle}>Dikuasai</div>
-              <div style={{ fontSize: 14, marginTop: 4 }} title={fmtInterval(21, 1)}>
+              <div className="kp-label">Dikuasai</div>
+              <div className="kp-stat-value" title={fmtInterval(21, 1)}>
                 {stats.mastered} / {stats.total} kartu
               </div>
             </div>
           </div>
         </div>
 
-        <div className="kp-stat kp-stat-streak" style={cardStyle}>
-          <div style={{ fontSize: 32 }}>🔥</div>
-          <div style={{ fontSize: 24, fontWeight: 800 }}>{streak.current} hari</div>
-          <div style={labelStyle}>Streak</div>
-          <div style={{ color: 'var(--card-soft)', fontSize: 12, marginTop: 4 }}>
+        <div className="kp-stat kp-stat-streak kp-card">
+          <div className="kp-stat-emoji">🔥</div>
+          <div className="kp-stat-hl">{streak.current} hari</div>
+          <div className="kp-label">Streak</div>
+          <div className="kp-stat-note">
             Terpanjang: {streak.longest}
           </div>
         </div>
 
-        <div className="kp-stat kp-stat-due" style={cardStyle}>
-          <div style={{ fontSize: 32 }}>📚</div>
-          <div style={{ fontSize: 24, fontWeight: 800 }}>{dueToday} kartu</div>
-          <div style={labelStyle}>Jatuh tempo hari ini</div>
+        <div className="kp-stat kp-stat-due kp-card">
+          <div className="kp-stat-emoji">📚</div>
+          <div className="kp-stat-hl">{dueToday} kartu</div>
+          <div className="kp-label">Jatuh tempo hari ini</div>
         </div>
 
-        <div className="kp-stat kp-stat-studied" style={cardStyle}>
-          <div style={{ fontSize: 32 }}>📖</div>
-          <div style={{ fontSize: 24, fontWeight: 800 }}>{totalStudied} kartu</div>
-          <div style={labelStyle}>Total dipelajari</div>
+        <div className="kp-stat kp-stat-studied kp-card">
+          <div className="kp-stat-emoji">📖</div>
+          <div className="kp-stat-hl">{totalStudiedCount} kartu</div>
+          <div className="kp-label">Total dipelajari</div>
         </div>
       </div>
 
       <section className="kp-material">
-        <h2 style={sectionTitle}>Per Materi</h2>
-        <div style={{ display: 'grid', gap: 10, marginTop: 10 }}>
+        <h2 className="kp-section-title">Per Materi</h2>
+        <div className="kp-card-stack">
           {perMaterial.map((m) => {
             const open = openMat === m.key
             return (
               <div
                 key={m.key}
-                style={{ ...cardStyle, cursor: 'pointer' }}
+                className="kp-card kp-click"
                 onClick={() => setOpenMat(open ? null : m.key)}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <span style={{ minWidth: 120, fontWeight: 700 }}>
-                    {m.label} <span style={{ color: 'var(--card-soft)' }}>{m.kanji}</span>
+                <div className="kp-mat-main">
+                  <span className="kp-mat-label">
+                    {m.label} <span className="kp-mat-kanji">{m.kanji}</span>
                   </span>
                   <StatsBar pct={m.pct} />
-                  <span style={{ minWidth: 44, textAlign: 'right', fontWeight: 700, color: 'var(--kin)' }}>
+                  <span className="kp-pct">
                     {m.pct}%
                   </span>
-                  <span style={{ color: 'var(--card-soft)', fontSize: 12 }}>
+                  <span className="kp-soft">
                     {m.started}/{m.total}
                   </span>
-                  <span style={{ color: 'var(--card-soft)' }}>{open ? '▴' : '▾'}</span>
+                  <span className="kp-soft">{open ? '▴' : '▾'}</span>
                 </div>
                 {open ? (
-                  <div style={{ display: 'flex', gap: 16, marginTop: 10, fontSize: 13, color: 'var(--card-soft)' }}>
+                  <div className="kp-mat-detail">
                     <span>✓ {m.mastered} dikuasai</span>
                     <span>📘 {m.learning} belajar</span>
                     <span>🆕 {m.newCards} baru</span>
@@ -183,22 +108,22 @@ export default function Kemampuan({ entries, cards, material, history, streak, a
       </section>
 
       <section className="kp-groups">
-        <h2 style={sectionTitle}>Per Kelompok</h2>
+        <h2 className="kp-section-title">Per Kelompok</h2>
         {groups.length ? (
-          <div style={{ display: 'grid', gap: 10, marginTop: 10 }}>
+          <div className="kp-card-stack">
             {groups.map((g) => (
-              <div key={g.name} style={cardStyle}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <span style={{ minWidth: 120, fontWeight: 700 }}>{g.name}</span>
+              <div key={g.name} className="kp-card">
+                <div className="kp-grp-main">
+                  <span className="kp-grp-name">{g.name}</span>
                   <StatsBar pct={g.pct} color="var(--moss)" />
-                  <span style={{ minWidth: 44, textAlign: 'right', fontWeight: 700, color: 'var(--moss)' }}>
+                  <span className="kp-pct kp-pct-moss">
                     {g.pct}%
                   </span>
-                  <span style={{ color: 'var(--card-soft)', fontSize: 12 }}>
+                  <span className="kp-soft">
                     {g.mastered}/{g.total}
                   </span>
                 </div>
-                <div style={{ display: 'flex', gap: 16, marginTop: 8, fontSize: 12, color: 'var(--card-soft)' }}>
+                <div className="kp-grp-detail">
                   <span>✓ {g.mastered} dikuasai</span>
                   <span>📘 {g.learning} belajar</span>
                   <span>🆕 {g.newCards} baru</span>
@@ -208,60 +133,43 @@ export default function Kemampuan({ entries, cards, material, history, streak, a
             ))}
           </div>
         ) : (
-          <p style={{ color: 'var(--card-soft)', marginTop: 10 }}>Belum ada kelompok.</p>
+          <p className="kp-empty">Belum ada kelompok.</p>
         )}
       </section>
 
-      <section className="kp-activity" style={cardStyle}>
-        <h2 style={sectionTitle}>Aktivitas 7 Hari</h2>
+      <section className="kp-activity kp-activity-card">
+        <h2 className="kp-section-title">Aktivitas 7 Hari</h2>
         {anyActivity ? (
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: 160, marginTop: 10 }}>
+          <div className="kp-act-chart">
             {activity.map((a) => (
               <div
                 key={a.key}
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'flex-end',
-                  height: '100%',
-                }}
+                className="kp-act-col"
               >
-                <span style={{ fontSize: 11, color: 'var(--card-soft)', marginBottom: 4 }}>
+                <span className="kp-act-val">
                   {a.count || ''}
                 </span>
                 <div
                   title={`${a.key}: ${a.count} kartu`}
+                  className={`kp-act-bar ${a.count ? '' : 'empty'}`}
                   style={{
-                    width: '100%',
-                    maxWidth: 40,
                     height: a.count ? `${(a.count / maxCount) * 100}%` : 3,
-                    background: a.count ? 'var(--kin)' : 'var(--panel-line)',
-                    borderRadius: '6px 6px 0 0',
                   }}
                 />
-                <span style={{ fontSize: 11, color: 'var(--card-soft)', marginTop: 6 }}>{a.label}</span>
+                <span className="kp-act-label">{a.label}</span>
               </div>
             ))}
           </div>
         ) : (
-          <p style={{ color: 'var(--card-soft)', marginTop: 10 }}>Belum ada aktivitas</p>
+          <p className="kp-empty">Belum ada aktivitas</p>
         )}
       </section>
 
-      <section className="kp-srs" style={cardStyle}>
-        <h2 style={sectionTitle}>Statistik SRS</h2>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-            gap: 10,
-            marginTop: 10,
-          }}
-        >
-          <StatBox label="Total ulasan" value={totalReviews} />
-          <StatBox label="Ease rata-rata" value={avgEase} />
+      <section className="kp-srs kp-activity-card">
+        <h2 className="kp-section-title">Statistik SRS</h2>
+        <div className="kp-srs-grid">
+          <StatBox label="Total ulasan" value={reviewsCount} />
+          <StatBox label="Ease rata-rata" value={avgEaseVal} />
           <StatBox label="Sedang belajar" value={stats.learning} />
           <StatBox label="Dikuasai" value={stats.mastered} />
           <StatBox label="Kartu baru" value={stats.newCards} />

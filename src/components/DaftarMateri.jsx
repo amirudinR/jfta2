@@ -1,5 +1,4 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
-import { byMaterial } from '../data'
 import {
   Search, CheckSquare, Square, ChevronLeft, Filter,
   ArrowUpDown, X,
@@ -7,35 +6,11 @@ import {
 import {
   HAFALAN_MODES, getMastered, toggleMastered, countMastered,
 } from '../lib/hafalan-storage'
+import { buildItems } from '../lib/hafalan-items'
+import { ProgressBar } from './ui/ProgressBar'
 import { DetailModal } from './hafalan/DetailModal'
 
 const PAGE_SIZE = 50
-
-function buildItems(materialKey) {
-  if (!materialKey) return []
-  return byMaterial(materialKey).map((e, i) => ({
-    id: `b-${e.id}`, num: i + 1, front: e.front,
-    reading: e.frontSub || e.reading || '',
-    meaning: e.backShort, full: e.backFull,
-  }))
-}
-
-// ── Progress Bar ──
-function ProgressBar({ current, total, label }) {
-  if (!total) return null
-  const pct = Math.round((current / total) * 100)
-  return (
-    <div className="dm-progress">
-      <div className="dm-progress-head">
-        <span className="dm-progress-label">{label}</span>
-        <span className="dm-progress-count">{current.toLocaleString()}/{total.toLocaleString()} ({pct}%)</span>
-      </div>
-      <div className="hh-progress-track">
-        <div className={`hh-progress-fill ${pct >= 100 ? 'full' : ''}`} style={{ width: `${Math.min(100, pct)}%` }} />
-      </div>
-    </div>
-  )
-}
 
 export default function DaftarMateri({ onGoHafalan, level = 'a2' }) {
   const activeMode = level
@@ -136,9 +111,9 @@ export default function DaftarMateri({ onGoHafalan, level = 'a2' }) {
 
       {/* Per-category progress */}
       <div className="dm-progress-row">
-        <ProgressBar current={kotobaHafal} total={kotobaTotal} label={`Kotoba ${modeInfo?.label}`} />
-        {hasKanji && <ProgressBar current={kanjiHafal} total={kanjiTotal} label={`Kanji ${modeInfo?.label}`} />}
-        {hasBunpou && <ProgressBar current={bunpouHafal} total={bunpouTotal} label={`Bunpou ${modeInfo?.label}`} />}
+        <ProgressBar current={kotobaHafal} total={kotobaTotal} label={`Kotoba ${modeInfo?.label}`} variant="card" formatCount={(n) => n.toLocaleString()} />
+        {hasKanji && <ProgressBar current={kanjiHafal} total={kanjiTotal} label={`Kanji ${modeInfo?.label}`} variant="card" formatCount={(n) => n.toLocaleString()} />}
+        {hasBunpou && <ProgressBar current={bunpouHafal} total={bunpouTotal} label={`Bunpou ${modeInfo?.label}`} variant="card" formatCount={(n) => n.toLocaleString()} />}
       </div>
 
       {/* Tabs */}

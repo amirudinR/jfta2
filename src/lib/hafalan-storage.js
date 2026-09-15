@@ -155,11 +155,3 @@ export function countMastered(modeKey, category) {
   const all = getMastered()
   return Object.keys(all[modeKey]?.[category] || {}).length
 }
-
-export function speak(text) {
-  if (!window.speechSynthesis) return
-  const u = new SpeechSynthesisUtterance(text)
-  u.lang = 'ja-JP'; u.rate = 0.85
-  window.speechSynthesis.cancel()
-  window.speechSynthesis.speak(u)
-}

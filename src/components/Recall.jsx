@@ -2,7 +2,10 @@ import { useMemo, useState, useRef } from 'react'
 import { buildOptions } from '../lib/quiz'
 import { shuffle } from '../lib/ui'
 import { availableDays, listDayItems } from '../lib/ujian-harian'
-import { dueRecallItems, recallStats, scheduleRecallItems, clearRecallItems } from '../lib/recall-queue'
+import {
+  dueRecallItems, recallStats, scheduleRecallItems,
+  clearRecallItems, categoryOfId, buildRecallResult,
+} from '../lib/recall-queue'
 import ReviewSalah from './ReviewSalah'
 import RecallSetup from './recall/RecallSetup'
 import RecallSession from './recall/RecallSession'
@@ -17,10 +20,7 @@ const CATS = [
 const ALL_CATS = CATS.map((c) => c.key)
 const CAT_LABEL = Object.fromEntries(CATS.map((c) => [c.key, c.label]))
 
-const PASS_RATE = 0.8 // sebuah kategori dianggap "hafal" bila akurasi >= 80%
 const MAX_Q = 40
-
-const categoryOfId = (id) => String(id).split(':')[1]
 
 // Recall — ulangi materi lampau: pilih tanggal + kategori, progres per kategori
 // terdeteksi; yang belum hafal otomatis dijadwalkan ulang besok.
@@ -135,28 +135,18 @@ export default function Recall({ onBack, onSaveResult, onQueueChange }) {
   }
 
   const finish = () => {
-    const wrongSet = new Set(wrongRef.current.map((w) => w.id))
-
-    // Statistik per kategori.
-    const perCat = {}
-    for (const c of ALL_CATS) {
-      const total = order.filter((it) => it.category === c).length
-      if (!total) continue
-      const wrong = order.filter((it) => it.category === c && wrongSet.has(it.id)).length
-      const correct = total - wrong
-      const rate = correct / total
-      perCat[c] = { total, correct, wrong, rate, passed: rate >= PASS_RATE }
-    }
+    const wrongIds = wrongRef.current.map((w) => w.id)
+    const { perCat, notPassed } = buildRecallResult(order, wrongIds, ALL_CATS)
 
     // Belum hafal → jadwalkan ulang besok. Sudah hafal → keluar dari antrian.
-    const wrongItems = order.filter((it) => wrongSet.has(it.id))
+    const wrongItems = order.filter((it) => wrongIds.includes(it.id))
     if (wrongItems.length) scheduleRecallItems(wrongItems, 1)
-    clearRecallItems(order.filter((it) => !wrongSet.has(it.id)).map((it) => it.id))
+    clearRecallItems(order.filter((it) => !wrongIds.includes(it.id)).map((it) => it.id))
     setQueueTick((t) => t + 1)
     if (onQueueChange) onQueueChange()
 
     const total = order.length
-    const finalScore = total - wrongSet.size
+    const finalScore = total - wrongIds.length
     if (onSaveResult) {
       onSaveResult({
         score: finalScore,
@@ -165,14 +155,13 @@ export default function Recall({ onBack, onSaveResult, onQueueChange }) {
         difficulty: 'recall',
         difficultyLabel: 'Recall',
         level: 'recall',
-        wrongCount: wrongSet.size,
+        wrongCount: wrongIds.length,
         categories: Object.keys(perCat),
         date: new Date().toISOString(),
       })
     }
 
-    const notPassed = ALL_CATS.filter((c) => perCat[c] && !perCat[c].passed)
-    setResult({ perCat, notPassed, wrongIds: [...wrongSet] })
+    setResult({ perCat, notPassed, wrongIds })
     setPhase('summary')
   }
 

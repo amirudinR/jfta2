@@ -14,7 +14,6 @@ import {
 } from './lib/storage'
 import { ttsSupported } from './lib/tts'
 import { materialOf } from './data/materials'
-import { QUOTES } from './data/quotes'
 import Topbar from './components/Topbar'
 import Sidebar from './components/Sidebar'
 import { MaterialBar, ModeBar } from './components/Bars'
@@ -42,18 +41,11 @@ import { useAuth } from './hooks/useAuth'
 import { useCloudSync, usePushCloud } from './hooks/useCloudSync'
 import { useAppSettings } from './hooks/useAppSettings'
 import { saveExamResult } from './lib/cloud-sync'
-
-const LEVEL_KEY = 'ankichou-level'
-function getSavedLevel() {
-  try { return localStorage.getItem(LEVEL_KEY) } catch { return null }
-}
-function saveLevel(lv) {
-  try { localStorage.setItem(LEVEL_KEY, lv) } catch {}
-}
-
-function pickQuote() {
-  return QUOTES[Math.floor(Math.random() * QUOTES.length)]
-}
+import {
+  getSavedLevel, saveLevel, pickQuote,
+  LATIHAN_TAB_MODES, PERMATERI_MODES,
+  HIDE_LEVEL_STRIP_MODES, CONTROL_MODES, KOTOBA_MODES,
+} from './lib/nav'
 
 export default function App() {
   const { user, loading: authLoading, loginGoogle, logout, loginError } = useAuth()
@@ -313,18 +305,13 @@ export default function App() {
   }
 
   // Semua mode yang hidup di bawah tab "Latihan" di BottomNav
-  const LATIHAN_TAB_MODES = [
-    'kartu', 'kuis', 'ulangi', 'sprint',   // latihan per-materi
-    'daftar', 'referensi', 'kemampuan', 'materi', // tools
-  ]
   const isLatihanTab = LATIHAN_TAB_MODES.includes(mode)
 
   // MaterialBar hanya untuk mode latihan per-materi (bukan tools)
-  const PERMATERI_MODES = ['kartu', 'kuis', 'ulangi', 'sprint', 'daftar', 'referensi']
   const hideMaterialBar = !PERMATERI_MODES.includes(mode)
-  const hideLevelStrip = ['profil', 'ujian-baru', 'recall', 'kotoba-n3', 'kotoba-n2', 'kotoba-n1'].includes(mode)
+  const hideLevelStrip = HIDE_LEVEL_STRIP_MODES.includes(mode)
   const showModeBar = isLatihanTab
-  const showControls = mode === 'kartu' || mode === 'ulangi' || mode === 'kuis' || mode === 'sprint'
+  const showControls = CONTROL_MODES.includes(mode)
 
   // LevelStrip: klik N3/N2/N1 langsung buka KotobaLevel
   const handleLevelChange = (lv) => {
@@ -333,7 +320,7 @@ export default function App() {
     if (lv === 'n1') { setMode('kotoba-n1'); return }
     setLevel(lv)
     // Kalau sedang di KotobaLevel, balik ke harian setelah ganti level
-    if (['kotoba-n3', 'kotoba-n2', 'kotoba-n1'].includes(mode)) setMode('harian')
+    if (KOTOBA_MODES.includes(mode)) setMode('harian')
   }
 
   return (

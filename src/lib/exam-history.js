@@ -18,3 +18,25 @@ export function addExamRecord(record) {
   try { localStorage.setItem(KEY, JSON.stringify(list.slice(0, 200))) } catch {}
   return list
 }
+
+// Susun objek hasil ujian siap simpan (lokal + cloud).
+export function buildExamResult({
+  score,
+  total,
+  category,
+  difficulty,
+  difficultyLabel = '',
+  level,
+  wrongCount,
+}) {
+  return {
+    score,
+    total,
+    category,
+    difficulty,
+    difficultyLabel,
+    level,
+    wrongCount,
+    date: new Date().toISOString(),
+  }
+}

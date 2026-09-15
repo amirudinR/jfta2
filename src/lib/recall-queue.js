@@ -80,3 +80,26 @@ export function recallStats(onDate = todayStr()) {
   }
   return { total: all.length, due, pending: all.length - due, byCat }
 }
+
+// Kategori sebuah id Recall disandikan setelah ':'. Contoh 'b-88:kanji' → 'kanji'.
+export const categoryOfId = (id) => String(id).split(':')[1]
+
+// Sebuah kategori dianggap "hafal" bila akurasi >= 80%.
+export const PASS_RATE = 0.8
+
+// Statistik hasil sesi per kategori + daftar kategori yang belum lulus.
+// order = daftar item yang ditanyakan, ids = id item yang dijawab salah.
+export function buildRecallResult(order, ids, cats) {
+  const wrongSet = new Set(ids)
+  const perCat = {}
+  for (const c of cats) {
+    const total = order.filter((it) => it.category === c).length
+    if (!total) continue
+    const wrong = order.filter((it) => it.category === c && wrongSet.has(it.id)).length
+    const correct = total - wrong
+    const rate = correct / total
+    perCat[c] = { total, correct, wrong, rate, passed: rate >= PASS_RATE }
+  }
+  const notPassed = cats.filter((c) => perCat[c] && !perCat[c].passed)
+  return { perCat, notPassed }
+}

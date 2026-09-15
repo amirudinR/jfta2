@@ -1,6 +1,10 @@
 /* ---------- Kemampuan (dashboard) ---------- */
 .kp-dashboard {
   max-width: 640px;
+  display: grid;
+  gap: 18px;
+  color: var(--card-ink);
+  padding: 8px 0 32px;
 }
 
 .kp-dashboard h1 {
@@ -8,7 +12,9 @@
 }
 
 .kp-stats-row {
+  display: grid;
   grid-template-columns: repeat(4, 1fr) !important;
+  gap: 12px;
 }
 
 .kp-stat {
@@ -42,4 +48,192 @@
 .kp-activity,
 .kp-srs {
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+}
+
+/* Umum */
+.kp-card {
+  background: var(--card-face);
+  border: 1px solid var(--panel-line);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.kp-click {
+  cursor: pointer;
+}
+
+.kp-label {
+  color: var(--card-soft);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+.kp-section-title {
+  font-size: 16px;
+  font-weight: 800;
+  margin: 0;
+  color: var(--card-ink);
+}
+
+/* Header dashboard */
+.kp-dash-header {
+  text-align: center;
+  padding: 8px 0 2px;
+}
+
+.kp-dash-title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--page-ink);
+}
+
+.kp-dash-sub {
+  margin: 4px 0 0;
+  color: var(--page-soft);
+}
+
+/* Stat cards */
+.kp-stat-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.kp-stat-value {
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.kp-stat-emoji {
+  font-size: 32px;
+}
+
+.kp-stat-hl {
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.kp-stat-note {
+  color: var(--card-soft);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* Materi & kelompok */
+.kp-card-stack {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.kp-mat-main,
+.kp-grp-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.kp-mat-label,
+.kp-grp-name {
+  min-width: 120px;
+  font-weight: 700;
+}
+
+.kp-mat-kanji {
+  color: var(--card-soft);
+}
+
+.kp-pct {
+  min-width: 44px;
+  text-align: right;
+  font-weight: 700;
+  color: var(--kin);
+}
+
+.kp-pct-moss {
+  color: var(--moss);
+}
+
+.kp-soft {
+  color: var(--card-soft);
+  font-size: 12px;
+}
+
+.kp-mat-detail {
+  display: flex;
+  gap: 16px;
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--card-soft);
+}
+
+.kp-grp-detail {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--card-soft);
+}
+
+.kp-empty {
+  color: var(--card-soft);
+  margin-top: 10px;
+}
+
+/* Aktivitas & SRS */
+.kp-activity-card {
+  background: var(--card-face);
+  border: 1px solid var(--panel-line);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.kp-act-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 160px;
+  margin-top: 10px;
+}
+
+.kp-act-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+}
+
+.kp-act-val {
+  font-size: 11px;
+  color: var(--card-soft);
+  margin-bottom: 4px;
+}
+
+.kp-act-bar {
+  width: 100%;
+  max-width: 40px;
+  background: var(--kin);
+  border-radius: 6px 6px 0 0;
+}
+
+.kp-act-bar.empty {
+  background: var(--panel-line);
+}
+
+.kp-act-label {
+  font-size: 11px;
+  color: var(--card-soft);
+  margin-top: 6px;
+}
+
+.kp-srs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
 }

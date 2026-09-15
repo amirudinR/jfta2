@@ -3,6 +3,7 @@ import { byMaterial } from '../data'
 import { buildOptions, buildOptionsHard } from '../lib/quiz'
 import { shuffle } from '../lib/ui'
 import { availableDays, listDayItems } from '../lib/ujian-harian'
+import { buildExamResult } from '../lib/exam-history'
 import ReviewSalah from './ReviewSalah'
 import UjianSetup from './ujian/UjianSetup'
 import UjianSession from './ujian/UjianSession'
@@ -126,9 +127,9 @@ export default function UjianBaru({ level, onBack, onSaveResult }) {
   }
 
   const finishExam = () => {
+    const diffLabel = DIFFICULTIES.find((d) => d.key === difficulty)?.label || ''
     if (onSaveResult) {
-      const diffLabel = DIFFICULTIES.find((d) => d.key === difficulty)?.label || ''
-      onSaveResult({
+      onSaveResult(buildExamResult({
         score,
         total: order.length,
         category,
@@ -136,8 +137,7 @@ export default function UjianBaru({ level, onBack, onSaveResult }) {
         difficultyLabel: diffLabel,
         level,
         wrongCount: wrongRef.current.length,
-        date: new Date().toISOString(),
-      })
+      }))
     }
     setPhase('summary')
   }

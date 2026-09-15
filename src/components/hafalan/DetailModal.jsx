@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { X, Volume2, CheckSquare, Square } from 'lucide-react'
-import { speak } from '../../lib/hafalan-storage'
+import { speak } from '../../lib/tts'
 
 export function DetailModal({ item, isChecked, onToggle, onClose }) {
   const panelRef = useRef(null)
@@ -8,7 +8,9 @@ export function DetailModal({ item, isChecked, onToggle, onClose }) {
   useEffect(() => {
     const panel = panelRef.current
     const first = panel?.querySelector('.hh-modal-close')
-    first?.focus()
+    // preventScroll: jangan biarkan browser scroll dokumen saat focus
+    // (modal masih animasi slide-up / di bawah viewport pada saat mount).
+    first?.focus({ preventScroll: true })
 
     const handler = (e) => { if (e.key === 'Escape') onClose() }
     const trap = (e) => {
