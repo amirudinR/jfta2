@@ -35,6 +35,32 @@
   margin-bottom: 12px;
 }
 
+/* Tombol kembali di halaman standalone Kotoba-level (strip level disembunyikan
+   di sini) supaya user tidak terjebak. */
+.kl-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  margin-bottom: 12px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--page-ink);
+  background: var(--panel);
+  border: 1px solid var(--panel-line);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all .18s;
+}
+
+.kl-back:hover {
+  color: var(--kin);
+  border-color: color-mix(in srgb, var(--kin) 50%, transparent);
+}
+
+.kl-back:active { transform: scale(.97); }
+
 .kl-hero-title {
   display: flex;
   align-items: center;

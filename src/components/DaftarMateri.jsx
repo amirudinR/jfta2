@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import {
   Search, CheckSquare, Square, ChevronLeft, Filter,
-  ArrowUpDown, X,
+  ArrowUpDown, X, GraduationCap,
 } from 'lucide-react'
 import {
   HAFALAN_MODES, getMastered, toggleMastered, countMastered,
@@ -12,7 +12,7 @@ import { DetailModal } from './hafalan/DetailModal'
 
 const PAGE_SIZE = 50
 
-export default function DaftarMateri({ onGoHafalan, level = 'a2' }) {
+export default function DaftarMateri({ onGoHafalan, onGoKotobaLevel, level = 'a2' }) {
   const activeMode = level
   const [tab, setTab] = useState('kotoba')
   const [query, setQuery] = useState('')
@@ -102,6 +102,15 @@ export default function DaftarMateri({ onGoHafalan, level = 'a2' }) {
         </button>
         <h2 className="dm-title">Daftar Materi</h2>
       </div>
+
+      {/* Pintu masuk sengaja ke halaman latihan Kotoba level (N3/N2/N1).
+          Halaman itu standalone (Kartu/Kuis/Ulangi/Daftar), dibuka HANYA dari
+          sini — bukan lagi sebagai efek samping ganti level di LevelStrip. */}
+      {onGoKotobaLevel && activeMode !== 'a2' && (
+        <button className="dm-open-kotoba" onClick={onGoKotobaLevel}>
+          <GraduationCap size={16} /> Latihan Kotoba {modeInfo?.label} (Kartu/Kuis)
+        </button>
+      )}
 
       {/* Grand summary */}
       <div className="dm-grand">

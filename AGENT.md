@@ -174,7 +174,25 @@ bisa diubah user lewat `SettingsPanel`.
   `CONTROL_MODES`, `KOTOBA_MODES`.
 - `App.jsx` `changeMode(key)` mengatur `mode` + mengingat posisi scroll per halaman
   (`sessionStorage` key `hh:scroll:*`).
-- `LevelStrip` = satu-satunya pengubah level. Klik N3/N2/N1 membuka `KotobaLevel`.
+
+### Dua konsep yang WAJIB dipisah (jangan dicampur)
+1. **Level aktif** (`level`: `a2|n3|n2|n1`) — diubah `LevelStrip` lewat
+   `handleLevelChange`. Dikonsumsi `HafalanHarian`, `DaftarMateri`, `UjianBaru`,
+   `Recall`. **Ganti level TIDAK boleh mengubah `mode`/halaman.** Kalau di
+   `harian`, tetap `harian` — hanya datanya berganti.
+2. **Mode halaman** (`mode`: `harian|materi|kartu|kotoba-n3|profil|…`) — navigasi.
+   Hanya berubah lewat `changeMode()` (BottomNav/Sidebar/ModeBar/aksi eksplisit).
+
+`HafalanHarian` menerima prop `level`; hook `useHafalan` memuat ulang data tiap
+`activeMode` (= level) berubah, jadi target/progress ikut level baru **tanpa refresh**.
+`pageKey` mengunci scroll `harian:${level}` per level.
+
+Halaman standalone `KotobaLevel` (mode `kotoba-n3/n2/n1`) menyembunyikan
+`LevelStrip`, jadi **hanya** dibuka sengaja via `openKotobaLevel()` (tombol di
+`DaftarMateri`) dan **selalu** punya tombol "Kembali" (`onBack`). **Jangan**
+mengarahkan ke sana sebagai efek samping ganti level — itu bug lama yang membuat
+user terjebak tanpa switcher.
+
 - `BottomNav` punya 5 tab: Harian · Latihan · Ujian · Recall · Profil.
 - `Sidebar` memuat daftar menu lengkap.
 

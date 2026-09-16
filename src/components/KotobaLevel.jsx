@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { BookMarked, List, RotateCcw, FileQuestion, BookCopy, BookOpen } from 'lucide-react'
+import { BookMarked, List, RotateCcw, FileQuestion, BookCopy, BookOpen, ChevronLeft } from 'lucide-react'
 import { byMaterial, groupListOf } from '../data'
 import Kartu from './Kartu'
 import Kuis from './Kuis'
@@ -19,7 +19,7 @@ const TABS = [
   { key: 'daftar', label: 'Daftar Hafal', icon: <List size={14} /> },
 ]
 
-export default function KotobaLevel({ material, label, hankoText, cards, prefs, onToggleRomaji, onGrade }) {
+export default function KotobaLevel({ material, label, hankoText, cards, prefs, onToggleRomaji, onGrade, onBack }) {
   const allEntries = useMemo(() => byMaterial(material), [material])
   const [tab, setTab] = useState('kartu')
   const [lessons, setLessons] = useState(null)
@@ -82,6 +82,13 @@ export default function KotobaLevel({ material, label, hankoText, cards, prefs, 
 
   return (
     <div className="kl-page">
+      {/* Tombol kembali — strip level disembunyikan di halaman standalone ini,
+          jadi tombol ini mencegah user terjebak di halaman Kotoba-level. */}
+      {onBack ? (
+        <button className="kl-back no-print" onClick={onBack} aria-label="Kembali ke Hafalan Harian">
+          <ChevronLeft size={16} /> Kembali
+        </button>
+      ) : null}
       <div className="kl-hero">
         <div className="kl-hero-title">
           <span className={`hanko hanko-${hankoText}`}>{hankoText}</span>

@@ -44,8 +44,11 @@ import { saveExamResult } from './lib/cloud-sync'
 import {
   getSavedLevel, saveLevel, pickQuote,
   LATIHAN_TAB_MODES, PERMATERI_MODES,
-  HIDE_LEVEL_STRIP_MODES, CONTROL_MODES, KOTOBA_MODES,
+  HIDE_LEVEL_STRIP_MODES, CONTROL_MODES,
 } from './lib/nav'
+
+// Level → mode halaman standalone KotobaLevel (khusus melatih kotoba per level).
+const KOTOBA_MODE_OF = { n3: 'kotoba-n3', n2: 'kotoba-n2', n1: 'kotoba-n1' }
 
 export default function App() {
   const { user, loading: authLoading, loginGoogle, logout, loginError } = useAuth()
@@ -235,7 +238,7 @@ export default function App() {
       case 'harian':
         return <HafalanHarian level={level} onGoMateri={() => changeMode('materi')} onGoRecall={() => changeMode('recall')} />
       case 'materi':
-        return <DaftarMateri level={level} onGoHafalan={() => changeMode('harian')} />
+        return <DaftarMateri level={level} onGoHafalan={() => changeMode('harian')} onGoKotobaLevel={() => openKotobaLevel(level)} />
       case 'kartu':
         return (
           <Kartu
@@ -319,6 +322,7 @@ export default function App() {
             prefs={prefs}
             onToggleRomaji={() => setPrefs({ showRomaji: !prefs.showRomaji })}
             onGrade={handleGrade}
+            onBack={() => changeMode('harian')}
           />
         )
       case 'referensi':
@@ -344,16 +348,19 @@ export default function App() {
   const showModeBar = isLatihanTab
   const showControls = CONTROL_MODES.includes(mode)
 
-  // LevelStrip: pilih level → set level aktif (dipakai Hafalan Harian, Ujian,
-  // Materi, & Recall) DAN buka halaman Kotoba-level khusus untuk melatih kotoba
-  // level tersebut. Bug lama: setLevel() tidak dipanggil untuk n3/n2/n1, jadi
-  // Hafalan Harian tetap A2 walau strip sudah pindah — sekarang diperbaiki.
-  const KOTOBA_MODE_OF = { n3: 'kotoba-n3', n2: 'kotoba-n2', n1: 'kotoba-n1' }
+  // LevelStrip: HANYA mengubah level aktif (Hafalan Harian/Ujian/Materi/Recall).
+  // TIDAK mengubah mode/halaman — dua konsep ini sengaja dipisah. Dulu ganti
+  // level ke N3/N2/N1 ikut pindah ke halaman standalone KotobaLevel (mode
+  // 'kotoba-n*') sehingga LevelStrip ikut hilang dan user terjebak. Sekarang
+  // tetap di halaman yang sama, hanya datanya berganti sesuai level baru.
   const handleLevelChange = (lv) => {
     setLevel(lv)
-    if (KOTOBA_MODE_OF[lv]) changeMode(KOTOBA_MODE_OF[lv])
-    else if (KOTOBA_MODES.includes(mode)) changeMode('harian') // balik dari KotobaLevel ke A2
   }
+
+  // Buka halaman standalone Kotoba-level (Kartu/Kuis/Ulangi/Daftar) — dipanggil
+  // HANYA saat user sengaja memilih, mis. dari tab Latihan/Materi, bukan efek
+  // samping ganti level. Selalu dikaitkan dengan level aktif saat itu.
+  const openKotobaLevel = (lv = level) => changeMode(KOTOBA_MODE_OF[lv] || 'kotoba-n3')
 
   return (
     <div className="stage">
