@@ -5,7 +5,13 @@ import { KOTOBA_N3 } from './kotoba-n3'
 import { KOTOBA_N2 } from './kotoba-n2'
 import { KOTOBA_N1 } from './kotoba-n1'
 import KANJI from './kanji'
+import { KANJI_N3 } from './kanji-n3'
+import { KANJI_N2 } from './kanji-n2'
+import { KANJI_N1 } from './kanji-n1'
 import BUNPO from './bunpo'
+import { BUNPO_N3 } from './bunpo-n3'
+import { BUNPO_N2 } from './bunpo-n2'
+import { BUNPO_N1 } from './bunpo-n1'
 import MNENONIC from './mnenonic'
 
 // Normalisasi: id → string (sesuai skema data asli yang ber-id numerik),
@@ -30,7 +36,13 @@ export const DATA = [
   ...KOTOBA_N2.map((e) => norm(e, 'kotoba-n2')),
   ...KOTOBA_N1.map((e) => norm(e, 'kotoba-n1')),
   ...KANJI.map((e) => norm(e, 'kanji')),
+  ...KANJI_N3.map((e) => norm(e, 'kanji-n3')),
+  ...KANJI_N2.map((e) => norm(e, 'kanji-n2')),
+  ...KANJI_N1.map((e) => norm(e, 'kanji-n1')),
   ...BUNPO.map((e) => norm(e, 'bunpo')),
+  ...BUNPO_N3.map((e) => norm(e, 'bunpo-n3')),
+  ...BUNPO_N2.map((e) => norm(e, 'bunpo-n2')),
+  ...BUNPO_N1.map((e) => norm(e, 'bunpo-n1')),
 ]
 
 export const byMaterial = (material) => DATA.filter((e) => e.material === material)

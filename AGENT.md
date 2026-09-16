@@ -102,6 +102,8 @@ Jaga pemisahan ini saat menambah fitur.
 | `ankichou-level` | level terakhir dipilih |
 
 `mode` = salah satu dari `HAFALAN_MODES` (`a2`,`n3`,`n2`,`n1`) di `lib/hafalan-storage.js`.
+Setiap mode punya 3 kategori sumber: `kotobaSrc`, `kanjiSrc`, `bunpouSrc` (semua
+level kini lengkap — lihat §5).
 
 ### Item id
 - Bawaan: `b-<idData>` (stabil terhadap indeks). Lihat `buildItems()`.
@@ -120,6 +122,17 @@ sehingga tanggal kalender memetakan rotasi yang konsisten.
 - `setCheckedForDate(mode, data)` — hari ini → live + `saveHistoryNow`; lainnya →
   tulis langsung ke `hh2-hist-{mode}` (boleh mengedit hari kemarin/besok).
 - Tanggal **besok** sengaja boleh ditulis (mencicil).
+- **Aturan backfill:** `isEditableDate(date)` membatasi mundur `MAX_BACKFILL_DAYS`
+  (7) & maju `MAX_FORWARD_DAYS` (7). Guard ini dipanggil di `setCheckedForDate()`
+  (layer storage) dan di `useHafalan` (`clampDate`) — jadi meski UI diakali, data
+  di luar rentang tidak akan tersimpan. Streak (`computeStreak`) dihitung dari
+  **tanggal asli**, bukan kapan dikerjakan, sehingga batas backfill mencegah
+  "curang" mengisi semua tanggal jauh ke belakang.
+
+### Bulk action (tandai/batal semua)
+- `markAll(type)` / `uncheckAll(type)` di `useHafalan` — **dua langkah**: klik
+  pertama set `confirmBulk='mark'|'clear'` (auto-reset 4 dtk), klik kedua eksekusi
+  lewat `applyBulk()`. Tidak memakai `window.confirm`.
 
 ---
 
@@ -127,15 +140,30 @@ sehingga tanggal kalender memetakan rotasi yang konsisten.
 
 - `index.js` — menggabungkan semua sumber, menormalisasi (`id` → String), dan
   mengekspor `DATA`, `byMaterial(material)`, `groupListOf(entries)`.
-- Material key: `hiragana`, `katakana`, `kotoba`, `kotoba-n3`, `kotoba-n2`,
-  `kotoba-n1`, `kanji`, `bunpo`.
+- Material key:
+  - kana: `hiragana`, `katakana`
+  - kotoba: `kotoba` (A2), `kotoba-n3`, `kotoba-n2`, `kotoba-n1`
+  - kanji: `kanji` (A2), `kanji-n3`, `kanji-n2`, `kanji-n1`
+  - bunpo: `bunpo` (A2), `bunpo-n3`, `bunpo-n2`, `bunpo-n1`
 - Bentuk entri: `{ id, front, frontSub, backShort, backFull, group, groupLabel,
   reading?, mnenonic?, material }`.
 - `materials.js` — metadata material (`MATERIALS`, `MODES`, `materialOf`, `stampOf`).
+  Material level (n3/n2/n1) diberi `standalone: true` agar tidak muncul di MaterialBar.
 - Data ber-id numerik; **selalu bandingkan id sebagai String** (normalisasi di `index.js`).
 
-Menambah kosakata: tambahkan entri via helper `E(...)` di file level terkait
-(`kotoba-n3.js` dst.) dengan `group` numerik pelajaran.
+### Status konten kanji/bunpo N3–N1
+File `kanji-n3/n2/n1.js` & `bunpo-n3/n2/n1.js` sudah ada dengan **skema lengkap**
+dan **konten SEED** (sebagian entri contoh) agar semua fitur jalan. Header tiap file
+menandai `STATUS KONTEN: SEED / PENDING`. Untuk melengkapi: tambah/ganti entri
+`E(...)` mengikuti skema A2 (`kanji.js` / `bunpo.js`) tanpa mengubah komponen.
+
+Menambah materi baru: tambah entri `E(...)` di file level terkait (dengan `group`
+numerik pelajaran), impor di `data/index.js`, dan daftarkan di `materials.js`
+(bila standalone) + `HAFALAN_MODES` (bila jadi kategori hafalan harian).
+
+Target harian default per level ada di `DEFAULT_TARGETS` (`lib/hafalan-storage.js`):
+A2 `50/25/5`, N3 `40/20/5`, N2 `40/25/6`, N1 `45/30/6` (kotoba/kanji/bunpou),
+bisa diubah user lewat `SettingsPanel`.
 
 ---
 

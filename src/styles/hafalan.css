@@ -1058,6 +1058,25 @@ html.dark-mode .hh-row.checked {
   cursor: default;
 }
 
+/* State konfirmasi dua-langkah: menyala agar jelas butuh klik ulang. */
+.hh-bulk-btn.confirming {
+  background: var(--kin);
+  border-color: var(--kin);
+  color: #fff;
+  animation: hh-bulk-pulse 1.1s ease-in-out infinite;
+}
+
+.hh-bulk-btn.clear.confirming {
+  color: #fff;
+  background: color-mix(in srgb, var(--shu) 85%, var(--card-face));
+  border-color: color-mix(in srgb, var(--shu) 70%, transparent);
+}
+
+@keyframes hh-bulk-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--kin) 45%, transparent); }
+  50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--kin) 0%, transparent); }
+}
+
 .hh-bulk-btn.clear {
   flex: 0 0 auto;
   background: var(--panel);

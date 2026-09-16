@@ -4,17 +4,29 @@ import { publishStoreChange } from './sync-events'
 
 export const HAFALAN_MODES = [
   { key: 'a2', label: 'JFT-A2', kanji: 'A2', kotobaSrc: 'kotoba', kanjiSrc: 'kanji', bunpouSrc: 'bunpo' },
-  { key: 'n3', label: 'N3', kanji: 'N3', kotobaSrc: 'kotoba-n3', kanjiSrc: null, bunpouSrc: null },
-  { key: 'n2', label: 'N2', kanji: 'N2', kotobaSrc: 'kotoba-n2', kanjiSrc: null, bunpouSrc: null },
-  { key: 'n1', label: 'N1', kanji: 'N1', kotobaSrc: 'kotoba-n1', kanjiSrc: null, bunpouSrc: null },
+  { key: 'n3', label: 'N3', kanji: 'N3', kotobaSrc: 'kotoba-n3', kanjiSrc: 'kanji-n3', bunpouSrc: 'bunpo-n3' },
+  { key: 'n2', label: 'N2', kanji: 'N2', kotobaSrc: 'kotoba-n2', kanjiSrc: 'kanji-n2', bunpouSrc: 'bunpo-n2' },
+  { key: 'n1', label: 'N1', kanji: 'N1', kotobaSrc: 'kotoba-n1', kanjiSrc: 'kanji-n1', bunpouSrc: 'bunpo-n1' },
 ]
+
+export const modeInfoOf = (key) => HAFALAN_MODES.find((m) => m.key === key)
 
 export const DEFAULT_TARGETS = {
   a2: { kotoba: 50, kanji: 25, bunpou: 5 },
-  n3: { kotoba: 40, kanji: 0, bunpou: 0 },
-  n2: { kotoba: 40, kanji: 0, bunpou: 0 },
-  n1: { kotoba: 40, kanji: 0, bunpou: 0 },
+  // N3: kosakata lebih banyak, kanji & bunpou mulai intens (level menengah).
+  n3: { kotoba: 40, kanji: 20, bunpou: 5 },
+  // N2: beban kanji lebih besar, bunpou lebih padat.
+  n2: { kotoba: 40, kanji: 25, bunpou: 6 },
+  // N1: kanji & kosakata paling berat.
+  n1: { kotoba: 45, kanji: 30, bunpou: 6 },
 }
+
+// Aturan backfill: mundur maksimal sekian hari untuk melengkapi tanggal lampau.
+// Streak dihitung dari tanggal asli (bukan kapan dikerjakan), jadi batas ini
+// mencegah "curang" mengisi semua tanggal kosong jauh ke belakang.
+export const MAX_BACKFILL_DAYS = 7
+// Batas mencicil ke depan (mengerjakan jatah hari mendatang).
+export const MAX_FORWARD_DAYS = 7
 
 export const STORAGE_PREFIX = 'hh2'
 export const REMINDER_HOUR = 21
@@ -144,7 +156,10 @@ function itemsToMaps(items) {
 // Simpan centang untuk tanggal tertentu.
 // - hari ini  → tulis live bucket + segarkan riwayat hari ini.
 // - tanggal lain (kemarin/besok) → tulis entri riwayat tanggal tsb.
+// Guard terakhir: tolak tanggal di luar rentang backfill/maju yang diizinkan,
+// agar streak & heatmap tetap akurat dan tidak bisa dimanipulasi jauh.
 export function setCheckedForDate(mode, data) {
+  if (!isEditableDate(data?.date)) return
   if (data.date === todayStr()) {
     setCheckedStorage(mode, data)
     saveHistoryNow(mode, data)
@@ -183,6 +198,9 @@ export function resetDailyProgress() {
   }
 }
 
+// Streak dihitung dari TANGGAL ASLI (bukan kapan pengerjaan) — konsisten dengan
+// riwayat/heatmap. Karena melengkapi mundur dibatasi MAX_BACKFILL_DAYS, orang
+// tidak bisa "curang" mengisi seluruh tanggal kosong jauh ke belakang.
 export function computeStreak(history) {
   let streak = 0
   const d = new Date()
@@ -196,6 +214,14 @@ export function computeStreak(history) {
   const todayEntry = history[todayStr()]
   if (todayEntry?.done) streak++
   return streak
+}
+
+// Bolehkah menulis centang untuk tanggal `date`? Hari ini bebas; masa lalu
+// dibatasi MAX_BACKFILL_DAYS; masa depan dibatasi MAX_FORWARD_DAYS.
+export function isEditableDate(date) {
+  if (!date) return false
+  const rel = diffDays(todayStr(), date)
+  return rel >= -MAX_BACKFILL_DAYS && rel <= MAX_FORWARD_DAYS
 }
 
 // ── Persistent mastery (shared between Hafalan Harian & Daftar Materi) ──

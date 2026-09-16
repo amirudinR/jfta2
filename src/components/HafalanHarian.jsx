@@ -20,7 +20,7 @@ export default function HafalanHarian({ onGoMateri, onGoRecall, level = 'a2' }) 
     today, isToday, isPast, isFuture,
     showSettings, setShowSettings, showForm, setShowForm,
     showHeatmap, setShowHeatmap, detailItem, setDetailItem,
-    showExam, setShowExam, confirmDeleteKey,
+    showExam, setShowExam, confirmDeleteKey, confirmBulk,
     kotobaCheckedCount, kanjiCheckedCount, bunpouCheckedCount,
     kotobaDone, kanjiDone, bunpouDone, allDone,
     history, streak, showReminder, reminderParts,
@@ -138,25 +138,28 @@ export default function HafalanHarian({ onGoMateri, onGoRecall, level = 'a2' }) 
         )}
       </div>
 
-      {/* Aksi cepat: tandai hafal semua / bersihkan — per tab & tanggal aktif */}
+      {/* Aksi cepat: tandai hafal semua / bersihkan — per tab & tanggal aktif.
+          Dua langkah: klik pertama minta konfirmasi, klik kedua eksekusi. */}
       {tabSlice > 0 && (
         <div className="hh-bulk">
           <button
-            className={`hh-bulk-btn mark ${canMarkAll ? '' : 'done'}`}
+            className={`hh-bulk-btn mark ${canMarkAll ? '' : 'done'} ${confirmBulk === 'mark' ? 'confirming' : ''}`}
             onClick={() => markAll(tab)}
             disabled={!canMarkAll}
             title={`Tandai semua ${tabLabel} pada ${dayLabel(selectedDate, today)} sebagai hafal`}
           >
             <CheckCheck size={16} />
-            {tabDone ? `${tabLabel} Sudah Hafal Semua` : `Hafal Semua (${tabSlice})`}
+            {confirmBulk === 'mark'
+              ? `Yakin tandai ${tabSlice} item? Klik lagi`
+              : tabDone ? `${tabLabel} Sudah Hafal Semua` : `Hafal Semua (${tabSlice})`}
           </button>
           {tabChecked > 0 && (
             <button
-              className="hh-bulk-btn clear"
+              className={`hh-bulk-btn clear ${confirmBulk === 'clear' ? 'confirming' : ''}`}
               onClick={() => uncheckAll(tab)}
               title={`Bersihkan centang ${tabLabel} pada ${dayLabel(selectedDate, today)}`}
             >
-              <Eraser size={15} /> Batal Semua
+              <Eraser size={15} /> {confirmBulk === 'clear' ? 'Yakin? Klik lagi' : 'Batal Semua'}
             </button>
           )}
         </div>

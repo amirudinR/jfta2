@@ -1,12 +1,18 @@
 export const MATERIALS = [
-  { key: 'hiragana', label: 'Hiragana', kanji: 'ひらがな', kind: 'kana' },
-  { key: 'katakana', label: 'Katakana', kanji: 'カタカナ', kind: 'kana' },
-  { key: 'kotoba', label: 'Kotoba A2', kanji: 'ことば', kind: 'vocab' },
-  { key: 'kotoba-n3', label: 'Kotoba N3', kanji: 'N3語彙', kind: 'vocab', standalone: true },
-  { key: 'kotoba-n2', label: 'Kotoba N2', kanji: 'N2語彙', kind: 'vocab', standalone: true },
-  { key: 'kotoba-n1', label: 'Kotoba N1', kanji: 'N1語彙', kind: 'vocab', standalone: true },
-  { key: 'kanji', label: 'Kanji', kanji: '漢字', kind: 'kanji' },
-  { key: 'bunpo', label: 'Bunpo', kanji: '文法', kind: 'bunpo' },
+  { key: 'hiragana', label: 'Hiragana', kanji: '????', kind: 'kana' },
+  { key: 'katakana', label: 'Katakana', kanji: '????', kind: 'kana' },
+  { key: 'kotoba', label: 'Kotoba A2', kanji: '???', kind: 'vocab' },
+  { key: 'kotoba-n3', label: 'Kotoba N3', kanji: 'N3??', kind: 'vocab', standalone: true },
+  { key: 'kotoba-n2', label: 'Kotoba N2', kanji: 'N2??', kind: 'vocab', standalone: true },
+  { key: 'kotoba-n1', label: 'Kotoba N1', kanji: 'N1??', kind: 'vocab', standalone: true },
+  { key: 'kanji', label: 'Kanji', kanji: '??', kind: 'kanji' },
+  { key: 'kanji-n3', label: 'Kanji N3', kanji: 'N3??', kind: 'kanji', standalone: true },
+  { key: 'kanji-n2', label: 'Kanji N2', kanji: 'N2??', kind: 'kanji', standalone: true },
+  { key: 'kanji-n1', label: 'Kanji N1', kanji: 'N1??', kind: 'kanji', standalone: true },
+  { key: 'bunpo', label: 'Bunpo', kanji: '??', kind: 'bunpo' },
+  { key: 'bunpo-n3', label: 'Bunpo N3', kanji: 'N3??', kind: 'bunpo', standalone: true },
+  { key: 'bunpo-n2', label: 'Bunpo N2', kanji: 'N2??', kind: 'bunpo', standalone: true },
+  { key: 'bunpo-n1', label: 'Bunpo N1', kanji: 'N1??', kind: 'bunpo', standalone: true },
 ]
 
 // ModeBar dalam tab Latihan — 2 group:
@@ -34,8 +40,8 @@ export function stampOf(entry, material) {
     const m = g.match(/(\d+)/)
     return m ? `第${m[1]}課` : g || '語彙'
   }
-  if (material === 'kanji') return g ? `No.${g}` : '漢字'
-  if (material === 'bunpo') return g ? `§${g}` : '文法'
+  if (material?.startsWith('kanji')) return g ? `No.${g}` : '漢字'
+  if (material?.startsWith('bunpo')) return g ? `文法${g}` : '文法'
   if (/半濁|handakuten/i.test(g)) return '半濁点'
   if (/濁|dakuten/i.test(g)) return '濁点'
   if (/拗|yōon|yoon/i.test(g)) return '拗音'

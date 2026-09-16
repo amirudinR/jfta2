@@ -161,7 +161,12 @@ export default function App() {
 
   const recallDue = useMemo(() => recallStats().due, [queueTick, mode])
 
-  const allEntriesRaw = useMemo(() => byMaterial('hiragana').concat(byMaterial('katakana'), byMaterial('kotoba'), byMaterial('kotoba-n3'), byMaterial('kotoba-n2'), byMaterial('kotoba-n1'), byMaterial('kanji'), byMaterial('bunpo')), [])
+  const allEntriesRaw = useMemo(() => byMaterial('hiragana').concat(
+    byMaterial('katakana'),
+    byMaterial('kotoba'), byMaterial('kotoba-n3'), byMaterial('kotoba-n2'), byMaterial('kotoba-n1'),
+    byMaterial('kanji'), byMaterial('kanji-n3'), byMaterial('kanji-n2'), byMaterial('kanji-n1'),
+    byMaterial('bunpo'), byMaterial('bunpo-n3'), byMaterial('bunpo-n2'), byMaterial('bunpo-n1'),
+  ), [])
 
   const doReset = () => {
     if (!resetArmed) {
@@ -339,14 +344,15 @@ export default function App() {
   const showModeBar = isLatihanTab
   const showControls = CONTROL_MODES.includes(mode)
 
-  // LevelStrip: klik N3/N2/N1 langsung buka KotobaLevel
+  // LevelStrip: pilih level → set level aktif (dipakai Hafalan Harian, Ujian,
+  // Materi, & Recall) DAN buka halaman Kotoba-level khusus untuk melatih kotoba
+  // level tersebut. Bug lama: setLevel() tidak dipanggil untuk n3/n2/n1, jadi
+  // Hafalan Harian tetap A2 walau strip sudah pindah — sekarang diperbaiki.
+  const KOTOBA_MODE_OF = { n3: 'kotoba-n3', n2: 'kotoba-n2', n1: 'kotoba-n1' }
   const handleLevelChange = (lv) => {
-    if (lv === 'n3') { changeMode('kotoba-n3'); return }
-    if (lv === 'n2') { changeMode('kotoba-n2'); return }
-    if (lv === 'n1') { changeMode('kotoba-n1'); return }
     setLevel(lv)
-    // Kalau sedang di KotobaLevel, balik ke harian setelah ganti level
-    if (KOTOBA_MODES.includes(mode)) changeMode('harian')
+    if (KOTOBA_MODE_OF[lv]) changeMode(KOTOBA_MODE_OF[lv])
+    else if (KOTOBA_MODES.includes(mode)) changeMode('harian') // balik dari KotobaLevel ke A2
   }
 
   return (

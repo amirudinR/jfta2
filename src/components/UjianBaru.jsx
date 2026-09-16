@@ -24,9 +24,9 @@ const DIFFICULTIES = [
 
 const LEVEL_MATERIALS = {
   a2: { kotoba: 'kotoba', kanji: 'kanji', bunpou: 'bunpo' },
-  n3: { kotoba: 'kotoba-n3', kanji: null, bunpou: null },
-  n2: { kotoba: 'kotoba-n2', kanji: null, bunpou: null },
-  n1: { kotoba: 'kotoba-n1', kanji: null, bunpou: null },
+  n3: { kotoba: 'kotoba-n3', kanji: 'kanji-n3', bunpou: 'bunpo-n3' },
+  n2: { kotoba: 'kotoba-n2', kanji: 'kanji-n2', bunpou: 'bunpo-n2' },
+  n1: { kotoba: 'kotoba-n1', kanji: 'kanji-n1', bunpou: 'bunpo-n1' },
 }
 
 function getEntriesForExam(level, category) {

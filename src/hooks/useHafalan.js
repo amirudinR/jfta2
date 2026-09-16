@@ -2,7 +2,8 @@
 import { useState, useMemo, useEffect } from 'react'
 import {
   HAFALAN_MODES, DEFAULT_TARGETS, REMINDER_HOUR,
-  todayStr, addDays, getTargets, setTargets, getHistory,
+  MAX_BACKFILL_DAYS, MAX_FORWARD_DAYS,
+  todayStr, addDays, diffDays, getTargets, setTargets, getHistory,
   getChecked, setCheckedStorage, getCheckedForDate, setCheckedForDate,
   getCustom, setCustomStorage,
   flushToHistory, computeStreak, newCustomId,
@@ -23,10 +24,13 @@ export function useHafalan({ level = 'a2' }) {
   const [detailItem, setDetailItem] = useState(null)
   const [showExam, setShowExam] = useState(false)
   const [confirmDeleteKey, setConfirmDeleteKey] = useState(null)
+  // Aksi borongan butuh konfirmasi singkat (klik dua kali) sebelum eksekusi.
+  const [confirmBulk, setConfirmBulk] = useState(null) // 'mark' | 'clear' | null
 
   const setTab = (t) => {
     _setTab(t)
     setConfirmDeleteKey(null) // reset confirm saat ganti tab
+    setConfirmBulk(null)      // reset confirm bulk saat ganti tab
   }
 
   const modeInfo = HAFALAN_MODES.find((m) => m.key === activeMode)
@@ -150,22 +154,36 @@ export function useHafalan({ level = 'a2' }) {
     persist(next)
   }
 
-  // Tandai SEMUA item pada tab aktif untuk tanggal terpilih sebagai hafal.
-  const markAll = (type) => {
+  // Terapkan bulk pada tab aktif. `mode` = 'mark' (tandai semua) | 'clear'.
+  const applyBulk = (type, mode) => {
     const list = itemsMap[type] || []
     if (!list.length) return
     const map = { ...(checked[type] || {}) }
-    for (const it of list) map[it.id] = true
+    if (mode === 'mark') for (const it of list) map[it.id] = true
+    else for (const it of list) delete map[it.id]
     persist({ ...checked, [type]: map })
+    setConfirmBulk(null)
+  }
+
+  // Tandai SEMUA item pada tab aktif untuk tanggal terpilih sebagai hafal.
+  // Klik pertama = minta konfirmasi; klik kedua (dalam 4 dtk) = eksekusi.
+  const markAll = (type) => {
+    if (confirmBulk !== 'mark') {
+      setConfirmBulk('mark')
+      setTimeout(() => setConfirmBulk((c) => (c === 'mark' ? null : c)), 4000)
+      return
+    }
+    applyBulk(type, 'mark')
   }
 
   // Bersihkan centang SEMUA item pada tab aktif untuk tanggal terpilih.
   const uncheckAll = (type) => {
-    const list = itemsMap[type] || []
-    if (!list.length) return
-    const map = { ...(checked[type] || {}) }
-    for (const it of list) delete map[it.id]
-    persist({ ...checked, [type]: map })
+    if (confirmBulk !== 'clear') {
+      setConfirmBulk('clear')
+      setTimeout(() => setConfirmBulk((c) => (c === 'clear' ? null : c)), 4000)
+      return
+    }
+    applyBulk(type, 'clear')
   }
 
   const addCustom = (type, item) => {
@@ -193,11 +211,19 @@ export function useHafalan({ level = 'a2' }) {
     setTargets(newTargets)
   }
 
-  // Navigasi hari: pindah ke kemarin (melengkapi) / besok (mencicil) atau
-  // tanggal mana pun dalam rentang yang diizinkan DayStrip (±7 hari).
-  const goToDate = (date) => setSelectedDate(date)
-  const shiftDay = (n) => setSelectedDate((d) => addDays(d, n))
-  const setDate = (dateStr) => { if (dateStr) setSelectedDate(dateStr) }
+  // Navigasi hari: pindah ke kemarin (melengkapi) / besok (mencicil).
+  // Dibatasi MAX_BACKFILL_DAYS ke belakang & MAX_FORWARD_DAYS ke depan —
+  // guard ada di layer logika, bukan cuma UI, agar aturan backfill konsisten.
+  const clampDate = (dateStr) => {
+    const min = addDays(today, -MAX_BACKFILL_DAYS)
+    const max = addDays(today, MAX_FORWARD_DAYS)
+    if (dateStr < min) return min
+    if (dateStr > max) return max
+    return dateStr
+  }
+  const goToDate = (date) => { if (date) setSelectedDate(clampDate(date)) }
+  const shiftDay = (n) => setSelectedDate((d) => clampDate(addDays(d, n)))
+  const setDate = (dateStr) => { if (dateStr) setSelectedDate(clampDate(dateStr)) }
 
   const items = currentItems
   const checkedMap = checked[tab] || {}
@@ -210,9 +236,10 @@ export function useHafalan({ level = 'a2' }) {
     tab, setTab, checked, custom,
     selectedDate, setSelectedDate, setDate, goToDate, shiftDay,
     today, isToday, isPast, isFuture, relOffset,
+    maxBackfillDays: MAX_BACKFILL_DAYS, maxForwardDays: MAX_FORWARD_DAYS,
     showSettings, setShowSettings, showForm, setShowForm,
     showHeatmap, setShowHeatmap, detailItem, setDetailItem,
-    showExam, setShowExam, confirmDeleteKey,
+    showExam, setShowExam, confirmDeleteKey, confirmBulk,
     kotobaCheckedCount, kanjiCheckedCount, bunpouCheckedCount,
     kotobaDone, kanjiDone, bunpouDone, allDone,
     history, streak, showReminder, reminderParts,
