@@ -19,10 +19,32 @@ export const DEFAULT_TARGETS = {
 export const STORAGE_PREFIX = 'hh2'
 export const REMINDER_HOUR = 21
 
-export function todayStr() {
-  const d = new Date()
+export function dayStr(d) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
+
+export function todayStr() {
+  return dayStr(new Date())
+}
+
+// Geser tanggal 'YYYY-MM-DD' sebanyak n hari (boleh negatif).
+export function addDays(dateStr, n) {
+  const d = new Date(`${dateStr}T00:00:00`)
+  d.setDate(d.getDate() + n)
+  return dayStr(d)
+}
+
+// Selisih hari (b - a) untuk dua string 'YYYY-MM-DD'.
+export function diffDays(a, b) {
+  return Math.round((new Date(`${b}T00:00:00`) - new Date(`${a}T00:00:00`)) / 86400000)
+}
+
+// Tanggal relatif terhadap hari ini: -1 kemarin, 0 hari ini, 1 besok, dst.
+export const relDate = (offset) => addDays(todayStr(), offset)
+
+export const isToday = (dateStr) => dateStr === todayStr()
+export const isPast = (dateStr) => dateStr < todayStr()
+export const isFuture = (dateStr) => dateStr > todayStr()
 
 export const lsGet = (k, fallback) => {
   try { const r = localStorage.getItem(k); return r ? JSON.parse(r) : fallback }
@@ -96,6 +118,42 @@ export function getChecked(mode) {
 }
 
 export const setCheckedStorage = (mode, data) => lsSet(`${STORAGE_PREFIX}-checked-${mode}`, data)
+
+const emptyDay = (date) => ({ date, kotoba: {}, kanji: {}, bunpou: {} })
+
+// Ambil data centang untuk tanggal mana pun (fleksibel: kemarin/besok).
+// - hari ini  → bucket hidup `hh2-checked-*`
+// - masa lalu → entri riwayat (`hh2-hist-*`), boleh diperbaiki lagi (melengkapi)
+// - masa depan→ entri riwayat (dicicil lebih awal), dibuatkan bila belum ada
+export function getCheckedForDate(mode, date) {
+  if (date === todayStr()) {
+    const c = getChecked(mode)
+    return { date, kotoba: { ...c.kotoba }, kanji: { ...c.kanji }, bunpou: { ...c.bunpou } }
+  }
+  const rec = getHistory(mode)[date]
+  if (!rec?.items) return emptyDay(date)
+  return { date, ...itemsToMaps(rec.items) }
+}
+
+// items riwayat berupa daftar id → ubah ke bentuk map {id:true}.
+function itemsToMaps(items) {
+  const toMap = (list) => Object.fromEntries((list || []).map((id) => [id, true]))
+  return { kotoba: toMap(items.kotoba), kanji: toMap(items.kanji), bunpou: toMap(items.bunpou) }
+}
+
+// Simpan centang untuk tanggal tertentu.
+// - hari ini  → tulis live bucket + segarkan riwayat hari ini.
+// - tanggal lain (kemarin/besok) → tulis entri riwayat tanggal tsb.
+export function setCheckedForDate(mode, data) {
+  if (data.date === todayStr()) {
+    setCheckedStorage(mode, data)
+    saveHistoryNow(mode, data)
+    return
+  }
+  const hist = getHistory(mode)
+  hist[data.date] = historyRecord({ ...data, mode })
+  lsSet(`${STORAGE_PREFIX}-hist-${mode}`, hist)
+}
 
 export const getCustom = (mode) => lsGet(`${STORAGE_PREFIX}-custom-${mode}`, { kotoba: [], kanji: [], bunpou: [] })
 export const setCustomStorage = (mode, data) => lsSet(`${STORAGE_PREFIX}-custom-${mode}`, data)

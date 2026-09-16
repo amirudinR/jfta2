@@ -2,18 +2,20 @@
 import { useState, useMemo, useEffect } from 'react'
 import {
   HAFALAN_MODES, DEFAULT_TARGETS, REMINDER_HOUR,
-  todayStr, getTargets, setTargets, getHistory, getChecked,
-  setCheckedStorage, getCustom, setCustomStorage,
-  flushToHistory, saveHistoryNow, computeStreak, newCustomId,
+  todayStr, addDays, getTargets, setTargets, getHistory,
+  getChecked, setCheckedStorage, getCheckedForDate, setCheckedForDate,
+  getCustom, setCustomStorage,
+  flushToHistory, computeStreak, newCustomId,
 } from '../lib/hafalan-storage'
-import { buildItems, appendCustom, dailySlice } from '../lib/hafalan-items'
+import { buildItems, appendCustom, dailySliceForDate } from '../lib/hafalan-items'
 import { onSyncApplied } from '../lib/sync-events'
 
 export function useHafalan({ level = 'a2' }) {
   const activeMode = level
   const [tab, _setTab] = useState('kotoba')
   const [targets, setTargetsState] = useState(() => getTargets())
-  const [checked, setChecked] = useState(() => getChecked(level))
+  const [selectedDate, setSelectedDate] = useState(() => todayStr())
+  const [checked, setChecked] = useState(() => getCheckedForDate(level, todayStr()))
   const [custom, setCustom] = useState(() => getCustom(level))
   const [showSettings, setShowSettings] = useState(false)
   const [showForm, setShowForm] = useState(null)
@@ -32,37 +34,58 @@ export function useHafalan({ level = 'a2' }) {
   const hasBunpou = modeInfo?.bunpouSrc != null
   const t = targets[activeMode] || DEFAULT_TARGETS[activeMode]
 
+  const today = todayStr()
+  const isToday = selectedDate === today
+  const isPast = selectedDate < today
+  const isFuture = selectedDate > today
+  // Offset relatif untuk label & limit (besok +1, kemarin -1).
+  const relOffset = useMemo(() => {
+    const a = new Date(`${today}T00:00:00`)
+    const b = new Date(`${selectedDate}T00:00:00`)
+    return Math.round((b - a) / 86400000)
+  }, [today, selectedDate])
+
   // Level berubah (dari LevelStrip global) → muat ulang data mode.
   useEffect(() => {
-    setChecked(getChecked(activeMode))
+    setSelectedDate(todayStr())
+    setChecked(getCheckedForDate(activeMode, todayStr()))
     setCustom(getCustom(activeMode))
     _setTab('kotoba')
     setDetailItem(null)
     setShowForm(null)
   }, [activeMode])
 
+  // Tanggal terpilih berubah → muat centang tanggal itu.
+  useEffect(() => {
+    setChecked(getCheckedForDate(activeMode, selectedDate))
+    setDetailItem(null)
+  }, [selectedDate, activeMode])
+
   // Data datang dari cloud (perangkat lain) → baca ulang dari localStorage.
   useEffect(() => {
     return onSyncApplied(() => {
-      setChecked(getChecked(activeMode))
+      setChecked(getCheckedForDate(activeMode, selectedDate))
       setCustom(getCustom(activeMode))
       setTargetsState(getTargets())
     })
-  }, [activeMode])
+  }, [activeMode, selectedDate])
 
-  // Auto-reset at midnight
+  // Auto-reset at midnight — hanya relevan saat melihat hari ini.
   useEffect(() => {
     const check = () => {
-      if (checked.date !== todayStr()) {
-        flushToHistory(activeMode, checked)
-        const fresh = { date: todayStr(), kotoba: {}, kanji: {}, bunpou: {} }
+      const now = todayStr()
+      if (selectedDate !== now) return
+      const live = getChecked(activeMode)
+      if (live.date !== now) {
+        flushToHistory(activeMode, live)
+        const fresh = { date: now, kotoba: {}, kanji: {}, bunpou: {} }
         setChecked(fresh)
         setCheckedStorage(activeMode, fresh)
       }
     }
     const timer = setInterval(check, 60_000)
     return () => clearInterval(timer)
-  }, [checked, activeMode])
+  }, [selectedDate, activeMode])
 
   // Build items
   const kotobaAll = useMemo(() => buildItems(modeInfo?.kotobaSrc), [activeMode])
@@ -73,19 +96,19 @@ export function useHafalan({ level = 'a2' }) {
   const kanjiWithCustom = useMemo(() => appendCustom(kanjiAll, custom.kanji), [kanjiAll, custom])
   const bunpouWithCustom = useMemo(() => appendCustom(bunpouAll, custom.bunpou), [bunpouAll, custom])
 
-  // Day page for rotation
-  const dayPage = useMemo(() => {
-    const hist = getHistory(activeMode)
-    const dates = Object.keys(hist).sort()
-    if (!dates.length) return 0
-    const first = new Date(dates[0])
-    const today = new Date(todayStr())
-    return Math.floor((today - first) / 86400000)
-  }, [activeMode])
+  // Anchor = hari pertama ada riwayat → rotasi konsisten lintas tanggal.
+  // Anchor tetap = hari pertama ada riwayat (atau hari ini bila belum ada).
+  // Dipakai agar tiap tanggal kalender memetakan rotasi yang konsisten, baik
+  // untuk hari ini, kemarin (offset negatif), maupun besok (offset positif).
+  const anchorDate = useMemo(() => {
+    const dates = Object.keys(getHistory(activeMode)).sort()
+    return dates[0] || today
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeMode, checked])
 
-  const kotobaSlice = useMemo(() => dailySlice(kotobaWithCustom, dayPage, t.kotoba), [kotobaWithCustom, dayPage, t.kotoba])
-  const kanjiSlice = useMemo(() => dailySlice(kanjiWithCustom, dayPage, t.kanji), [kanjiWithCustom, dayPage, t.kanji])
-  const bunpouSlice = useMemo(() => dailySlice(bunpouWithCustom, dayPage, t.bunpou || 0), [bunpouWithCustom, dayPage, t.bunpou])
+  const kotobaSlice = useMemo(() => dailySliceForDate(kotobaWithCustom, anchorDate, selectedDate, t.kotoba), [kotobaWithCustom, anchorDate, selectedDate, t.kotoba])
+  const kanjiSlice = useMemo(() => dailySliceForDate(kanjiWithCustom, anchorDate, selectedDate, t.kanji), [kanjiWithCustom, anchorDate, selectedDate, t.kanji])
+  const bunpouSlice = useMemo(() => dailySliceForDate(bunpouWithCustom, anchorDate, selectedDate, t.bunpou || 0), [bunpouWithCustom, anchorDate, selectedDate, t.bunpou])
 
   // Checked counts
   const kotobaCheckedCount = Object.values(checked.kotoba || {}).filter(Boolean).length
@@ -97,23 +120,52 @@ export function useHafalan({ level = 'a2' }) {
   const bunpouDone = !t.bunpou || bunpouCheckedCount >= t.bunpou
   const allDone = kotobaDone && kanjiDone && bunpouDone
 
+  // Progres aktual terhadap target = jumlah item yang dicentang (bisa > target
+  // bila mencicil lebih / dari hari lain) — dipakai untuk banner.
   const history = useMemo(() => getHistory(activeMode), [checked, activeMode])
   const streak = useMemo(() => computeStreak(history), [history])
 
   const hour = new Date().getHours()
-  const showReminder = hour >= REMINDER_HOUR && !allDone
+  const showReminder = isToday && hour >= REMINDER_HOUR && !allDone
 
   // Build reminder text
   const reminderParts = [`${kotobaCheckedCount}/${t.kotoba} kotoba`]
   if (hasKanji) reminderParts.push(`${kanjiCheckedCount}/${t.kanji} kanji`)
   if (hasBunpou && t.bunpou > 0) reminderParts.push(`${bunpouCheckedCount}/${t.bunpou} bunpou`)
 
+  // Baris item untuk tab aktif (untuk "Hafal semua").
+  const itemsMap = { kotoba: kotobaSlice, kanji: kanjiSlice, bunpou: bunpouSlice }
+  const totalMap = { kotoba: kotobaWithCustom, kanji: kanjiWithCustom, bunpou: bunpouWithCustom }
+  const currentItems = itemsMap[tab] || []
+
+  // Tulis centang untuk tanggal terpilih (hari ini → live; lainnya → riwayat).
+  const persist = (next) => {
+    setChecked(next)
+    setCheckedForDate(activeMode, next)
+  }
+
   // Actions
   const toggle = (type, id) => {
     const next = { ...checked, [type]: { ...checked[type], [id]: !checked[type]?.[id] } }
-    setChecked(next)
-    setCheckedStorage(activeMode, next)
-    saveHistoryNow(activeMode, next)
+    persist(next)
+  }
+
+  // Tandai SEMUA item pada tab aktif untuk tanggal terpilih sebagai hafal.
+  const markAll = (type) => {
+    const list = itemsMap[type] || []
+    if (!list.length) return
+    const map = { ...(checked[type] || {}) }
+    for (const it of list) map[it.id] = true
+    persist({ ...checked, [type]: map })
+  }
+
+  // Bersihkan centang SEMUA item pada tab aktif untuk tanggal terpilih.
+  const uncheckAll = (type) => {
+    const list = itemsMap[type] || []
+    if (!list.length) return
+    const map = { ...(checked[type] || {}) }
+    for (const it of list) delete map[it.id]
+    persist({ ...checked, [type]: map })
   }
 
   const addCustom = (type, item) => {
@@ -141,10 +193,13 @@ export function useHafalan({ level = 'a2' }) {
     setTargets(newTargets)
   }
 
-  // Current tab data
-  const itemsMap = { kotoba: kotobaSlice, kanji: kanjiSlice, bunpou: bunpouSlice }
-  const totalMap = { kotoba: kotobaWithCustom, kanji: kanjiWithCustom, bunpou: bunpouWithCustom }
-  const items = itemsMap[tab] || []
+  // Navigasi hari: pindah ke kemarin (melengkapi) / besok (mencicil) atau
+  // tanggal mana pun dalam rentang yang diizinkan DayStrip (±7 hari).
+  const goToDate = (date) => setSelectedDate(date)
+  const shiftDay = (n) => setSelectedDate((d) => addDays(d, n))
+  const setDate = (dateStr) => { if (dateStr) setSelectedDate(dateStr) }
+
+  const items = currentItems
   const checkedMap = checked[tab] || {}
 
   // Tab label for add form
@@ -153,6 +208,8 @@ export function useHafalan({ level = 'a2' }) {
   return {
     activeMode, modeInfo, hasKanji, hasBunpou, t, targets,
     tab, setTab, checked, custom,
+    selectedDate, setSelectedDate, setDate, goToDate, shiftDay,
+    today, isToday, isPast, isFuture, relOffset,
     showSettings, setShowSettings, showForm, setShowForm,
     showHeatmap, setShowHeatmap, detailItem, setDetailItem,
     showExam, setShowExam, confirmDeleteKey,
@@ -160,6 +217,6 @@ export function useHafalan({ level = 'a2' }) {
     kotobaDone, kanjiDone, bunpouDone, allDone,
     history, streak, showReminder, reminderParts,
     itemsMap, totalMap, items, checkedMap, tabLabel,
-    toggle, addCustom, removeCustom, saveTargets,
+    toggle, markAll, uncheckAll, addCustom, removeCustom, saveTargets,
   }
 }

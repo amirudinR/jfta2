@@ -1,6 +1,7 @@
 import {
   CheckSquare, Square, Plus, ChevronDown, ChevronUp,
   Trash2, Settings, Flame, BookText, ListChecks, History,
+  CheckCheck, Eraser,
 } from 'lucide-react'
 import { useHafalan } from '../hooks/useHafalan'
 import { Heatmap } from './hafalan/Heatmap'
@@ -9,20 +10,34 @@ import { DetailModal } from './hafalan/DetailModal'
 import { SettingsPanel } from './hafalan/SettingsPanel'
 import { AddForm } from './hafalan/AddForm'
 import { UjianHarian } from './hafalan/UjianHarian'
+import { DayStrip, dayLabel } from './hafalan/DayStrip'
 
 export default function HafalanHarian({ onGoMateri, onGoRecall, level = 'a2' }) {
   const {
     hasKanji, hasBunpou, t,
     tab, setTab,
+    selectedDate, setDate,
+    today, isToday, isPast, isFuture,
     showSettings, setShowSettings, showForm, setShowForm,
     showHeatmap, setShowHeatmap, detailItem, setDetailItem,
     showExam, setShowExam, confirmDeleteKey,
     kotobaCheckedCount, kanjiCheckedCount, bunpouCheckedCount,
-    allDone,
+    kotobaDone, kanjiDone, bunpouDone, allDone,
     history, streak, showReminder, reminderParts,
     totalMap, items, checkedMap, tabLabel,
-    toggle, addCustom, removeCustom, saveTargets, targets,
+    toggle, markAll, uncheckAll, addCustom, removeCustom, saveTargets, targets,
   } = useHafalan({ level })
+
+  // Berapa item yang sudah dicentang per tanggal (untuk badge strip & quick).
+  const dayMeta = (date) => history[date]?.kotoba != null
+    ? (history[date].kotoba + history[date].kanji + history[date].bunpou)
+    : null
+
+  // Jumlah item tercentang di tab & tanggal aktif (untuk tombol Hafal/Batal semua).
+  const tabSlice = { kotoba: t.kotoba, kanji: t.kanji, bunpou: t.bunpou }[tab] || 0
+  const tabChecked = { kotoba: kotobaCheckedCount, kanji: kanjiCheckedCount, bunpou: bunpouCheckedCount }[tab] || 0
+  const tabDone = { kotoba: kotobaDone, kanji: kanjiDone, bunpou: bunpouDone }[tab] ?? true
+  const canMarkAll = tabSlice > 0 && tabChecked < tabSlice
 
   return (
     <div className="hh-root">
@@ -30,13 +45,39 @@ export default function HafalanHarian({ onGoMateri, onGoRecall, level = 'a2' }) 
         <UjianHarian onBack={() => setShowExam(false)} />
       ) : (
       <>
+      {/* Pemilih hari — fleksibel: kemarin (melengkapi), hari ini, besok (cicil). */}
+      <DayStrip
+        selectedDate={selectedDate}
+        onChange={setDate}
+        meta={dayMeta}
+      />
+
+      {isPast && !allDone && (
+        <div className="hh-fill-banner">
+          Melengkapi {dayLabel(selectedDate, today)} — masih ada bagian belum hafal.
+          Bisa dicicil sekarang.
+        </div>
+      )}
+
+      {isFuture && (
+        <div className="hh-cicil-banner">
+          Mencicil {dayLabel(selectedDate, today)} — centang lebih awal tidak masalah.
+        </div>
+      )}
+
       {showReminder && (
         <div className="hh-reminder">
           Target belum tercapai! {reminderParts.join(', ')}
         </div>
       )}
 
-      {allDone && <div className="hh-done-banner">Target hari ini tercapai! すごい！</div>}
+      {allDone && (
+        <div className="hh-done-banner">
+          {isToday ? 'Target hari ini tercapai! すごい！'
+            : isPast ? `Target ${dayLabel(selectedDate, today)} lengkap! よかった！`
+            : `Sudah dicicil semua untuk ${dayLabel(selectedDate, today)}! はやい！`}
+        </div>
+      )}
 
       {/* Streak + settings */}
       <div className="hh-header">
@@ -96,6 +137,30 @@ export default function HafalanHarian({ onGoMateri, onGoRecall, level = 'a2' }) 
           </button>
         )}
       </div>
+
+      {/* Aksi cepat: tandai hafal semua / bersihkan — per tab & tanggal aktif */}
+      {tabSlice > 0 && (
+        <div className="hh-bulk">
+          <button
+            className={`hh-bulk-btn mark ${canMarkAll ? '' : 'done'}`}
+            onClick={() => markAll(tab)}
+            disabled={!canMarkAll}
+            title={`Tandai semua ${tabLabel} pada ${dayLabel(selectedDate, today)} sebagai hafal`}
+          >
+            <CheckCheck size={16} />
+            {tabDone ? `${tabLabel} Sudah Hafal Semua` : `Hafal Semua (${tabSlice})`}
+          </button>
+          {tabChecked > 0 && (
+            <button
+              className="hh-bulk-btn clear"
+              onClick={() => uncheckAll(tab)}
+              title={`Bersihkan centang ${tabLabel} pada ${dayLabel(selectedDate, today)}`}
+            >
+              <Eraser size={15} /> Batal Semua
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Item List */}
       <div className="hh-list">
@@ -157,7 +222,7 @@ export default function HafalanHarian({ onGoMateri, onGoRecall, level = 'a2' }) 
       )}
 
       <div className="hh-info">
-        Target: {t.kotoba} kotoba
+        {isToday ? 'Hari Ini' : `${dayLabel(selectedDate, today)}`} · Target: {t.kotoba} kotoba
         {hasKanji ? ` + ${t.kanji} kanji` : ''}
         {hasBunpou && t.bunpou > 0 ? ` + ${t.bunpou} bunpou` : ''}
         {' '}/ hari · Reset 00:00 ·

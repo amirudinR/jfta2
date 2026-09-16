@@ -620,6 +620,189 @@ html.dark-mode .hh-row.checked {
   padding: 8px 0;
 }
 
+/* ── Day Strip (pemilih hari) ── */
+.hh-daystrip {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 14px;
+  background: var(--card-face);
+  border: 1px solid var(--panel-line);
+}
+
+.hh-daystrip.past { border-color: color-mix(in srgb, var(--kin) 45%, var(--panel-line)); }
+.hh-daystrip.future { border-color: color-mix(in srgb, var(--moss) 45%, var(--panel-line)); }
+
+.hh-day-nav {
+  flex: 0 0 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--panel);
+  border: 1px solid var(--panel-line);
+  border-radius: 10px;
+  color: var(--card-ink);
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.hh-day-nav:disabled { opacity: .3; cursor: not-allowed; }
+.hh-day-nav:not(:disabled):active { transform: scale(.94); }
+
+.hh-day-mid {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hh-day-quick {
+  display: flex;
+  gap: 6px;
+}
+
+.hh-day-quick-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 6px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font-jp);
+  color: var(--page-soft);
+  background: none;
+  border: 1px solid var(--panel-line);
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all .18s;
+  white-space: nowrap;
+}
+
+.hh-day-quick-btn.active {
+  background: var(--kin);
+  border-color: var(--kin);
+  color: #fff;
+}
+
+.hh-day-quick-count {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--card-ink) 12%, transparent);
+}
+
+.hh-day-quick-btn.active .hh-day-quick-count {
+  background: rgba(255, 255, 255, .28);
+}
+
+.hh-day-pick {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--card-soft);
+  padding: 0 4px;
+}
+
+.hh-day-pick input[type="date"] {
+  background: var(--card-deep);
+  border: 1px solid var(--card-line);
+  border-radius: 7px;
+  color: var(--card-ink);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 4px 6px;
+  max-width: 140px;
+}
+
+.hh-day-pick-label {
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+  font-weight: 700;
+  color: var(--card-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Banner melengkapi / mencicil ── */
+.hh-fill-banner {
+  background: color-mix(in srgb, var(--kin) 16%, var(--card-face));
+  border: 1px solid color-mix(in srgb, var(--kin) 40%, transparent);
+  color: var(--card-ink);
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.hh-cicil-banner {
+  background: color-mix(in srgb, var(--moss) 16%, var(--card-face));
+  border: 1px solid color-mix(in srgb, var(--moss) 40%, transparent);
+  color: var(--card-ink);
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+/* ── Aksi borongan (Hafal semua / Batal semua) ── */
+.hh-bulk {
+  display: flex;
+  gap: 8px;
+}
+
+.hh-bulk-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 11px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .18s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hh-bulk-btn.mark {
+  background: color-mix(in srgb, var(--moss) 16%, var(--card-face));
+  border: 1px solid color-mix(in srgb, var(--moss) 45%, transparent);
+  color: var(--moss);
+}
+
+.hh-bulk-btn.mark:active { transform: scale(.98); }
+.hh-bulk-btn.mark.done {
+  background: color-mix(in srgb, var(--moss) 26%, var(--card-face));
+  cursor: default;
+}
+
+.hh-bulk-btn.clear {
+  flex: 0 0 auto;
+  background: var(--panel);
+  border: 1px solid var(--panel-line);
+  color: var(--page-soft);
+  padding: 11px 14px;
+}
+
+.hh-bulk-btn.clear:hover { color: var(--shu); border-color: color-mix(in srgb, var(--shu) 45%, transparent); }
+
+@media (max-width: 420px) {
+  .hh-day-pick-label { display: none; }
+  .hh-day-pick input[type="date"] { max-width: none; flex: 1; }
+  .hh-bulk-btn.clear { font-size: 12px; padding: 11px 10px; }
+}
+
 /* ── Detail Modal ── */
 .hh-modal-overlay {
   position: fixed;

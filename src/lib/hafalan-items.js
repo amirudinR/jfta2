@@ -1,6 +1,7 @@
 // Helper pembangun item kalender Hafalan Harian & Daftar Materi.
 
 import { byMaterial } from '../data'
+import { diffDays } from './hafalan-storage'
 
 // Item baku dari sumber materi (id prefiks 'b-', stabil terhadap indeks).
 export function buildItems(materialKey) {
@@ -27,8 +28,18 @@ export function appendCustom(builtIn, customs) {
 // Potongan harian bergilir (rotasi sesuai dayPage) dari daftar item.
 export function dailySlice(src, dayPage, count) {
   if (!src.length || count <= 0) return []
-  const start = (dayPage * count) % src.length
+  const len = src.length
+  // Modulo positif — dayPage boleh negatif (lihat kemarin).
+  const start = (((dayPage * count) % len) + len) % len
   const items = []
-  for (let i = 0; i < count && i < src.length; i++) items.push(src[(start + i) % src.length])
+  for (let i = 0; i < count && i < len; i++) items.push(src[(start + i) % len])
   return items
+}
+
+// Potongan untuk satu tanggal spesifik. `anchorDate` = tanggal halaman 0
+// (hari pertama ada riwayat). Offset bisa negatif (kemarin) / positif (besok).
+export function dailySliceForDate(src, anchorDate, targetDate, count) {
+  if (!src.length || count <= 0) return []
+  if (!anchorDate || !targetDate) return dailySlice(src, 0, count)
+  return dailySlice(src, diffDays(anchorDate, targetDate), count)
 }
