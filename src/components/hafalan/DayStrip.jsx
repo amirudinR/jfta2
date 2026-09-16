@@ -1,5 +1,6 @@
-import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { todayStr, addDays, diffDays } from '../../lib/hafalan-storage'
+import { Kalender } from './Kalender'
 
 const DAY_NAMES = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab']
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
@@ -55,21 +56,20 @@ export function DayStrip({
             </button>
           ))}
         </div>
-        <label className="hh-day-pick">
-          <CalendarDays size={14} />
-          <input
-            type="date"
-            value={selectedDate}
-            max={addDays(today, maxForward)}
+        <div className="hh-day-pick">
+          <Kalender
+            selectedDate={selectedDate}
+            onChange={onChange}
+            meta={meta}
             min={addDays(today, -maxBack)}
-            onChange={(e) => onChange(e.target.value)}
-            aria-label="Pilih tanggal"
+            max={addDays(today, maxForward)}
+            title="Pilih tanggal hafalan"
           />
           <span className="hh-day-pick-label">
             {dayLabel(selectedDate, today)}{suffix ? ` ${suffix}` : ''}
             {meta[selectedDate] != null ? ` · ${meta[selectedDate]}` : ''}
           </span>
-        </label>
+        </div>
       </div>
 
       <button
