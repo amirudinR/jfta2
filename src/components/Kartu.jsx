@@ -137,10 +137,13 @@ export default function Kartu({
 
   const jp2id = direction === 'jp2id'
   const frontEntry = jp2id ? entry.front : entry.backShort
-  const frontSubEntry = jp2id ? entry.reading : ''
+  // Bacaan kana di sisi depan: kanji → reading, kotoba/bunpo → frontSub.
+  const frontSubEntry = jp2id ? (entry.reading || entry.frontSub) : ''
   const backMain = jp2id ? entry.backShort : entry.front
-  const backReading = jp2id ? '' : entry.reading
-  const jpText = entry.reading || entry.front
+  const backReading = jp2id ? '' : (entry.reading || entry.frontSub)
+  // Sumber kana untuk romaji: kotoba & bunpo menyimpan bacaan di frontSub,
+  // kanji menyimpan di reading. Jangan pakai `front` (bisa kanji → romaji kosong).
+  const jpText = entry.reading || entry.frontSub || entry.front
   const romaji = showRomaji ? kanaToRomaji(jpText) : ''
 
   const doSpeak = (e) => {

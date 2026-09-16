@@ -39,6 +39,10 @@ const KANA = {
   ば: 'ba', び: 'bi', ぶ: 'bu', べ: 'be', ぼ: 'bo',
   ぱ: 'pa', ぴ: 'pi', ぷ: 'pu', ぺ: 'pe', ぽ: 'po',
   ゔ: 'vu',
+  // Kana kecil (muncul berdiri sendiri pada kata serapan, mis. ファイアウォール).
+  ぁ: 'a', ぃ: 'i', ぅ: 'u', ぇ: 'e', ぉ: 'o',
+  ゃ: 'ya', ゅ: 'yu', ょ: 'yo', ゎ: 'wa',
+  ゕ: 'ka', ゖ: 'ke',
 }
 
 // Katakana → hiragana (kode 0x30A1–0x30F6 digeser 0x60).
