@@ -1,0 +1,359 @@
+/* ============================================================
+   Nemonik Kanji — port dari desain mandiri ke tema app.
+   Struktur & peletakan gambar (kartu: gambar KIRI + KANAN) dipertahankan;
+   hanya warna/ukuran/font yang diselaraskan dengan token app (washi/navy/shu/kin).
+   ============================================================ */
+
+.nemo-page {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 4px 0 96px;
+}
+
+/* ── Header ── */
+.nemo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.nemo-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--panel-line);
+  background: var(--panel);
+  color: var(--page-ink);
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.12s;
+}
+.nemo-back:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255,255,255,0.22); }
+.nemo-back:active { transform: translateY(1px); }
+
+.nemo-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-ui);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--page-ink);
+}
+.nemo-brand-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: var(--shu);
+  color: var(--washi);
+}
+
+.nemo-loading,
+.nemo-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 48px 16px;
+  color: var(--page-soft);
+  font-family: var(--font-ui);
+}
+.nemo-error { color: var(--shu); }
+.nemo-spin { animation: nemo-spin 1s linear infinite; }
+@keyframes nemo-spin { to { transform: rotate(360deg); } }
+
+/* ── Dashboard ── */
+.nemo-dashboard { display: flex; flex-direction: column; gap: 14px; }
+
+.nemo-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.nemo-stat-card {
+  background: var(--card-face);
+  color: var(--card-ink);
+  border: 1px solid var(--card-line);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+}
+.nemo-stat-card h3 {
+  margin: 0 0 6px;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--card-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.nemo-stat-num {
+  font-family: var(--font-serif-jp);
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+.nemo-streak .nemo-stat-num { color: var(--shu); }
+
+.nemo-srs-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+.nemo-srs-box {
+  border-radius: 14px;
+  padding: 12px;
+  text-align: center;
+  border: 1px solid var(--card-line);
+  background: var(--card-face);
+  color: var(--card-ink);
+}
+.nemo-srs-box h4 {
+  margin: 0 0 6px;
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--card-soft);
+}
+.nemo-srs-num { font-size: 1.5rem; font-weight: 800; font-family: var(--font-serif-jp); }
+.box-baru .nemo-srs-num { color: var(--ai-600); }
+.box-belajar .nemo-srs-num { color: var(--kin-deep); }
+.box-ulang .nemo-srs-num { color: var(--shu); }
+.box-hafal .nemo-srs-num { color: var(--moss-dark); }
+
+.nemo-actions { display: flex; flex-direction: column; gap: 10px; }
+
+.nemo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 18px;
+  border-radius: 13px;
+  border: 1px solid transparent;
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.12s, filter 0.15s, opacity 0.15s;
+}
+.nemo-btn:hover:not(:disabled) { filter: brightness(1.08); }
+.nemo-btn:active:not(:disabled) { transform: translateY(1px); }
+.nemo-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.nemo-btn.full { width: 100%; }
+.nemo-btn.primary { background: var(--shu); color: var(--washi); }
+.nemo-btn.warning { background: var(--kin); color: #2a2110; }
+.nemo-btn.danger  { background: var(--ai-700); color: var(--page-ink); border-color: var(--panel-line); }
+
+/* ── Study ── */
+.nemo-study { display: flex; flex-direction: column; gap: 14px; }
+.nemo-study-progress {
+  align-self: center;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--page-soft);
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--panel);
+  border: 1px solid var(--panel-line);
+}
+
+.nemo-flashcard {
+  background: var(--card-face);
+  color: var(--card-ink);
+  border: 1px solid var(--card-line);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+}
+
+/* Baris atas: kanji polos (kiri) + ilustrasi mnemonic (kanan), side-by-side.
+   Kedua gambar aslinya persegi (800x800) → tampilkan UTUH (contain), tanpa
+   memotong bagian mana pun (termasuk teks di bawah ilustrasi mnemonic). */
+.nemo-flashcard-top {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--card-line);
+}
+.nemo-img-left,
+.nemo-img-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--card-deep);
+  padding: 10px;
+  min-width: 0; /* cegah grid item melar & memotong isi */
+}
+.nemo-img-left img,
+.nemo-img-right img {
+  display: block;
+  width: 100%;
+  height: auto;        /* tinggi mengikuti aspect ratio asli (tidak dipaksa) */
+  max-width: 100%;
+  object-fit: contain; /* jaring pengaman: gambar utuh, tidak terpotong */
+  border-radius: 10px;
+}
+.nemo-img-missing {
+  color: var(--card-soft);
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* Baris bawah: kartu lengkap (selesai_potong) — FULL WIDTH, tampil apa adanya. */
+.nemo-flashcard-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  background: var(--card-deep);
+  border-top: 1px solid var(--card-line);
+}
+.nemo-flashcard-bottom img {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 12px;
+}
+
+.nemo-rating { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.nemo-rating-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 13px 8px;
+  border-radius: 13px;
+  border: 1px solid transparent;
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.12s, filter 0.15s;
+}
+.nemo-rating-btn:hover { filter: brightness(1.08); }
+.nemo-rating-btn:active { transform: translateY(1px); }
+.nemo-rating-btn.wrong { background: var(--shu); color: var(--washi); }
+.nemo-rating-btn.hard  { background: var(--kin); color: #2a2110; }
+.nemo-rating-btn.easy  { background: var(--moss); color: var(--washi); }
+
+.nemo-empty { text-align: center; color: var(--page-soft); font-family: var(--font-ui); }
+.nemo-done {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 40px 16px;
+  text-align: center;
+  font-family: var(--font-ui);
+  background: var(--card-face);
+  color: var(--card-ink);
+  border-radius: 20px;
+  border: 1px solid var(--card-line);
+}
+.nemo-done-icon { color: var(--moss); }
+.nemo-done h2 { margin: 0; font-family: var(--font-serif-jp); }
+
+/* ── Quiz ── */
+.nemo-quiz {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: var(--card-face);
+  color: var(--card-ink);
+  border: 1px solid var(--card-line);
+  border-radius: 20px;
+  padding: 18px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+}
+.nemo-quiz-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  color: var(--card-soft);
+}
+.nemo-quiz-score { font-weight: 700; color: var(--shu); }
+.nemo-quiz-count { margin-left: auto; font-family: var(--font-mono); }
+.nemo-quiz-close {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border-radius: 9px;
+  border: 1px solid var(--card-line);
+  background: transparent;
+  color: var(--card-ink);
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.nemo-quiz-close:hover { background: var(--card-deep); }
+
+.nemo-quiz-prompt { margin: 4px 0 0; font-family: var(--font-ui); color: var(--card-soft); }
+.nemo-quiz-question {
+  font-family: var(--font-serif-jp);
+  font-size: 2.4rem;
+  font-weight: 800;
+  text-align: center;
+  padding: 10px 0;
+}
+.nemo-quiz-options { display: grid; gap: 10px; }
+.nemo-quiz-option {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--card-line);
+  background: var(--card-deep);
+  color: var(--card-ink);
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.12s, background 0.15s, border-color 0.15s;
+}
+.nemo-quiz-option:hover:not(:disabled) { transform: translateY(-1px); border-color: var(--kin); }
+.nemo-quiz-option:disabled { cursor: default; }
+.nemo-quiz-option.correct { background: var(--moss); color: var(--washi); border-color: var(--moss-dark); }
+.nemo-quiz-option.wrong { background: var(--shu); color: var(--washi); border-color: var(--shu-dark); }
+
+.nemo-quiz-result {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: var(--card-face);
+  color: var(--card-ink);
+  border: 1px solid var(--card-line);
+  border-radius: 20px;
+  padding: 24px;
+  text-align: center;
+}
+.nemo-quiz-result h2 { margin: 0; font-family: var(--font-serif-jp); }
+.nemo-result-stats { display: flex; flex-direction: column; gap: 6px; font-family: var(--font-ui); }
+.nemo-highlight { font-weight: 800; color: var(--shu); font-family: var(--font-mono); }
+.nemo-mistakes { text-align: left; font-family: var(--font-ui); font-size: 0.9rem; }
+.nemo-mistakes h3 { font-size: 0.85rem; color: var(--card-soft); margin: 0 0 8px; }
+.nemo-mistakes ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+
+/* ── Responsive ── */
+@media (max-width: 560px) {
+  .nemo-srs-stats { grid-template-columns: repeat(2, 1fr); }
+  .nemo-img-left, .nemo-img-right { padding: 6px; }
+}
+@media (max-width: 420px) {
+  .nemo-stats { grid-template-columns: 1fr; }
+  .nemo-rating { grid-template-columns: 1fr; }
+}
