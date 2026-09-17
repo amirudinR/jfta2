@@ -33,6 +33,7 @@ import DaftarMateri from './components/DaftarMateri'
 import UjianBaru from './components/UjianBaru'
 import Recall from './components/Recall'
 import Profil from './components/Profil'
+import Nemonik from './components/nemonik/Nemonik'
 import { recordStudy, getHistory, computeStreak } from './lib/history'
 import { addExamRecord } from './lib/exam-history'
 import { recallStats } from './lib/recall-queue'
@@ -238,7 +239,7 @@ export default function App() {
       case 'harian':
         return <HafalanHarian level={level} onGoMateri={() => changeMode('materi')} onGoRecall={() => changeMode('recall')} />
       case 'materi':
-        return <DaftarMateri level={level} onGoHafalan={() => changeMode('harian')} onGoKotobaLevel={() => openKotobaLevel(level)} />
+        return <DaftarMateri level={level} onGoHafalan={() => changeMode('harian')} onGoKotobaLevel={() => openKotobaLevel(level)} onGoNemonik={() => changeMode('nemonik')} />
       case 'kartu':
         return (
           <Kartu
@@ -310,6 +311,10 @@ export default function App() {
             allEntries={allEntriesRaw}
           />
         )
+      case 'nemonik':
+        // Halaman standalone Nemonik Kanji (port dari app mandiri).
+        // Tombol back kembali ke Daftar Materi tempat pintu masuknya.
+        return <Nemonik onBack={() => changeMode('materi')} />
       case 'kotoba-n3':
       case 'kotoba-n2':
       case 'kotoba-n1':

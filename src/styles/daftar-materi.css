@@ -51,6 +51,26 @@
 .dm-open-kotoba:hover { background: var(--moss-dark); }
 .dm-open-kotoba:active { transform: scale(.98); }
 
+/* Pintu masuk Nemonik Kanji (khusus level A2) */
+.dm-open-nemonik {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--shu);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all .18s;
+}
+
+.dm-open-nemonik:hover { background: var(--shu-dark); }
+.dm-open-nemonik:active { transform: scale(.98); }
+
 .dm-title {
   margin: 0;
   font-size: 18px;

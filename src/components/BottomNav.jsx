@@ -4,6 +4,9 @@ import { CalendarCheck, GraduationCap, FlaskConical, History, User } from 'lucid
 const LATIHAN_MODES = [
   'kartu', 'kuis', 'ulangi', 'sprint', 'daftar',
   'referensi', 'kemampuan', 'materi',
+  // Nemonik diakses dari area Latihan; biarkan tab tetap menyala
+  // agar user tidak kehilangan konteks navigasi.
+  'nemonik',
 ]
 
 const TABS = [

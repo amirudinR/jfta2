@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import {
   Search, CheckSquare, Square, ChevronLeft, Filter,
-  ArrowUpDown, X, GraduationCap,
+  ArrowUpDown, X, GraduationCap, Brain,
 } from 'lucide-react'
 import {
   HAFALAN_MODES, getMastered, toggleMastered, countMastered,
@@ -12,7 +12,7 @@ import { DetailModal } from './hafalan/DetailModal'
 
 const PAGE_SIZE = 50
 
-export default function DaftarMateri({ onGoHafalan, onGoKotobaLevel, level = 'a2' }) {
+export default function DaftarMateri({ onGoHafalan, onGoKotobaLevel, onGoNemonik, level = 'a2' }) {
   const activeMode = level
   const [tab, setTab] = useState('kotoba')
   const [query, setQuery] = useState('')
@@ -109,6 +109,13 @@ export default function DaftarMateri({ onGoHafalan, onGoKotobaLevel, level = 'a2
       {onGoKotobaLevel && activeMode !== 'a2' && (
         <button className="dm-open-kotoba" onClick={onGoKotobaLevel}>
           <GraduationCap size={16} /> Latihan Kotoba {modeInfo?.label} (Kartu/Kuis)
+        </button>
+      )}
+
+      {/* Nemonik Kanji: gambar mnemonik untuk kanji A2 — pintu masuk khusus A2. */}
+      {onGoNemonik && activeMode === 'a2' && (
+        <button className="dm-open-nemonik" onClick={onGoNemonik}>
+          <Brain size={16} /> Nemonik Kanji (Belajar via Gambar)
         </button>
       )}
 

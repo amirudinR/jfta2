@@ -28,7 +28,7 @@ export const LATIHAN_TAB_MODES = [
 export const PERMATERI_MODES = ['kartu', 'kuis', 'ulangi', 'sprint', 'daftar', 'referensi']
 
 // Mode yang menyembunyikan LevelStrip di atas konten.
-export const HIDE_LEVEL_STRIP_MODES = ['profil', 'ujian-baru', 'recall', 'kotoba-n3', 'kotoba-n2', 'kotoba-n1']
+export const HIDE_LEVEL_STRIP_MODES = ['profil', 'ujian-baru', 'recall', 'kotoba-n3', 'kotoba-n2', 'kotoba-n1', 'nemonik']
 
 // Mode latihan kartu (Controls + ModeBar aktif).
 export const CONTROL_MODES = ['kartu', 'ulangi', 'kuis', 'sprint']

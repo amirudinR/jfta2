@@ -1,19 +1,20 @@
 import { useEffect, useRef } from 'react'
 import {
   CalendarCheck, GraduationCap, FlaskConical,
-  History, User, X, BarChart3,
+  History, User, X, BarChart3, Brain,
 } from 'lucide-react'
 
 const NAV_ITEMS = [
   { key: 'harian',    label: 'Hafalan Harian', icon: CalendarCheck, desc: 'Target hafalan hari ini' },
   { key: 'kartu',    label: 'Latihan',         icon: GraduationCap, desc: 'Kartu, kuis, sprint' },
+  { key: 'nemonik',  label: 'Nemonik Kanji',   icon: Brain,         desc: 'Belajar kanji via gambar' },
   { key: 'ujian-baru', label: 'Ujian',         icon: FlaskConical,  desc: 'Uji kemampuanmu' },
   { key: 'recall',   label: 'Recall',           icon: History,       desc: 'Ulangi materi lampau' },
   { key: 'kemampuan',label: 'Kemampuan',        icon: BarChart3,     desc: 'Statistik & progres' },
   { key: 'profil',   label: 'Profil',           icon: User,          desc: 'Akun & pengaturan' },
 ]
 
-const LATIHAN_MODES = ['kartu','kuis','ulangi','sprint','daftar','referensi','materi']
+const LATIHAN_MODES = ['kartu','kuis','ulangi','sprint','daftar','referensi','materi','nemonik']
 
 export default function Sidebar({ open, onClose, active, onChange, user, recallDue = 0 }) {
   // Tutup sidebar saat tekan Escape
@@ -44,7 +45,8 @@ export default function Sidebar({ open, onClose, active, onChange, user, recallD
   }
 
   const isActive = (key) => {
-    if (key === 'kartu') return LATIHAN_MODES.includes(active)
+    // Nemonik punya menu sendiri — jangan biarkan tab Latihan ikut aktif.
+    if (key === 'kartu') return LATIHAN_MODES.includes(active) && active !== 'nemonik'
     return active === key
   }
 
