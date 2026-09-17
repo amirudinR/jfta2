@@ -182,8 +182,11 @@ export function newCustomId() {
 }
 
 // Reset semua data harian/riwayat (checked, history, custom, targets, mastery,
-// recall queue, exam history, study history) — dipanggil saat "Reset semua progres".
-// SRS card & preferensi di-reset terpisah oleh resetProgress() di lib/storage.
+// recall queue, exam history, study history, meta sync) — dipanggil saat
+// "Reset semua progres". SRS card & preferensi di-reset terpisah oleh
+// resetProgress() di lib/storage.
+// Catatan: `hh2-*` (termasuk `hh2-sync-meta`) ikut terhapus lewat prefix, jadi
+// fingerprint anti-echo tidak stale dan state bersih ikut ter-push ke cloud.
 export function resetDailyProgress() {
   const removals = []
   for (let i = 0; i < localStorage.length; i++) {
@@ -192,6 +195,7 @@ export function resetDailyProgress() {
     if (k.startsWith(`${STORAGE_PREFIX}-`)) removals.push(k) // hh2-*
     else if (k === 'ankichou-exam-history') removals.push(k)
     else if (k === 'hafalan-jft-a2-history-v1') removals.push(k)
+    else if (k === 'ankichou-level') removals.push(k)
   }
   for (const k of removals) {
     try { localStorage.removeItem(k) } catch {}
@@ -202,17 +206,24 @@ export function resetDailyProgress() {
 // riwayat/heatmap. Karena melengkapi mundur dibatasi MAX_BACKFILL_DAYS, orang
 // tidak bisa "curang" mengisi seluruh tanggal kosong jauh ke belakang.
 export function computeStreak(history) {
-  let streak = 0
-  const d = new Date()
+  const today = todayStr()
+  if (!history[today]?.done) {
+    // Hari ini belum dituntaskan — streak yang masih "hidup" = kemarin dst.
+    // (Tidak menghitung hari ini supaya angka tidak terlihat dobel.)
+    let past = 0
+    for (let i = 1; i <= 365; i++) {
+      if (history[addDays(today, -i)]?.done) past++
+      else break
+    }
+    return past
+  }
+  // Hari ini done → hitung mundur dari hari ini memakai basis tanggal yang sama
+  // (`todayStr`/`addDays`) agar tak beda zona/midnight dengan sumber lain.
+  let streak = 1
   for (let i = 1; i <= 365; i++) {
-    const check = new Date(d)
-    check.setDate(check.getDate() - i)
-    const key = `${check.getFullYear()}-${String(check.getMonth() + 1).padStart(2, '0')}-${String(check.getDate()).padStart(2, '0')}`
-    if (history[key]?.done) streak++
+    if (history[addDays(today, -i)]?.done) streak++
     else break
   }
-  const todayEntry = history[todayStr()]
-  if (todayEntry?.done) streak++
   return streak
 }
 

@@ -1,19 +1,43 @@
 // sync-registry — daftar "store" yang ikut disinkronkan Firestore.
 // Offline-first: localStorage tetap sumber utama; cloud = mirror live.
 //
-// Setiap store = { key, path(uid), merge(local, cloud, meta) }
+// Setiap store = { key, path(uid), merge(local, cloud) }.
 // Doc cloud punya bentuk { data, updated (epoch ms), syncedAt (server) }.
+// `merge(local, cloud)` menerima & mengembalikan wrapper `{ data, updated }`
+// (lihat kontrak di bawah) — hasilnya dibaca live-sync lewat `.data`.
 // Doc progress/main memakai bentuk lamanya (perMaterial/prefs/tombstone/...)
 // dan merge lama (mergeProgress).
 
 import { HAFALAN_MODES } from './hafalan-storage'
 
 // ── Merge helpers ──
-// Last-writer-wins utuh: dokumen dgn `updated` terbaru menang.
+// KONTRAK (dipakai live-sync.js applyCloud):
+//   store.merge(local, cloud) dengan local = { data, updated } & cloud = { data, updated },
+//   dan WAJIB mengembalikan { data, updated } — live-sync membaca hasilnya via `.data`
+//   lalu menulis `data` itu ke localStorage. Jangan kembalikan bentuk mentah store
+//   (mis. { kotoba, kanji }) atau kontraknya rusak dan data bisa tertimpa `undefined`.
+//
+// Helper internal `unwrap`/`wrap` menjaga kontrak ini seragam untuk semua store.
+
+// Terima wrapper { data, updated } atau nilai mentah → { data, updated }.
+function unwrap(v) {
+  if (v && typeof v === 'object' && 'data' in v) {
+    return { data: v.data, updated: v.updated || 0 }
+  }
+  return { data: v, updated: 0 }
+}
+
+function wrap(data, updated) {
+  return { data, updated }
+}
+
+// Last-writer-wins utuh: sisi dengan `updated` terbaru menang.
 function lww(local, cloud) {
   if (!cloud) return local
   if (!local) return cloud
-  return (cloud.updated || 0) > (local.updated || 0) ? cloud : local
+  const l = unwrap(local)
+  const c = unwrap(cloud)
+  return (c.updated || 0) > (l.updated || 0) ? wrap(c.data, c.updated) : wrap(l.data, l.updated)
 }
 
 // checked{date,kotoba,kanji,bunpou}: kalau tanggal sama → gabung per id (aman
@@ -22,16 +46,21 @@ function lww(local, cloud) {
 function mergeChecked(local, cloud) {
   if (!cloud) return local
   if (!local) return cloud
-  if ((local.date || '') !== (cloud.date || '')) return lww(local, cloud)
-  const merge = (a, b) => ({ ...(a || {}), ...(b || {}) })
-  return {
-    ...lww(local, cloud),
-    date: local.date,
-    kotoba: merge(local.kotoba, cloud.kotoba),
-    kanji: merge(local.kanji, cloud.kanji),
-    bunpou: merge(local.bunpou, cloud.bunpou),
-    updated: Math.max(local.updated || 0, cloud.updated || 0),
+  const l = unwrap(local)
+  const c = unwrap(cloud)
+  if ((l.data?.date || '') !== (c.data?.date || '')) {
+    return (c.updated || 0) > (l.updated || 0) ? wrap(c.data, c.updated) : wrap(l.data, l.updated)
   }
+  const merge = (a, b) => ({ ...(a || {}), ...(b || {}) })
+  const updated = Math.max(l.updated || 0, c.updated || 0)
+  const winner = (c.updated || 0) > (l.updated || 0) ? c.data : l.data
+  return wrap({
+    ...(winner || {}),
+    date: l.data?.date,
+    kotoba: merge(l.data?.kotoba, c.data?.kotoba),
+    kanji: merge(l.data?.kanji, c.data?.kanji),
+    bunpou: merge(l.data?.bunpou, c.data?.bunpou),
+  }, updated)
 }
 
 // custom{kotoba[],kanji[],bunpou[]}: gabung per id (item custom punya id
@@ -39,18 +68,20 @@ function mergeChecked(local, cloud) {
 function mergeCustom(local, cloud) {
   if (!cloud) return local
   if (!local) return cloud
+  const l = unwrap(local)
+  const c = unwrap(cloud)
   const byId = (list) => new Map((list || []).map((it) => [it.id, it]))
   const mergeList = (a, b) => {
     const m = byId(a)
     for (const it of b || []) if (!m.has(it.id)) a.push(it)
     return a
   }
-  return {
-    kotoba: mergeList([...(local.kotoba || [])], cloud.kotoba),
-    kanji: mergeList([...(local.kanji || [])], cloud.kanji),
-    bunpou: mergeList([...(local.bunpou || [])], cloud.bunpou),
-    updated: Math.max(local.updated || 0, cloud.updated || 0),
-  }
+  const updated = Math.max(l.updated || 0, c.updated || 0)
+  return wrap({
+    kotoba: mergeList([...(l.data?.kotoba || [])], c.data?.kotoba),
+    kanji: mergeList([...(l.data?.kanji || [])], c.data?.kanji),
+    bunpou: mergeList([...(l.data?.bunpou || [])], c.data?.bunpou),
+  }, updated)
 }
 
 // history / hari `{ 'YYYY-MM-DD': record }`: gabung union semua hari; hari yg
@@ -59,16 +90,14 @@ function mergeCustom(local, cloud) {
 function mergeDays(local, cloud) {
   if (!cloud) return local
   if (!local) return cloud
-  const cloudNewer = (cloud.updated || 0) > (local.updated || 0)
-  const winner = cloudNewer ? cloud : local
-  const loser = cloudNewer ? local : cloud
-  const out = { ...loser }
-  for (const [k, v] of Object.entries(winner)) {
-    if (k === 'updated') continue
-    out[k] = v
-  }
-  out.updated = Math.max(local.updated || 0, cloud.updated || 0)
-  return out
+  const l = unwrap(local)
+  const c = unwrap(cloud)
+  const cloudNewer = (c.updated || 0) > (l.updated || 0)
+  const winner = cloudNewer ? c.data : l.data
+  const loser = cloudNewer ? l.data : c.data
+  const out = { ...(loser || {}) }
+  for (const [k, v] of Object.entries(winner || {})) out[k] = v
+  return wrap(out, Math.max(l.updated || 0, c.updated || 0))
 }
 
 // ── Registry ──
@@ -90,6 +119,11 @@ export const SYNC_STORES = [
   { key: 'ankichou-exam-history', path: (uid) => `users/${uid}/hh/exam-history`, merge: lww },
   { key: 'hafalan-jft-a2-history-v1', path: (uid) => `users/${uid}/hh/study-history`, merge: lww },
   { key: 'ankichou-level', path: (uid) => `users/${uid}/hh/level`, merge: lww },
+  // Nemonik Kanji (SRS terpisah dari SRS utama) — LWW: doc dengan `updated`
+  // terbaru menang (paling sering hanya 1 perangkat yang belajar nemonik).
+  { key: 'hh2-nemonik-srs', path: (uid) => `users/${uid}/hh/nemonik-srs`, merge: lww },
+  { key: 'hh2-nemonik-streak', path: (uid) => `users/${uid}/hh/nemonik-streak`, merge: lww },
+  { key: 'hh2-nemonik-last-login', path: (uid) => `users/${uid}/hh/nemonik-last-login`, merge: lww },
   ...dynamic(
     (m) => `hh2-checked-${m}`,
     (u, mk) => `users/${u}/hh/checked-${mk}`,

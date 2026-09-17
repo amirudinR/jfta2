@@ -77,6 +77,9 @@ function flushDirty() {
 }
 
 function pushStore(store) {
+  // Guard: uid bisa jadi null bila stopLiveSync() jalan di sela debounce
+  // (mis. logout) — jangan push ke path `users/null/...`.
+  if (!running || !uid) return
   const raw = readLocal(store.key)
   if (raw == null) return
   const meta = getMeta()
