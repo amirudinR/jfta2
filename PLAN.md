@@ -43,3 +43,14 @@ data asli dipakai begitu file HTML tersedia.
   dengan id numerik-string per materi, field: `id, front, frontSub, backShort, backFull,
   group, groupLabel` (+ `reading` utk kanji/bunpo).
 - Verifikasi jumlah: 104 / 126 / 1355 / 613 / 81.
+
+---
+
+## Nemonik Kanji (Aug 2026) — lihat AGENT.md §11
+- Port app mandiri `nemonik/` (HTML/CSS/JS) → React. Aset di `public/nemonik/`
+  (data.json 361 kanji + 1.086 webp). Folder lama dihapus.
+- **Kartu 3 gambar:** `kanji_bersih` (kiri) + `kanji_nama` (kanan) side-by-side,
+  lalu `selesai_potong` (kartu lengkap) full-width di bawah. Gambar **utuh** (no crop),
+  teks **tidak** di-generate ulang. Tombol: "Saya Tidak Tahu" / "Saya Tahu".
+- SRS **terpisah** dari SRS utama A2, store `hh2-nemonik-*` (ikut cloud sync & reset).
+- Pintu masuk: tombol di `DaftarMateri` (hanya level A2) + menu `Sidebar`.

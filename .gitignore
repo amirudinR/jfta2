@@ -5,6 +5,9 @@ dist/
 .vite/
 mcp_audit.db
 
+# Tooling OCR lokal (tesseract/pdf-parse) — bukan runtime app
+nemonik/node_modules/
+
 # Tooling lokal (Serena / opencode / arsip konteks)
 .serena/
 .context-archive/
