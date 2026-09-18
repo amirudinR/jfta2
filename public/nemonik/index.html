@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nemonik Kanji Flashcards</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1 id="home-logo" style="cursor:pointer;">Nemonik Kanji</h1>
+            <div class="header-actions">
+                <button id="theme-toggle" class="icon-btn" aria-label="Toggle Dark Mode">🌙</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- DASHBOARD SCREEN -->
+    <main id="dashboard-screen" class="screen">
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <h3>Total Kanji</h3>
+                <div id="stat-total" class="stat-num">361</div>
+            </div>
+            <div class="stat-card streak-card">
+                <h3>🔥 Streak Belajar</h3>
+                <div id="stat-streak" class="stat-num">0 Hari</div>
+            </div>
+        </div>
+
+        <div class="srs-stats">
+            <div class="srs-box box-baru">
+                <h4>Baru</h4>
+                <div id="stat-baru" class="srs-num">361</div>
+            </div>
+            <div class="srs-box box-belajar">
+                <h4>Belajar</h4>
+                <div id="stat-belajar" class="srs-num">0</div>
+            </div>
+            <div class="srs-box box-ulang">
+                <h4>Perlu Diulang</h4>
+                <div id="stat-ulang" class="srs-num">0</div>
+            </div>
+            <div class="srs-box box-hafal">
+                <h4>Hafal</h4>
+                <div id="stat-hafal" class="srs-num">0</div>
+            </div>
+        </div>
+
+        <div class="dashboard-actions">
+            <button id="btn-start-study" class="primary-btn">📖 Lanjutkan Belajar</button>
+            <button id="btn-start-review" class="warning-btn">🔄 Review Kartu (<span id="review-count">0</span>)</button>
+            <button id="btn-start-quiz" class="danger-btn">🎮 Mode Kuis</button>
+        </div>
+    </main>
+
+    <!-- STUDY SCREEN -->
+    <main id="study-screen" class="screen hidden">
+        <div class="study-header">
+            <button id="btn-back-study" class="back-btn">&larr; Kembali</button>
+            <div class="study-progress">
+                <span id="study-progress-text"></span>
+            </div>
+        </div>
+
+        <div id="card-container" class="card-container">
+            <!-- Cards will be generated here -->
+        </div>
+        
+        <div class="study-controls">
+            <!-- Active Recall mode -->
+            <button id="btn-show-answer" class="primary-btn full-width">👀 Tampilkan Jawaban</button>
+            
+            <!-- SRS Rating mode (hidden initially) -->
+            <div id="srs-rating-container" class="srs-rating hidden">
+                <button class="rating-btn btn-wrong" data-rating="1">❌ Lupa</button>
+                <button class="rating-btn btn-hard" data-rating="2">🤔 Sulit</button>
+                <button class="rating-btn btn-easy" data-rating="3">✅ Tahu / Mudah</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- QUIZ MODAL -->
+    <div id="quiz-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2 id="quiz-title">Mode Kuis</h2>
+            <div id="quiz-question-container">
+                <p id="quiz-prompt" class="quiz-prompt"></p>
+                <div id="quiz-question" class="quiz-question"></div>
+            </div>
+            <div id="quiz-options" class="quiz-options"></div>
+            <div class="quiz-footer">
+                <span id="quiz-score">Skor: 0</span>
+                <button id="close-quiz-btn" class="close-btn">Akhiri Kuis</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- QUIZ RESULT MODAL -->
+    <div id="quiz-result-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Kuis Selesai!</h2>
+            <div class="result-stats">
+                <p>Skor Akhir: <span id="final-score" class="highlight">0</span></p>
+                <p>Akurasi: <span id="final-accuracy" class="highlight">0%</span></p>
+            </div>
+            
+            <div id="mistakes-container" class="mistakes-container hidden">
+                <h3>Sering Salah:</h3>
+                <ul id="mistakes-list"></ul>
+            </div>
+            
+            <button id="btn-quiz-done" class="primary-btn full-width mt-1">Tutup</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

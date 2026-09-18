@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Laporan OCR Mismatch</title>
+  <style>
+    body { font-family: sans-serif; background: #f4f4f5; margin: 20px; }
+    h1 { color: #1f2937; }
+    table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-top: 20px; }
+    th, td { border: 1px solid #e4e4e7; padding: 10px; text-align: center; vertical-align: middle; }
+    th { background: #3f3f46; color: white; position: sticky; top: 0; }
+    img { max-width: 150px; max-height: 150px; border: 1px solid #ccc; border-radius: 8px; }
+    .kanji-text { font-size: 2.5rem; font-weight: bold; }
+    .highlight { color: #ef4444; font-weight: bold; }
+    .keyword { background: #fee2e2; color: #b91c1c; padding: 4px 8px; border-radius: 4px; font-family: monospace; }
+  </style>
+</head>
+<body>
+  <h1>🚨 Laporan OCR Mismatch (88 Kanji)</h1>
+  <p>Berikut adalah gambar-gambar yang teks di dalamnya <b>TIDAK COCOK</b> dengan Kanji yang seharusnya. 
+     Gunakan tabel ini untuk melihat gambar yang salah dan gambar target yang disarankan oleh OCR.</p>
+  
+  <table>
+    <thead>
+      <tr>
+        <th>No. Asal</th>
+        <th>Kanji Asal</th>
+        <th>Gambar Saat Ini (Salah)</th>
+        <th>Teks Terdeteksi (OCR)</th>
+        <th>No. Target (Saran)</th>
+        <th>Kanji Target</th>
+        <th>Gambar Target (Untuk Swap)</th>
+      </tr>
+    </thead>
+    <tbody id="report-body"></tbody>
+  </table>
+
+  <script>
+    const mismatches = [
+  {
+    "no": 1,
+    "kanji": "字",
+    "ocrKeyword": "イン",
+    "targetNo": 60,
+    "targetKanji": "飲"
+  },
+  {
+    "no": 2,
+    "kanji": "漢",
+    "ocrKeyword": "セン",
+    "targetNo": 13,
+    "targetKanji": "浅"
+  },
+  {
+    "no": 8,
+    "kanji": "葉",
+    "ocrKeyword": "あき",
+    "targetNo": 7,
+    "targetKanji": "秋"
+  },
+  {
+    "no": 12,
+    "kanji": "朝",
+    "ocrKeyword": "あざ",
+    "targetNo": 1,
+    "targetKanji": "字"
+  },
+  {
+    "no": 17,
+    "kanji": "味",
+    "ocrKeyword": "ソン",
+    "targetNo": 339,
+    "targetKanji": "村"
+  },
+  {
+    "no": 18,
+    "kanji": "義",
+    "ocrKeyword": "あし",
+    "targetNo": 16,
+    "targetKanji": "足"
+  },
+  {
+    "no": 19,
+    "kanji": "満",
+    "ocrKeyword": "さる",
+    "targetNo": 176,
+    "targetKanji": "去"
+  },
+  {
+    "no": 20,
+    "kanji": "利",
+    "ocrKeyword": "あし",
+    "targetNo": 16,
+    "targetKanji": "足"
+  },
+  {
+    "no": 24,
+    "kanji": "熱",
+    "ocrKeyword": "あつい",
+    "targetNo": 25,
+    "targetKanji": "暑"
+  },
+  {
+    "no": 26,
+    "kanji": "集",
+    "ocrKeyword": "まちあわせ",
+    "targetNo": 334,
+    "targetKanji": "待"
+  },
+  {
+    "no": 27,
+    "kanji": "後",
+    "ocrKeyword": "きき",
+    "targetNo": 162,
+    "targetKanji": "機"
+  },
+  {
+    "no": 33,
+    "kanji": "洗",
+    "ocrKeyword": "あらい",
+    "targetNo": 317,
+    "targetKanji": "井"
+  },
+  {
+    "no": 34,
+    "kanji": "歩",
+    "ocrKeyword": "ヘン",
+    "targetNo": 131,
+    "targetKanji": "返"
+  },
+  {
+    "no": 40,
+    "kanji": "意",
+    "ocrKeyword": "いう",
+    "targetNo": 35,
+    "targetKanji": "言"
+  },
+  {
+    "no": 47,
+    "kanji": "一",
+    "ocrKeyword": "さき",
+    "targetNo": 204,
+    "targetKanji": "埼"
+  },
+  {
+    "no": 48,
+    "kanji": "中",
+    "ocrKeyword": "きき",
+    "targetNo": 162,
+    "targetKanji": "機"
+  },
+  {
+    "no": 59,
+    "kanji": "祝",
+    "ocrKeyword": "いま",
+    "targetNo": 54,
+    "targetKanji": "今"
+  },
+  {
+    "no": 60,
+    "kanji": "飲",
+    "ocrKeyword": "のる",
+    "targetNo": 301,
+    "targetKanji": "乗"
+  },
+  {
+    "no": 61,
+    "kanji": "食",
+    "ocrKeyword": "ちゅうもん",
+    "targetNo": 201,
+    "targetKanji": "注"
+  },
+  {
+    "no": 73,
+    "kanji": "館",
+    "ocrKeyword": "がか",
+    "targetNo": 36,
+    "targetKanji": "家"
+  },
+  {
+    "no": 74,
+    "kanji": "語",
+    "ocrKeyword": "ラン",
+    "targetNo": 268,
+    "targetKanji": "卵"
+  },
+  {
+    "no": 79,
+    "kanji": "円",
+    "ocrKeyword": "かた",
+    "targetNo": 139,
+    "targetKanji": "方"
+  },
+  {
+    "no": 83,
+    "kanji": "雪",
+    "ocrKeyword": "あめ",
+    "targetNo": 31,
+    "targetKanji": "雨"
+  },
+  {
+    "no": 84,
+    "kanji": "喜",
+    "ocrKeyword": "シン",
+    "targetNo": 23,
+    "targetKanji": "新"
+  },
+  {
+    "no": 86,
+    "kanji": "金",
+    "ocrKeyword": "とおか",
+    "targetNo": 280,
+    "targetKanji": "十"
+  },
+  {
+    "no": 89,
+    "kanji": "起",
+    "ocrKeyword": "おき",
+    "targetNo": 87,
+    "targetKanji": "沖"
+  },
+  {
+    "no": 93,
+    "kanji": "子",
+    "ocrKeyword": "さん",
+    "targetNo": 230,
+    "targetKanji": "三"
+  },
+  {
+    "no": 97,
+    "kanji": "仕",
+    "ocrKeyword": "テン",
+    "targetNo": 69,
+    "targetKanji": "転"
+  },
+  {
+    "no": 106,
+    "kanji": "男",
+    "ocrKeyword": "いぶ",
+    "targetNo": 155,
+    "targetKanji": "武"
+  },
+  {
+    "no": 107,
+    "kanji": "同",
+    "ocrKeyword": "いじ",
+    "targetNo": 151,
+    "targetKanji": "地"
+  },
+  {
+    "no": 110,
+    "kanji": "祭",
+    "ocrKeyword": "おや",
+    "targetNo": 115,
+    "targetKanji": "親"
+  },
+  {
+    "no": 111,
+    "kanji": "店",
+    "ocrKeyword": "いしい",
+    "targetNo": 317,
+    "targetKanji": "井"
+  },
+  {
+    "no": 113,
+    "kanji": "思",
+    "ocrKeyword": "おもい",
+    "targetNo": 112,
+    "targetKanji": "重"
+  },
+  {
+    "no": 117,
+    "kanji": "終",
+    "ocrKeyword": "アン",
+    "targetNo": 344,
+    "targetKanji": "安"
+  },
+  {
+    "no": 121,
+    "kanji": "回",
+    "ocrKeyword": "かい",
+    "targetNo": 129,
+    "targetKanji": "買"
+  },
+  {
+    "no": 125,
+    "kanji": "外",
+    "ocrKeyword": "さいたま",
+    "targetNo": 204,
+    "targetKanji": "埼"
+  },
+  {
+    "no": 134,
+    "kanji": "学",
+    "ocrKeyword": "かいぎしつ",
+    "targetNo": 124,
+    "targetKanji": "室"
+  },
+  {
+    "no": 141,
+    "kanji": "必",
+    "ocrKeyword": "かな",
+    "targetNo": 192,
+    "targetKanji": "名"
+  },
+  {
+    "no": 144,
+    "kanji": "空",
+    "ocrKeyword": "あに",
+    "targetNo": 28,
+    "targetKanji": "兄"
+  },
+  {
+    "no": 146,
+    "kanji": "軽",
+    "ocrKeyword": "きき",
+    "targetNo": 162,
+    "targetKanji": "機"
+  },
+  {
+    "no": 161,
+    "kanji": "気",
+    "ocrKeyword": "三人",
+    "targetNo": 230,
+    "targetKanji": "三"
+  },
+  {
+    "no": 163,
+    "kanji": "祇",
+    "ocrKeyword": "あう",
+    "targetNo": 3,
+    "targetKanji": "会"
+  },
+  {
+    "no": 164,
+    "kanji": "園",
+    "ocrKeyword": "さき",
+    "targetNo": 204,
+    "targetKanji": "埼"
+  },
+  {
+    "no": 166,
+    "kanji": "能",
+    "ocrKeyword": "ぶし",
+    "targetNo": 155,
+    "targetKanji": "武"
+  },
+  {
+    "no": 169,
+    "kanji": "決",
+    "ocrKeyword": "うき",
+    "targetNo": 31,
+    "targetKanji": "雨"
+  },
+  {
+    "no": 172,
+    "kanji": "車",
+    "ocrKeyword": "ゆうし",
+    "targetNo": 356,
+    "targetKanji": "史"
+  },
+  {
+    "no": 174,
+    "kanji": "京",
+    "ocrKeyword": "ことば",
+    "targetNo": 8,
+    "targetKanji": "葉"
+  },
+  {
+    "no": 177,
+    "kanji": "閣",
+    "ocrKeyword": "きき",
+    "targetNo": 162,
+    "targetKanji": "機"
+  },
+  {
+    "no": 178,
+    "kanji": "禁",
+    "ocrKeyword": "にがい",
+    "targetNo": 293,
+    "targetKanji": "苦"
+  },
+  {
+    "no": 179,
+    "kanji": "止",
+    "ocrKeyword": "シン",
+    "targetNo": 23,
+    "targetKanji": "新"
+  },
+  {
+    "no": 182,
+    "kanji": "的",
+    "ocrKeyword": "けいかく",
+    "targetNo": 71,
+    "targetKanji": "画"
+  },
+  {
+    "no": 187,
+    "kanji": "式",
+    "ocrKeyword": "きき",
+    "targetNo": 162,
+    "targetKanji": "機"
+  },
+  {
+    "no": 194,
+    "kanji": "格",
+    "ocrKeyword": "かく",
+    "targetNo": 133,
+    "targetKanji": "書"
+  },
+  {
+    "no": 195,
+    "kanji": "高",
+    "ocrKeyword": "さき",
+    "targetNo": 204,
+    "targetKanji": "埼"
+  },
+  {
+    "no": 200,
+    "kanji": "文",
+    "ocrKeyword": "まる",
+    "targetNo": 79,
+    "targetKanji": "円"
+  },
+  {
+    "no": 203,
+    "kanji": "玉",
+    "ocrKeyword": "ツウ",
+    "targetNo": 281,
+    "targetKanji": "通"
+  },
+  {
+    "no": 205,
+    "kanji": "市",
+    "ocrKeyword": "さいたま",
+    "targetNo": 204,
+    "targetKanji": "埼"
+  },
+  {
+    "no": 210,
+    "kanji": "昨",
+    "ocrKeyword": "マン",
+    "targetNo": 19,
+    "targetKanji": "満"
+  },
+  {
+    "no": 214,
+    "kanji": "参",
+    "ocrKeyword": "いしい",
+    "targetNo": 317,
+    "targetKanji": "井"
+  },
+  {
+    "no": 233,
+    "kanji": "山",
+    "ocrKeyword": "いし",
+    "targetNo": 43,
+    "targetKanji": "石"
+  },
+  {
+    "no": 242,
+    "kanji": "消",
+    "ocrKeyword": "さか",
+    "targetNo": 82,
+    "targetKanji": "阪"
+  },
+  {
+    "no": 246,
+    "kanji": "品",
+    "ocrKeyword": "せいひん",
+    "targetNo": 260,
+    "targetKanji": "製"
+  },
+  {
+    "no": 254,
+    "kanji": "紀",
+    "ocrKeyword": "折半",
+    "targetNo": 308,
+    "targetKanji": "半"
+  },
+  {
+    "no": 258,
+    "kanji": "成",
+    "ocrKeyword": "リョ",
+    "targetNo": 355,
+    "targetKanji": "旅"
+  },
+  {
+    "no": 259,
+    "kanji": "長",
+    "ocrKeyword": "ラン",
+    "targetNo": 268,
+    "targetKanji": "卵"
+  },
+  {
+    "no": 261,
+    "kanji": "界",
+    "ocrKeyword": "新品",
+    "targetNo": 23,
+    "targetKanji": "新"
+  },
+  {
+    "no": 265,
+    "kanji": "料",
+    "ocrKeyword": "でる",
+    "targetNo": 114,
+    "targetKanji": "出"
+  },
+  {
+    "no": 266,
+    "kanji": "業",
+    "ocrKeyword": "さき",
+    "targetNo": 204,
+    "targetKanji": "埼"
+  },
+  {
+    "no": 272,
+    "kanji": "調",
+    "ocrKeyword": "ちょうし",
+    "targetNo": 29,
+    "targetKanji": "姉"
+  },
+  {
+    "no": 276,
+    "kanji": "点",
+    "ocrKeyword": "ごてん",
+    "targetNo": 197,
+    "targetKanji": "御"
+  },
+  {
+    "no": 279,
+    "kanji": "道",
+    "ocrKeyword": "とお",
+    "targetNo": 280,
+    "targetKanji": "十"
+  },
+  {
+    "no": 286,
+    "kanji": "別",
+    "ocrKeyword": "デン",
+    "targetNo": 154,
+    "targetKanji": "田"
+  },
+  {
+    "no": 291,
+    "kanji": "野",
+    "ocrKeyword": "いし",
+    "targetNo": 43,
+    "targetKanji": "石"
+  },
+  {
+    "no": 292,
+    "kanji": "菜",
+    "ocrKeyword": "さい",
+    "targetNo": 204,
+    "targetKanji": "埼"
+  },
+  {
+    "no": 296,
+    "kanji": "城",
+    "ocrKeyword": "にじ",
+    "targetNo": 297,
+    "targetKanji": "二"
+  },
+  {
+    "no": 298,
+    "kanji": "寝",
+    "ocrKeyword": "とう",
+    "targetNo": 342,
+    "targetKanji": "問"
+  },
+  {
+    "no": 300,
+    "kanji": "末",
+    "ocrKeyword": "あき",
+    "targetNo": 7,
+    "targetKanji": "秋"
+  },
+  {
+    "no": 322,
+    "kanji": "便",
+    "ocrKeyword": "うりょう",
+    "targetNo": 31,
+    "targetKanji": "雨"
+  },
+  {
+    "no": 325,
+    "kanji": "化",
+    "ocrKeyword": "いう",
+    "targetNo": 35,
+    "targetKanji": "言"
+  },
+  {
+    "no": 326,
+    "kanji": "勉",
+    "ocrKeyword": "さきょう",
+    "targetNo": 174,
+    "targetKanji": "京"
+  },
+  {
+    "no": 332,
+    "kanji": "誠",
+    "ocrKeyword": "夫人",
+    "targetNo": 101,
+    "targetKanji": "夫"
+  },
+  {
+    "no": 334,
+    "kanji": "待",
+    "ocrKeyword": "しゃしん",
+    "targetNo": 234,
+    "targetKanji": "写"
+  },
+  {
+    "no": 343,
+    "kanji": "題",
+    "ocrKeyword": "ない",
+    "targetNo": 340,
+    "targetKanji": "無"
+  },
+  {
+    "no": 347,
+    "kanji": "洋",
+    "ocrKeyword": "からて",
+    "targetNo": 136,
+    "targetKanji": "手"
+  },
+  {
+    "no": 352,
+    "kanji": "夜",
+    "ocrKeyword": "あさ",
+    "targetNo": 12,
+    "targetKanji": "朝"
+  },
+  {
+    "no": 353,
+    "kanji": "留",
+    "ocrKeyword": "ヘン",
+    "targetNo": 131,
+    "targetKanji": "返"
+  },
+  {
+    "no": 355,
+    "kanji": "旅",
+    "ocrKeyword": "シン",
+    "targetNo": 23,
+    "targetKanji": "新"
+  },
+  {
+    "no": 360,
+    "kanji": "私",
+    "ocrKeyword": "じこしょうかい",
+    "targetNo": 223,
+    "targetKanji": "紹"
+  }
+];
+    
+    fetch('./data.json')
+      .then(res => res.json())
+      .then(data => {
+        const tbody = document.getElementById('report-body');
+        
+        mismatches.forEach(m => {
+          const asal = data.find(d => d.no === m.no);
+          const target = data.find(d => d.no === m.targetNo);
+          
+          const imgAsal = asal && asal.img_kanji_nama ? `<img src="./${asal.img_kanji_nama}" loading="lazy">` : 'Tidak Ada';
+          const imgTarget = target && target.img_kanji_nama ? `<img src="./${target.img_kanji_nama}" loading="lazy">` : 'Tidak Ada';
+          
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${m.no}</td>
+            <td class="kanji-text">${m.kanji}</td>
+            <td>${imgAsal}<br><small>${asal ? asal.img_kanji_nama.split('/').pop() : ''}</small></td>
+            <td><span class="keyword">${m.ocrKeyword}</span></td>
+            <td>${m.targetNo}</td>
+            <td class="kanji-text">${m.targetKanji}</td>
+            <td>${imgTarget}<br><small>${target ? target.img_kanji_nama.split('/').pop() : ''}</small></td>
+          `;
+          tbody.appendChild(tr);
+        });
+      });
+  </script>
+</body>
+</html>

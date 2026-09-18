@@ -1,0 +1,506 @@
+[
+  {
+    "no": 5,
+    "kanji": "赤",
+    "issue": "Field kosong (null)",
+    "reason": "File ada di backup (D:/vibekanban/kanji nama)",
+    "solution": "Restore from backup: 005_赤_あかい.jpeg"
+  },
+  {
+    "no": 22,
+    "kanji": "頭",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 27,
+    "kanji": "後",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 28,
+    "kanji": "兄",
+    "issue": "Field kosong (null)",
+    "reason": "File ada di backup (D:/vibekanban/kanji nama)",
+    "solution": "Restore from backup: 028_兄_あに.jpeg"
+  },
+  {
+    "no": 32,
+    "kanji": "人",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 48,
+    "kanji": "中",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 53,
+    "kanji": "五",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 54,
+    "kanji": "今",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 56,
+    "kanji": "口",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 62,
+    "kanji": "付",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 84,
+    "kanji": "喜",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 95,
+    "kanji": "教",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 97,
+    "kanji": "仕",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 98,
+    "kanji": "月",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 108,
+    "kanji": "願",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 114,
+    "kanji": "出",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 122,
+    "kanji": "階",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 125,
+    "kanji": "外",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 128,
+    "kanji": "場",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 141,
+    "kanji": "必",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 142,
+    "kanji": "紙",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 149,
+    "kanji": "光",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 152,
+    "kanji": "韓",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 157,
+    "kanji": "天",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 164,
+    "kanji": "園",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 166,
+    "kanji": "能",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 182,
+    "kanji": "的",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 189,
+    "kanji": "健",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 197,
+    "kanji": "御",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 202,
+    "kanji": "週",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 204,
+    "kanji": "埼",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 207,
+    "kanji": "馬",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 209,
+    "kanji": "龍",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 210,
+    "kanji": "昨",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 212,
+    "kanji": "下",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 215,
+    "kanji": "加",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 220,
+    "kanji": "間",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 223,
+    "kanji": "紹",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 228,
+    "kanji": "然",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 230,
+    "kanji": "三",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 236,
+    "kanji": "張",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 238,
+    "kanji": "省",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 239,
+    "kanji": "小",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 240,
+    "kanji": "休",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 250,
+    "kanji": "水",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 251,
+    "kanji": "好",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 252,
+    "kanji": "少",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 253,
+    "kanji": "住",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 254,
+    "kanji": "紀",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 260,
+    "kanji": "製",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 262,
+    "kanji": "先",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 263,
+    "kanji": "全",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 264,
+    "kanji": "部",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 272,
+    "kanji": "調",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 280,
+    "kanji": "十",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 284,
+    "kanji": "徴",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 286,
+    "kanji": "別",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 293,
+    "kanji": "苦",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 296,
+    "kanji": "城",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 298,
+    "kanji": "寝",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 299,
+    "kanji": "始",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 302,
+    "kanji": "博",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 311,
+    "kanji": "要",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 329,
+    "kanji": "北",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 331,
+    "kanji": "毎",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 332,
+    "kanji": "誠",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 338,
+    "kanji": "六",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 340,
+    "kanji": "無",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 353,
+    "kanji": "留",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 354,
+    "kanji": "両",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 356,
+    "kanji": "史",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  },
+  {
+    "no": 357,
+    "kanji": "歴",
+    "issue": "Field kosong (null)",
+    "reason": "File tidak ditemukan di backup sama sekali",
+    "solution": "Biarkan null (sah by design/tidak ada gambar)"
+  }
+]

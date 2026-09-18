@@ -42,9 +42,9 @@ export default function Nemonik({ onBack }) {
   )
 
   // Mulai sesi belajar: semua status 'baru'/'belajar' (fallback: semua kartu).
-  const startStudy = useCallback((filter) => {
+  const startStudy = useCallback((filterFn) => {
     if (!data) return
-    let q = data.filter((k) => filter(srs[String(k.no)]))
+    let q = data.filter((k) => filterFn(srs[String(k.no)]))
     if (q.length === 0) q = data
     setQueue(q)
     setPhase('study')
@@ -54,6 +54,12 @@ export default function Nemonik({ onBack }) {
     () => startStudy((s) => !s || s.status === 'baru' || s.status === 'belajar'),
     [startStudy],
   )
+
+  const startBrowseAll = useCallback(() => {
+    if (!data) return
+    setQueue(data)
+    setPhase('study')
+  }, [data])
 
   const startReview = useCallback(() => {
     if (!data) return
@@ -117,6 +123,7 @@ export default function Nemonik({ onBack }) {
           stats={stats}
           streak={streak}
           onLearn={startLearn}
+          onBrowseAll={startBrowseAll}
           onReview={startReview}
           onQuiz={() => setPhase('quiz')}
         />

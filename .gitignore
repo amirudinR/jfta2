@@ -12,3 +12,9 @@ nemonik/node_modules/
 .serena/
 .context-archive/
 opencode.json
+
+# Large unused files and reports
+nggak_kepakai/
+**/*nggak_kepakai*
+*.pdf
+jpn.traineddata

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Audit Visual Nemonik</title>
+  <style>
+    body { font-family: sans-serif; background: #f4f4f5; margin: 20px; }
+    table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    th, td { border: 1px solid #e4e4e7; padding: 10px; text-align: center; }
+    th { background: #3f3f46; color: white; position: sticky; top: 0; }
+    img { max-width: 120px; max-height: 120px; border: 1px solid #ccc; border-radius: 8px; }
+    .kanji-text { font-size: 3rem; font-weight: bold; }
+    .missing { color: #ef4444; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>Dashboard Audit Visual Mnemonic (361 Kanji)</h1>
+  <p>Scroll ke bawah untuk membandingkan secara visual apakah teks Kanji sesuai dengan gambar-gambarnya.</p>
+  <table id="audit-table">
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>Kanji (Teks)</th>
+        <th>Kanji Bersih</th>
+        <th>Mnemonic (Kanji Nama)</th>
+        <th>Selesai Potong</th>
+      </tr>
+    </thead>
+    <tbody id="audit-body"></tbody>
+  </table>
+
+  <script>
+    fetch('./data.json')
+      .then(res => res.json())
+      .then(data => {
+        const tbody = document.getElementById('audit-body');
+        data.forEach(d => {
+          const tr = document.createElement('tr');
+          
+          const imgBersih = d.img_kanji_bersih ? `<img src="./${d.img_kanji_bersih}" alt="bersih" loading="lazy">` : `<span class="missing">NULL</span>`;
+          const imgNama = d.img_kanji_nama ? `<img src="./${d.img_kanji_nama}" alt="nama" loading="lazy">` : `<span class="missing">NULL (Cacat Sumber)</span>`;
+          const imgSelesai = d.img_selesai_potong ? `<img src="./${d.img_selesai_potong}" alt="selesai" loading="lazy">` : `<span class="missing">NULL</span>`;
+
+          tr.innerHTML = `
+            <td>${d.no}</td>
+            <td class="kanji-text">${d.kanji}</td>
+            <td>${imgBersih}</td>
+            <td>${imgNama}</td>
+            <td>${imgSelesai}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      });
+  </script>
+</body>
+</html>

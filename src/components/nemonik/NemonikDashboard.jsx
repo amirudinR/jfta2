@@ -1,7 +1,7 @@
-import { BookOpen, RotateCcw, Gamepad2 } from 'lucide-react'
+import { BookOpen, RotateCcw, Gamepad2, List } from 'lucide-react'
 
 // Dashboard Nemonik — ringkasan progres + pintu masuk 3 mode.
-export default function NemonikDashboard({ stats, streak, onLearn, onReview, onQuiz }) {
+export default function NemonikDashboard({ stats, streak, onLearn, onReview, onQuiz, onBrowseAll }) {
   if (!stats) return null
   const { total, baru, belajar, hafal, ulang, reviewCount } = stats
 
@@ -40,6 +40,9 @@ export default function NemonikDashboard({ stats, streak, onLearn, onReview, onQ
       <div className="nemo-actions">
         <button className="nemo-btn primary" onClick={onLearn}>
           <BookOpen size={16} /> Lanjutkan Belajar
+        </button>
+        <button className="nemo-btn primary" onClick={onBrowseAll} style={{ backgroundColor: '#6366f1' }}>
+          <List size={16} /> Jelajahi Semua ({total})
         </button>
         <button className="nemo-btn warning" onClick={onReview} disabled={reviewCount === 0}>
           <RotateCcw size={16} /> Review Kartu ({reviewCount})
