@@ -2,21 +2,49 @@
    Sidebar — hamburger menu, desktop-only slide-in
    ============================================================ */
 
-/* Backdrop */
+/* Backdrop — gelap + blur area di belakang (frosted glass ala iOS).
+   Tidak pakai `display:none` saat tertutup agar transisi opacity+blur halus;
+   ganti dengan opacity + visibility. */
 .sidebar-backdrop {
-  display: none;
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: rgba(0, 0, 0, 0);
-  transition: background 0.3s var(--ios-ease, cubic-bezier(0.32, 0.72, 0, 1));
+  background: rgba(0, 0, 0, 0.55);
+  -webkit-backdrop-filter: blur(0px) saturate(100%);
+  backdrop-filter: blur(0px) saturate(100%);
+  opacity: 0;
+  visibility: hidden;
   pointer-events: none;
+  transition:
+    opacity 0.34s var(--ios-ease, cubic-bezier(0.32, 0.72, 0, 1)),
+    backdrop-filter 0.34s var(--ios-ease, cubic-bezier(0.32, 0.72, 0, 1)),
+    -webkit-backdrop-filter 0.34s var(--ios-ease, cubic-bezier(0.32, 0.72, 0, 1)),
+    visibility 0s linear 0.34s;
 }
 
 .sidebar-backdrop.open {
-  display: block;
-  background: rgba(0, 0, 0, 0.55);
+  opacity: 1;
+  visibility: visible;
   pointer-events: auto;
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  backdrop-filter: blur(14px) saturate(180%);
+  transition:
+    opacity 0.34s var(--ios-ease, cubic-bezier(0.32, 0.72, 0, 1)),
+    backdrop-filter 0.34s var(--ios-ease, cubic-bezier(0.32, 0.72, 0, 1)),
+    -webkit-backdrop-filter 0.34s var(--ios-ease, cubic-bezier(0.32, 0.72, 0, 1)),
+    visibility 0s linear 0s;
+}
+
+/* Hormati preferensi user: tanpa blur & tanpa transisi bila reduced-motion. */
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-backdrop,
+  .sidebar-backdrop.open {
+    transition: none;
+  }
+  .sidebar-backdrop.open {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
 }
 
 /* Panel */

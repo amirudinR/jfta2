@@ -6,6 +6,7 @@ import {
   todayStr, addDays, diffDays, getTargets, setTargets, getHistory, historyDates,
   getChecked, setCheckedStorage, getCheckedForDate, setCheckedForDate,
   getCustom, setCustomStorage, lsGet, lsSet,
+  getAudioRows, setAudioRows,
   flushToHistory, computeStreak, newCustomId,
 } from '../lib/hafalan-storage'
 import { buildItems, appendCustom, dailySliceForDate } from '../lib/hafalan-items'
@@ -20,6 +21,12 @@ export function useHafalan({ level = 'a2' }) {
   const [custom, setCustom] = useState(() => getCustom(level))
   const [showSettings, setShowSettings] = useState(false)
   const [showForm, setShowForm] = useState(null)
+  // Toggle tampilkan tombol audio di baris daftar (preferensi per-device).
+  const [audioRows, setAudioRowsState] = useState(() => getAudioRows())
+  const setAudioRowsToggle = (on) => {
+    setAudioRowsState(!!on)
+    setAudioRows(!!on)
+  }
   const [showHeatmap, setShowHeatmap] = useState(false)
   const [detailItem, setDetailItem] = useState(null)
   const [showExam, setShowExam] = useState(false)
@@ -256,6 +263,7 @@ export function useHafalan({ level = 'a2' }) {
     maxBackfillDays: MAX_BACKFILL_DAYS, maxForwardDays: MAX_FORWARD_DAYS,
     showSettings, setShowSettings, showForm, setShowForm,
     showHeatmap, setShowHeatmap, detailItem, setDetailItem,
+    audioRows, setAudioRows: setAudioRowsToggle,
     showExam, setShowExam, confirmDeleteKey, confirmBulk,
     kotobaCheckedCount, kanjiCheckedCount, bunpouCheckedCount,
     kotobaDone, kanjiDone, bunpouDone, allDone,

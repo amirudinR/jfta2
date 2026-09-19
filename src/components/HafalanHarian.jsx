@@ -1,9 +1,10 @@
 import {
   CheckSquare, Square, Plus, ChevronDown, ChevronUp,
   Trash2, Settings, Flame, BookText, ListChecks, History,
-  CheckCheck, Eraser,
+  CheckCheck, Eraser, Volume2,
 } from 'lucide-react'
 import { useHafalan } from '../hooks/useHafalan'
+import { speak, ttsSupported } from '../lib/tts'
 import { Heatmap } from './hafalan/Heatmap'
 import { ProgressBar } from './ui/ProgressBar'
 import { DetailModal } from './hafalan/DetailModal'
@@ -20,6 +21,7 @@ export default function HafalanHarian({ onGoMateri, onGoRecall, level = 'a2' }) 
     today, isToday, isPast, isFuture,
     showSettings, setShowSettings, showForm, setShowForm,
     showHeatmap, setShowHeatmap, detailItem, setDetailItem,
+    audioRows, setAudioRows,
     showExam, setShowExam, confirmDeleteKey, confirmBulk,
     kotobaCheckedCount, kanjiCheckedCount, bunpouCheckedCount,
     kotobaDone, kanjiDone, bunpouDone, allDone,
@@ -27,6 +29,9 @@ export default function HafalanHarian({ onGoMateri, onGoRecall, level = 'a2' }) 
     totalMap, items, checkedMap, tabLabel,
     toggle, markAll, uncheckAll, addCustom, removeCustom, saveTargets, targets,
   } = useHafalan({ level })
+
+  // Apakah TTS tersedia di browser ini (tombol audio hanya tampil bila ada).
+  const canSpeak = ttsSupported()
 
   // Berapa item yang sudah dicentang per tanggal (untuk badge strip & quick).
   const dayMeta = (date) => history[date]?.kotoba != null
@@ -102,7 +107,15 @@ export default function HafalanHarian({ onGoMateri, onGoRecall, level = 'a2' }) 
       </div>
 
       {showSettings && (
-        <SettingsPanel mode={level} targets={targets} onSave={saveTargets} onClose={() => setShowSettings(false)} />
+        <SettingsPanel
+          mode={level}
+          targets={targets}
+          onSave={saveTargets}
+          onClose={() => setShowSettings(false)}
+          audioEnabled={canSpeak ? audioRows : false}
+          audioSupported={canSpeak}
+          onToggleAudio={setAudioRows}
+        />
       )}
 
       {/* Progress */}
@@ -184,6 +197,16 @@ export default function HafalanHarian({ onGoMateri, onGoRecall, level = 'a2' }) 
                 </div>
                 <div className="hh-meaning">{item.meaning}</div>
               </button>
+              {canSpeak && audioRows && (
+                <button
+                  className="hh-tts-btn"
+                  onClick={() => speak(item.reading || item.front)}
+                  title="Dengarkan"
+                  aria-label={`Dengarkan ${item.front}`}
+                >
+                  <Volume2 size={18} />
+                </button>
+              )}
               <button className={`hh-check-btn ${isChecked ? 'checked' : ''}`} onClick={() => toggle(tab, item.id)}>
                 {isChecked ? <CheckSquare size={28} /> : <Square size={28} />}
               </button>

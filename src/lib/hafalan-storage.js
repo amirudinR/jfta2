@@ -72,6 +72,18 @@ export const lsSet = (k, v) => {
 export const getTargets = () => lsGet(`${STORAGE_PREFIX}-targets`, DEFAULT_TARGETS)
 export const setTargets = (v) => lsSet(`${STORAGE_PREFIX}-targets`, v)
 
+// Preferensi tampilan: tampilkan tombol audio di baris daftar hafalan.
+// SENGAJA pakai prefix `hh1` (bukan `hh2`) agar TIDAK ikut cloud-sync dan
+// tidak ter-reset saat ganti akun — ini preferensi per-device (nyaman/mengganggu).
+const AUDIO_ROWS_KEY = 'hh1-hafalan-audio-rows'
+export const getAudioRows = () => {
+  const v = lsGet(AUDIO_ROWS_KEY, true) // default: aktif
+  return v !== false
+}
+export const setAudioRows = (on) => {
+  try { localStorage.setItem(AUDIO_ROWS_KEY, JSON.stringify(!!on)) } catch {}
+}
+
 export const getHistory = (mode) => lsGet(`${STORAGE_PREFIX}-hist-${mode}`, {})
 
 // Daftar tanggal valid (YYYY-MM-DD) dari riwayat, terurut menaik. Menyaring

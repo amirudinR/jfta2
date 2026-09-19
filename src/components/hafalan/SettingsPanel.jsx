@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { X } from 'lucide-react'
+import { X, Volume2 } from 'lucide-react'
 import { HAFALAN_MODES, DEFAULT_TARGETS } from '../../lib/hafalan-storage'
 import { byMaterial } from '../../data'
 
@@ -8,7 +8,10 @@ function estDays(total, target) {
   return Math.ceil(total / target)
 }
 
-export function SettingsPanel({ mode, targets, onSave, onClose }) {
+export function SettingsPanel({
+  mode, targets, onSave, onClose,
+  audioEnabled = false, audioSupported = true, onToggleAudio,
+}) {
   const t = targets[mode] || DEFAULT_TARGETS[mode]
   const modeInfo = HAFALAN_MODES.find(m => m.key === mode)
   const hasKanji = modeInfo?.kanjiSrc != null
@@ -102,6 +105,31 @@ export function SettingsPanel({ mode, targets, onSave, onClose }) {
           Dengan target ini, seluruh materi {modeInfo?.label} selesai dalam kurang lebih <strong>{maxEst} hari</strong>
         </div>
       )}
+
+      {/* Tampilan: tombol audio di baris daftar */}
+      <div className="hh-setting-row hh-setting-toggle">
+        <div className="hh-setting-left">
+          <span className="hh-setting-toggle-title">
+            <Volume2 size={15} /> Tombol audio di daftar
+          </span>
+          <span className="hh-setting-est">
+            {audioSupported
+              ? 'Matikan bila suara dirasa mengganggu saat menghafal.'
+              : 'Browser ini tidak mendukung suara (TTS).'}
+          </span>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={audioEnabled}
+          aria-label="Tampilkan tombol audio di daftar hafalan"
+          disabled={!audioSupported}
+          className={`hh-switch ${audioEnabled ? 'on' : ''}`}
+          onClick={() => audioSupported && onToggleAudio?.(!audioEnabled)}
+        >
+          <span className="hh-switch-knob" />
+        </button>
+      </div>
 
       <button className="hh-add-submit" onClick={save}>
         Simpan Target

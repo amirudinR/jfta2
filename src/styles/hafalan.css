@@ -208,6 +208,69 @@
   font-family: var(--font-mono);
 }
 
+/* Toggle audio di panel pengaturan — switch ala iOS. */
+.hh-setting-toggle {
+  padding-top: 10px;
+  gap: 12px;
+}
+
+.hh-setting-toggle-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.hh-switch {
+  flex: none;
+  position: relative;
+  width: 50px;
+  height: 30px;
+  border-radius: 999px;
+  border: 1px solid var(--card-line);
+  background: var(--card-deep);
+  cursor: pointer;
+  padding: 0;
+  transition:
+    background-color 0.24s var(--ios-ease, cubic-bezier(0.32, 0.72, 0, 1)),
+    border-color 0.24s var(--ios-ease, cubic-bezier(0.32, 0.72, 0, 1));
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hh-switch:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.hh-switch.on {
+  background: var(--moss);
+  border-color: transparent;
+}
+
+.hh-switch-knob {
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  transform: translateY(-50%);
+  transition: transform 0.24s var(--ios-ease, cubic-bezier(0.32, 0.72, 0, 1));
+}
+
+.hh-switch.on .hh-switch-knob {
+  transform: translate(20px, -50%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hh-switch,
+  .hh-switch-knob {
+    transition: none;
+  }
+}
+
 .hh-input-sm {
   width: 72px;
   text-align: center;
@@ -504,6 +567,50 @@ html.dark-mode .hh-row.checked {
 
 .hh-check-btn:active { transform: scale(.9); }
 .hh-check-btn.checked { color: var(--moss); opacity: 1; }
+
+/* Tombol audio langsung di baris — dengarkan tanpa buka detail.
+   Ikon kecil rapi (bukan box besar) agar tidak menutupi konten bacaan.
+   Tetap punya area sentuh ≥44px lewat padding + hitbox, tanpa kotak besar. */
+.hh-tts-btn {
+  flex-shrink: 0;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--card-soft);
+  opacity: .55;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity .2s, color .2s, transform .15s var(--ios-ease, cubic-bezier(0.32, 0.72, 0, 1));
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Perbesar area sentuh ke atas/bawah saja (≥44px tinggi) tanpa mencuri
+   klik tombol tetangga (centang/isi) di kiri-kanannya. */
+.hh-tts-btn::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -6px;
+  bottom: -6px;
+}
+
+.hh-tts-btn:active {
+  transform: scale(.88);
+  opacity: 1;
+  color: var(--kin);
+}
+
+.hh-tts-btn:hover {
+  opacity: 1;
+  color: var(--kin);
+}
 
 .hh-del-custom {
   position: absolute;
