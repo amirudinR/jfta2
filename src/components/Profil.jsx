@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import {
   LogOut, User as UserIcon, Flame, Library, CalendarCheck, Sparkles,
-  Volume2, Play, Moon, Sun, Monitor, MonitorSmartphone, Languages, Type,
+  Volume2, Play, Moon, Sun, Monitor, MonitorSmartphone, Languages, Type, RefreshCw,
 } from 'lucide-react'
 import GoogleIcon from './GoogleIcon'
 import NemonikHeatmap from './nemonik/NemonikHeatmap'
@@ -67,7 +67,19 @@ export default function Profil({ user, loading, onLogin, onLogout, prefs = {}, o
   const wakeLock = useWakeLock(!!prefs.keepAwake)
 
   // Voices dimuat asinkron oleh browser — refresh saat siap.
-  useEffect(() => { const un = onVoicesReady(() => setVoices(listJapaneseVoices())); return un }, [])
+  // Fallback: beberapa browser TIDAK memicu `voiceschanged` (race) sehingga
+  // kita poll singkat (maks ~3 dtk) sampai daftar berisi / berhenti berubah.
+  useEffect(() => {
+    const sync = () => setVoices(listJapaneseVoices())
+    const unsub = onVoicesReady(sync)
+    let tries = 0
+    const id = setInterval(() => {
+      tries += 1
+      sync()
+      if (tries >= 6 || listJapaneseVoices().length > 0) clearInterval(id)
+    }, 500)
+    return () => { unsub(); clearInterval(id) }
+  }, [])
 
   // Tutup modal konfirmasi dengan tombol Escape.
   useEffect(() => {
@@ -313,11 +325,31 @@ export default function Profil({ user, loading, onLogin, onLogout, prefs = {}, o
         {!ttsSupported() ? (
           <p className="muted profil-voice-note">Browser ini tidak mendukung suara (TTS).</p>
         ) : voices.length === 0 ? (
-          <p className="muted profil-voice-note">Tidak ada suara Jepang di perangkat ini. Pasang voice Jepang di pengaturan sistem.</p>
+          <p className="muted profil-voice-note">
+            Tidak ada suara Jepang di perangkat ini. Pasang paket suara Jepang lewat pengaturan sistem:
+            {' '}<b>Android</b> → Pengaturan → Sistem → Bahasa & input → Output teks-ke-ucapan → instal data suara Jepang;
+            {' '}<b>Windows</b> → Pengaturan → Waktu & Bahasa → Bicara → tambah bahasa Jepang;
+            {' '}<b>iPhone</b> → Pengaturan → Aksesibilitas → Konten Terbaca → Suara → Jepang. Lalu tekan muat ulang ↻.
+          </p>
         ) : (
           <>
             <div className="profil-setting-row fixed col">
-              <span className="profil-setting-left"><Volume2 size={17} /><span>Pilih suara</span></span>
+              <div className="profil-voice-head">
+                <span className="profil-setting-left">
+                  <Volume2 size={17} />
+                  <span>Pilih suara</span>
+                  <em className="profil-voice-count">{voices.length} tersedia</em>
+                </span>
+                <button
+                  type="button"
+                  className="profil-voice-refresh"
+                  onClick={() => setVoices(listJapaneseVoices())}
+                  title="Muat ulang daftar suara"
+                  aria-label="Muat ulang daftar suara"
+                >
+                  <RefreshCw size={15} />
+                </button>
+              </div>
               <div className="profil-voice-pick">
                 <button
                   className={`profil-voice-opt ${!voicePref.voice ? 'on' : ''}`}
@@ -328,7 +360,7 @@ export default function Profil({ user, loading, onLogin, onLogout, prefs = {}, o
                 </button>
                 {voices.map((v) => (
                   <button
-                    key={v.name}
+                    key={v.voiceURI || `${v.name}-${v.lang}`}
                     className={`profil-voice-opt ${voicePref.voice === v.name ? 'on' : ''}`}
                     onClick={() => applyVoice(v.name)}
                   >
@@ -338,6 +370,12 @@ export default function Profil({ user, loading, onLogin, onLogout, prefs = {}, o
                   </button>
                 ))}
               </div>
+              {voices.length === 1 && (
+                <p className="muted profil-voice-hint">
+                  Hanya 1 suara Jepang terdeteksi. Tambah suara lain dari pengaturan sistem perangkat,
+                  lalu tekan ↻ untuk memuat ulang.
+                </p>
+              )}
             </div>
 
             <div className="profil-setting-row fixed col">

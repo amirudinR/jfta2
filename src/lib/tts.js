@@ -92,10 +92,18 @@ function onVoicesChanged() {
 }
 
 // Berlangganan event `voiceschanged` (voices dimuat asinkron oleh browser).
-// Mengembalikan fungsi unsubscribe. Langsung panggil cb bila sudah tersedia.
+// Mengembalikan fungsi unsubscribe.
+//
+// PENTING: dulu fungsi ini langsung `return () => {}` (unsubscribe) begitu
+// terdeteksi >=1 voice. Akibatnya kalau browser awalnya hanya mengekspos 1
+// voice Jepang lalu menambah sisanya beberapa ratus ms kemudian (umum di
+// Chrome/Android/iOS), daftar tidak pernah di-refresh → user hanya melihat 1.
+// Sekarang: panggil cb() SEKALI untuk render awal, TAPI tetap berlangganan
+// `voiceschanged` sampai komponen unsubscribe.
 export function onVoicesReady(cb) {
   if (!ttsSupported()) return () => {}
-  if (listJapaneseVoices().length > 0) { cb(); return () => {} }
+  // Render awal (mungkin [] atau sebagian voice).
+  try { cb() } catch { /* abaikan */ }
   const handler = () => cb()
   try {
     window.speechSynthesis.addEventListener('voiceschanged', handler)
