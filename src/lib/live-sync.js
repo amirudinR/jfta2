@@ -17,6 +17,10 @@ import { saveProgress } from './storage'
 import { onStoreChanged, dispatchSyncApplied } from './sync-events'
 
 const META_KEY = 'hh2-sync-meta'
+// Penanda pemilik data lokal (uid terakhir yang sinkron). Dipakai untuk
+// mendeteksi pergantian akun di device yang sama → bersihkan store lokal agar
+// user baru tidak melihat data user lama sebelum snapshot cloud-nya datang.
+const OWNER_KEY = 'hh2-sync-owner'
 const PUSH_DEBOUNCE_MS = 1500
 
 const lsGet = (k, fb) => { try { const r = localStorage.getItem(k); return r ? JSON.parse(r) : fb } catch { return fb } }
@@ -117,6 +121,11 @@ function handleLocalChange(key) {
   const fp = JSON.stringify(raw)
   // Data sama dengan yang terakhir terkirim → sudah sinkron, jangan push lagi.
   if (fp === m.fingerprint) return
+  // Naikkan waktu lokal SEKARANG (jangan tunggu push sukses). Ini mencegah
+  // snapshot cloud LAMA menang di jeda debounce — penting untuk store LWW
+  // (tanpa penanda resetAt) agar "Reset semua progres" tak ter-resurrect.
+  meta[store.key] = { ...m, updated: Date.now() }
+  setMeta(meta)
   dirty.add(key)
   scheduleFlush()
 }
@@ -173,8 +182,36 @@ function applyCloud(store, cloud) {
 }
 
 // ── Start / stop ──
+// Bersihkan store lokal + meta (TANPA menyentuh cloud). Dipakai saat pergantian
+// akun: mencegah user baru melihat data user lama sebelum snapshot-nya datang.
+function resetLocalStores() {
+  if (timer) { clearTimeout(timer); timer = null }
+  dirty.clear()
+  const keys = new Set(SYNC_STORES.map((s) => s.key))
+  keys.add(META_KEY)
+  for (const k of keys) {
+    try { localStorage.removeItem(k) } catch {}
+  }
+}
+
 export function startLiveSync(userUid) {
+  // Jika engine sudah jalan untuk uid LAIN, hentikan dulu (jangan early-return
+  // buta) supaya pergantian akun selalu memicu bersih-bersih.
+  if (running && uid !== userUid) stopLiveSync()
   if (running) return () => {}
+
+  // Deteksi pergantian akun pada device yang sama. Bila data lokal dibersihkan,
+  // kirim sinyal supaya UI (progress/level/riwayat) memuat ulang — dilakukan
+  // SETELAH langganan dipasang agar event tidak hilang (lihat akhir fungsi).
+  let accountSwitched = false
+  let prevOwner = null
+  try { prevOwner = localStorage.getItem(OWNER_KEY) } catch {}
+  if (prevOwner && prevOwner !== userUid) {
+    resetLocalStores() // data user lama disembunyikan; cloud user baru akan mengisi
+    accountSwitched = true
+  }
+  try { localStorage.setItem(OWNER_KEY, userUid) } catch {}
+
   uid = userUid
   running = true
 
@@ -192,6 +229,12 @@ export function startLiveSync(userUid) {
 
   window.addEventListener('online', onWindowOnline)
   document.addEventListener('visibilitychange', onVisibility)
+
+  // Dispatch SETELAH langganan terpasang agar sinyal "store dibersihkan" tidak
+  // hilang (listener onSyncApplied belum ada saat mulai).
+  if (accountSwitched) {
+    dispatchSyncApplied([...new Set(SYNC_STORES.map((s) => s.key))])
+  }
 
   return () => stopLiveSync()
 }

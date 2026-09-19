@@ -181,24 +181,58 @@ export function newCustomId() {
   return `cc-${Date.now().toString(36)}-${customSeq}`
 }
 
+// Nilai "kosong" untuk tiap key yang di-reset. Ditimpa lewat lsSet (bukan
+// removeItem) supaya (a) ter-push ke cloud sebagai kosong & (b) fingerprint
+// `hh2-sync-meta` tetap valid → snapshot cloud lama tak menghidupkan lagi data
+// yang sudah dihapus. Boleh berupa fungsi (dipanggil saat reset) untuk kasus
+// yang butuh timestamp segar (mis. `resetAt`).
+export const RESET_EMPTY_VALUES = {
+  'hh2-targets': () => DEFAULT_TARGETS,
+  'hh2-mastered': () => ({}),
+  'hh2-recall-queue': () => ({}),
+  'ankichou-exam-history': () => [],
+  'hafalan-jft-a2-history-v1': () => ({}),
+  'ankichou-level': () => 'a2',
+  'hh2-nemonik-srs': () => ({}),
+  'hh2-nemonik-streak': () => 0,
+  // mergeDays → butuh `resetAt` agar union tidak menghidupkan hari lama.
+  'hh2-nemonik-daily-log': () => ({ resetAt: Date.now() }),
+  'hh2-nemonik-sessions': () => [],
+  'hh2-nemonik-achievements': () => ({}),
+  'hh2-hist-a2': () => ({ resetAt: Date.now() }),
+  'hh2-hist-n3': () => ({ resetAt: Date.now() }),
+  'hh2-hist-n2': () => ({ resetAt: Date.now() }),
+  'hh2-hist-n1': () => ({ resetAt: Date.now() }),
+  'hh2-custom-a2': () => ({ kotoba: [], kanji: [], bunpou: [], resetAt: Date.now() }),
+  'hh2-custom-n3': () => ({ kotoba: [], kanji: [], bunpou: [], resetAt: Date.now() }),
+  'hh2-custom-n2': () => ({ kotoba: [], kanji: [], bunpou: [], resetAt: Date.now() }),
+  'hh2-custom-n1': () => ({ kotoba: [], kanji: [], bunpou: [], resetAt: Date.now() }),
+}
+
 // Reset semua data harian/riwayat (checked, history, custom, targets, mastery,
-// recall queue, exam history, study history, meta sync) — dipanggil saat
-// "Reset semua progres". SRS card & preferensi di-reset terpisah oleh
-// resetProgress() di lib/storage.
-// Catatan: `hh2-*` (termasuk `hh2-sync-meta`) ikut terhapus lewat prefix, jadi
-// fingerprint anti-echo tidak stale dan state bersih ikut ter-push ke cloud.
+// recall queue, exam history, study history) — dipanggil saat "Reset semua
+// progres". SRS card & preferensi di-reset terpisah oleh resetProgress().
 export function resetDailyProgress() {
+  const checkedEmpty = () => ({ date: todayStr(), kotoba: {}, kanji: {}, bunpou: {}, resetAt: Date.now() })
   const removals = []
   for (let i = 0; i < localStorage.length; i++) {
     const k = localStorage.key(i)
     if (!k) continue
+    if (k === 'hh2-sync-meta') continue // jangan sentuh meta anti-echo
     if (k.startsWith(`${STORAGE_PREFIX}-`)) removals.push(k) // hh2-*
     else if (k === 'ankichou-exam-history') removals.push(k)
     else if (k === 'hafalan-jft-a2-history-v1') removals.push(k)
     else if (k === 'ankichou-level') removals.push(k)
   }
   for (const k of removals) {
-    try { localStorage.removeItem(k) } catch {}
+    const empty = RESET_EMPTY_VALUES[k]
+    if (typeof empty === 'function') {
+      lsSet(k, empty()) // timpa dengan kosong → publish → push cloud
+    } else if (k.startsWith(`${STORAGE_PREFIX}-checked-`)) {
+      lsSet(k, checkedEmpty()) // bucket centang harian → kosong bertanggal
+    } else {
+      try { localStorage.removeItem(k) } catch {}
+    }
   }
 }
 

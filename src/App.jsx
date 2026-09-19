@@ -95,6 +95,7 @@ export default function App() {
   const handleCloudApplied = () => {
     setProgress(getProgress())
     setPrefsState(getPrefs())
+    setLevelState(getSavedLevel() || 'a2')
     setHistoryTick((t) => t + 1)
     setQueueTick((t) => t + 1)
   }
@@ -314,7 +315,9 @@ export default function App() {
       case 'nemonik':
         // Halaman standalone Nemonik Kanji (port dari app mandiri).
         // Tombol back kembali ke Daftar Materi tempat pintu masuknya.
-        return <Nemonik onBack={() => changeMode('materi')} />
+        // `key={user?.uid}` memaksa remount saat ganti akun → state nemonik
+        // tak bocor dari user sebelumnya.
+        return <Nemonik key={user?.uid || 'anon'} onBack={() => changeMode('materi')} />
       case 'kotoba-n3':
       case 'kotoba-n2':
       case 'kotoba-n1':

@@ -73,6 +73,21 @@ export function mergeProgress(local, cloud) {
   const cloudTime = cloud.syncedAt?.toMillis?.() || cloud.updated || 0
   const cloudNewer = cloudTime > localTime
 
+  // Reset menang: jika lokal punya `resetAt` yang lebih baru dari cloud, kartu
+  // lama di cloud TIDAK boleh dihidupkan lagi (hormati "Reset semua progres").
+  // Bandingkan dengan `cloud.updated` (waktu klien) — konsisten dengan merge
+  // lain & tahan terhadap skew `syncedAt` server.
+  const cloudLocalTime = cloud.updated || 0
+  if (local.resetAt && local.resetAt >= cloudLocalTime) {
+    return {
+      perMaterial: {},
+      prefs: { ...(cloud.prefs || {}), ...(local.prefs || {}) },
+      tombstone: { ...(local.tombstone || {}) },
+      updated: Math.max(localTime, Date.now()),
+      resetAt: local.resetAt,
+    }
+  }
+
   // Gabung peta kartu per materi (apa pun sisi yang lebih baru).
   const materials = new Set([
     ...Object.keys(local.perMaterial || {}),

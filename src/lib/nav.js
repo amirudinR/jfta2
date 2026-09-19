@@ -1,17 +1,30 @@
 // Konstanta navigasi & mode aplikasi.
 
 import { QUOTES } from '../data/quotes'
-import { publishStoreChange } from './sync-events'
+import { lsSet } from './hafalan-storage'
 
 export const LEVEL_KEY = 'ankichou-level'
 
+// Disimpan sebagai JSON (lewat lsGet/lsSet) agar ikut sinkron ke cloud lewat
+// live-sync — sebelumnya `localStorage.setItem(lv)` mentah membuat
+// `JSON.parse('n3')` gagal di live-sync sehingga level tak pernah ter-push.
+// Migrasi: data lama berupa string mentah (tanpa kutip) → baca apa adanya.
 export function getSavedLevel() {
-  try { return localStorage.getItem(LEVEL_KEY) } catch { return null }
+  try {
+    const raw = localStorage.getItem(LEVEL_KEY)
+    if (raw == null) return null
+    try {
+      return JSON.parse(raw) // format baru (JSON)
+    } catch {
+      return raw // format lama (mentah) → pakai langsung + naikkan ke JSON
+    }
+  } catch {
+    return null
+  }
 }
 
 export function saveLevel(lv) {
-  try { localStorage.setItem(LEVEL_KEY, lv) } catch {}
-  publishStoreChange(LEVEL_KEY)
+  lsSet(LEVEL_KEY, lv)
 }
 
 export function pickQuote() {

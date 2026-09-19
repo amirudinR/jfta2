@@ -124,10 +124,13 @@ export function clearCard(material, id) {
 }
 
 export function resetProgress() {
-  cache = emptyState()
+  // Pertahankan prefs (tema/bahasa) tapi kosongkan kartu. `resetAt` = penanda
+  // agar merge cloud TIDAK menghidupkan lagi kartu lama (lihat mergeProgress).
+  const prefs = { ...(cache?.prefs || DEFAULT_PREFS) }
+  cache = { perMaterial: {}, prefs, tombstone: {}, updated: Date.now(), resetAt: Date.now() }
+  saveProgress(cache) // publish → live-sync push state kosong ke cloud
   try {
-    localStorage.removeItem(KEY)
-    localStorage.removeItem(KEY_V1)
+    localStorage.removeItem(KEY_V1) // data lama v1 tak perlu lagi
   } catch (e) {
     /* abaikan */
   }

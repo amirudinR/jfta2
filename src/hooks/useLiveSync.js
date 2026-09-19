@@ -12,9 +12,11 @@ export function useLiveSync(user, onApplied) {
 
   useEffect(() => {
     if (!user || user.uid.startsWith('preview')) return
+    // Pasang listener LEBIH DULU, lalu start — agar sinyal "store dibersihkan"
+    // saat pergantian akun (dispatch di dalam startLiveSync) tidak hilang.
+    const off = onSyncApplied((keys) => onAppliedRef.current && onAppliedRef.current(keys))
     startLiveSync(user.uid)
     saveUserProfile(user) // fire-and-forget; aman di dalam try/catch sendiri
-    const off = onSyncApplied((keys) => onAppliedRef.current && onAppliedRef.current(keys))
     return () => {
       off()
       stopLiveSync()

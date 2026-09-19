@@ -48,6 +48,12 @@ function mergeChecked(local, cloud) {
   if (!local) return cloud
   const l = unwrap(local)
   const c = unwrap(cloud)
+  // Reset menang: bucket lokal punya `resetAt` lebih baru dari cloud → buang
+  // centang lama cloud (jangan dihidupkan lagi).
+  if (l.data?.resetAt && l.data.resetAt >= (c.updated || 0)) {
+    const { resetAt, ...clean } = l.data
+    return wrap(clean, l.updated || resetAt)
+  }
   if ((l.data?.date || '') !== (c.data?.date || '')) {
     return (c.updated || 0) > (l.updated || 0) ? wrap(c.data, c.updated) : wrap(l.data, l.updated)
   }
@@ -70,6 +76,10 @@ function mergeCustom(local, cloud) {
   if (!local) return cloud
   const l = unwrap(local)
   const c = unwrap(cloud)
+  // Reset menang: lokal punya `resetAt` lebih baru → jangan sisipkan item lama cloud.
+  if (l.data?.resetAt && l.data.resetAt >= (c.updated || 0)) {
+    return wrap({ kotoba: [], kanji: [], bunpou: [] }, l.updated || l.data.resetAt)
+  }
   const byId = (list) => new Map((list || []).map((it) => [it.id, it]))
   const mergeList = (a, b) => {
     const m = byId(a)
@@ -92,6 +102,12 @@ function mergeDays(local, cloud) {
   if (!local) return cloud
   const l = unwrap(local)
   const c = unwrap(cloud)
+  // Reset menang: lokal punya `resetAt` lebih baru → buang seluruh hari lama
+  // cloud (unìon tak bisa menghapus key, jadi harus eksplisit).
+  if (l.data?.resetAt && l.data.resetAt >= (c.updated || 0)) {
+    const { resetAt, ...clean } = l.data
+    return wrap(clean, l.updated || resetAt)
+  }
   const cloudNewer = (c.updated || 0) > (l.updated || 0)
   const winner = cloudNewer ? c.data : l.data
   const loser = cloudNewer ? l.data : c.data
@@ -123,7 +139,6 @@ export const SYNC_STORES = [
   // terbaru menang (paling sering hanya 1 perangkat yang belajar nemonik).
   { key: 'hh2-nemonik-srs', path: (uid) => `users/${uid}/hh/nemonik-srs`, merge: lww },
   { key: 'hh2-nemonik-streak', path: (uid) => `users/${uid}/hh/nemonik-streak`, merge: lww },
-  { key: 'hh2-nemonik-last-login', path: (uid) => `users/${uid}/hh/nemonik-last-login`, merge: lww },
   // Log harian (union per tanggal) & riwayat sesi (daftar; sisi terbaru menang).
   { key: 'hh2-nemonik-daily-log', path: (uid) => `users/${uid}/hh/nemonik-daily-log`, merge: mergeDays },
   { key: 'hh2-nemonik-sessions', path: (uid) => `users/${uid}/hh/nemonik-sessions`, merge: lww },
