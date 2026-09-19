@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Eraser, Undo2, PenLine, Info } from 'lucide-react'
+import { Eraser, Undo2, PenLine, Info, HelpCircle } from 'lucide-react'
 import { imgUrl } from '../../lib/nemonik'
+import KanjiTutorial from './KanjiTutorial'
 
 // Canvas latihan tulis kanji dengan panduan profesional:
 //  • Grid genkou (田字格): kotak + crosshair horizontal/vertikal/diagonal.
@@ -26,6 +27,7 @@ export default function NemonikSketch({ entry }) {
   const [canUndo, setCanUndo] = useState(false)
   const [brush, setBrush] = useState('mid')
   const [showGuide, setShowGuide] = useState(true)
+  const [showTutorial, setShowTutorial] = useState(false)
 
   const bg = entry ? imgUrl(entry.img_kanji_bersih) : ''
 
@@ -180,16 +182,31 @@ export default function NemonikSketch({ entry }) {
             </button>
           ))}
         </div>
-        <button
-          type="button"
-          className={`nemo-guide-toggle ${showGuide ? 'on' : ''}`}
-          onClick={() => setShowGuide((v) => !v)}
-          aria-pressed={showGuide}
-          title="Tampilkan/sembunyikan grid & bayangan"
-        >
-          <PenLine size={15} /> Panduan
-        </button>
+        <div className="nemo-sketch-tools-right">
+          <button
+            type="button"
+            className={`nemo-guide-toggle ${showGuide ? 'on' : ''}`}
+            onClick={() => setShowGuide((v) => !v)}
+            aria-pressed={showGuide}
+            title="Tampilkan/sembunyikan grid & bayangan"
+          >
+            <PenLine size={15} /> Panduan
+          </button>
+          <button
+            type="button"
+            className={`nemo-guide-toggle ${showTutorial ? 'on' : ''}`}
+            onClick={() => setShowTutorial((v) => !v)}
+            aria-pressed={showTutorial}
+            aria-expanded={showTutorial}
+            title="Cara menulis kanji langkah demi langkah"
+          >
+            <HelpCircle size={15} /> Tutorial
+          </button>
+        </div>
       </div>
+
+      {/* ── Tutorial langkah demi langkah ── */}
+      {showTutorial && <KanjiTutorial onClose={() => setShowTutorial(false)} />}
 
       {/* ── Panggung tulis ── */}
       <div className="nemo-sketch-stage">

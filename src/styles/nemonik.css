@@ -1230,6 +1230,112 @@
   border-color: rgba(193, 148, 63, 0.5);
   background: rgba(193, 148, 63, 0.14);
 }
+.nemo-sketch-tools-right { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ── Tutorial menulis kanji ── */
+.nemo-tut {
+  display: flex; flex-direction: column; gap: 14px;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--card-face);
+  border: 1px solid var(--card-line);
+  animation: nemo-fade-in 0.22s ease-out;
+}
+.nemo-tut-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.nemo-tut-title {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--font-ui); font-weight: 700; font-size: 0.95rem;
+  color: var(--card-ink);
+}
+.nemo-tut-close {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; flex: none;
+  border-radius: 10px; cursor: pointer;
+  border: 1px solid var(--card-line); background: var(--layer-1);
+  color: var(--card-soft);
+}
+.nemo-tut-close:active { transform: scale(0.94); }
+
+.nemo-tut-section { display: flex; flex-direction: column; gap: 10px; }
+.nemo-tut-lead { margin: 0; font-size: 0.82rem; line-height: 1.55; color: var(--card-soft); }
+.nemo-tut-lead b { color: var(--card-ink); }
+.nemo-tut-h {
+  font-family: var(--font-ui); font-weight: 700; font-size: 0.85rem;
+  color: var(--card-ink); padding-bottom: 2px;
+  border-bottom: 1px solid var(--card-line);
+}
+
+/* Jenis goresan */
+.nemo-tut-strokes { display: flex; flex-direction: column; gap: 8px; }
+.nemo-tut-stroke {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px; border-radius: 12px;
+  background: var(--layer-1); border: 1px solid var(--card-line);
+}
+.nemo-tut-glyph {
+  font-family: var(--font-jp); font-size: 1.7rem; line-height: 1;
+  color: var(--shu); flex: none; width: 2rem; text-align: center;
+}
+.nemo-tut-stroke-name { font-size: 0.82rem; font-weight: 700; color: var(--card-ink); }
+.nemo-tut-stroke-desc { font-size: 0.75rem; color: var(--card-soft); line-height: 1.45; }
+
+/* 7 aturan urutan */
+.nemo-tut-rules { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.nemo-tut-rule {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 11px; border-radius: 12px;
+  background: var(--layer-1); border: 1px solid var(--card-line);
+}
+.nemo-tut-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; flex: none; border-radius: 50%;
+  font-size: 0.72rem; font-weight: 800;
+  color: var(--washi); background: var(--shu);
+}
+.nemo-tut-rule-glyph {
+  font-family: var(--font-jp); font-size: 1.5rem; line-height: 1;
+  color: var(--card-ink); flex: none; width: 1.9rem; text-align: center;
+}
+.nemo-tut-rule-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.nemo-tut-rule-body b { font-size: 0.8rem; color: var(--card-ink); }
+.nemo-tut-rule-body em { font-style: normal; font-size: 0.73rem; color: var(--card-soft); line-height: 1.45; }
+
+/* Alur latihan 5 langkah */
+.nemo-tut-flow { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.nemo-tut-step {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 11px; border-radius: 12px;
+  background: var(--layer-1); border: 1px solid var(--card-line);
+  position: relative;
+}
+.nemo-tut-step-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; flex: none; border-radius: 9px;
+  color: var(--kin-deep); background: rgba(193, 148, 63, 0.14);
+}
+.nemo-tut-step-body { min-width: 0; }
+.nemo-tut-step-title { font-size: 0.82rem; font-weight: 700; color: var(--card-ink); }
+.nemo-tut-step-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 17px; height: 17px; border-radius: 50%; margin-right: 4px;
+  font-size: 0.65rem; font-weight: 800;
+  color: var(--page-ink); background: var(--layer-3);
+}
+.nemo-tut-step-desc { font-size: 0.74rem; color: var(--card-soft); line-height: 1.5; margin-top: 2px; }
+.nemo-tut-step-arrow { color: var(--card-soft); flex: none; margin-left: auto; opacity: 0.5; }
+
+.nemo-tut-done {
+  margin-top: 2px;
+  padding: 12px 16px; border: none; border-radius: 12px; cursor: pointer;
+  background: var(--shu); color: var(--washi);
+  font-family: var(--font-ui); font-weight: 700; font-size: 0.85rem;
+  min-height: 46px;
+}
+.nemo-tut-done:active { transform: scale(0.98); }
+
+@media (prefers-reduced-motion: reduce) {
+  .nemo-tut { animation: none !important; }
+}
 
 /* ── Panggung ── */
 .nemo-sketch-stage {
