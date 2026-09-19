@@ -34,6 +34,18 @@
     gap: 6px;
   }
 
+  /* Tambah tombol hamburger → jaga agar actions tetap muat tanpa overflow.
+     .tb-row sudah flex-wrap, tapi kurangi sedikit ukuran kontrol sekunder. */
+  .tb-hamburger {
+    width: 40px;
+    height: 40px;
+  }
+
+  .icon-btn {
+    width: 40px;
+    height: 40px;
+  }
+
   /* Font picker tetap tampil di mobile — dibuat kompak */
   .font-pick {
     display: flex;

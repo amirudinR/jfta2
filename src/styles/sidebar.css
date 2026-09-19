@@ -240,31 +240,35 @@
   text-overflow: ellipsis;
 }
 
-/* Hamburger button di Topbar — DESKTOP ONLY */
+/* Hamburger button di Topbar — tampil di SEMUA ukuran layar.
+   Di mobile ini satu-satunya pintu ke Sidebar (yang memuat menu lengkap
+   termasuk Nemonik Kanji), karena BottomNav hanya punya 5 tab utama. */
 .tb-hamburger {
-  display: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--page-soft, #8fa8c0);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  flex-shrink: 0;
 }
 
-@media (min-width: 769px) {
-  .tb-hamburger {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    background: rgba(255, 255, 255, 0.04);
-    color: var(--page-soft, #8fa8c0);
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s, border-color 0.15s;
-    flex-shrink: 0;
-  }
+.tb-hamburger:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: var(--page-ink, #f0ebe0);
+}
 
-  .tb-hamburger:hover {
-    background: rgba(255, 255, 255, 0.09);
-    border-color: rgba(255, 255, 255, 0.18);
-    color: var(--page-ink, #f0ebe0);
+/* Mobile: pastikan tombol hamburger cukup besar untuk tap (min 44px). */
+@media (max-width: 768px) {
+  .tb-hamburger {
+    width: 44px;
+    height: 44px;
   }
 }
 
@@ -272,5 +276,11 @@
 @media (max-width: 768px) {
   .sidebar {
     width: 280px;
+  }
+
+  /* Perbesar tap-target tombol tutup (min 44px) untuk jari. */
+  .sidebar-close {
+    width: 44px;
+    height: 44px;
   }
 }

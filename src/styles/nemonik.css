@@ -349,6 +349,21 @@
 .nemo-mistakes ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
 
 /* ── Responsive ── */
+/* Mobile: perbesar tap-target tombol navigasi kecil (min 44px) supaya
+   nyaman diakses dengan jari. */
+@media (max-width: 768px) {
+  .nemo-back {
+    min-height: 44px;
+    padding: 10px 16px;
+  }
+  .nemo-quiz-close {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 10px 14px;
+    justify-content: center;
+  }
+}
+
 @media (max-width: 560px) {
   .nemo-srs-stats { grid-template-columns: repeat(2, 1fr); }
   .nemo-img-left, .nemo-img-right { padding: 6px; }

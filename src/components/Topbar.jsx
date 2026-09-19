@@ -51,12 +51,14 @@ export default function Topbar({ stats, darkMode, onToggleDark, font, onFont, us
               <span>Masuk</span>
             </button>
           ) : null}
-          {/* Hamburger — desktop only, dikontrol via CSS */}
+          {/* Hamburger — tampil di semua ukuran layar (di mobile ini pintu ke
+              Sidebar, satu-satunya cara menjangkau menu spt Nemonik Kanji). */}
           <button
             className="tb-hamburger no-print"
             onClick={onMenuOpen}
             aria-label="Buka menu navigasi"
             title="Menu"
+            aria-haspopup="true"
           >
             <Menu size={20} />
           </button>
