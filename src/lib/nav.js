@@ -5,19 +5,24 @@ import { lsSet } from './hafalan-storage'
 
 export const LEVEL_KEY = 'ankichou-level'
 
-// Disimpan sebagai JSON (lewat lsGet/lsSet) agar ikut sinkron ke cloud lewat
+// Disimpan sebagai JSON (lewat lsSet) agar ikut sinkron ke cloud lewat
 // live-sync — sebelumnya `localStorage.setItem(lv)` mentah membuat
 // `JSON.parse('n3')` gagal di live-sync sehingga level tak pernah ter-push.
-// Migrasi: data lama berupa string mentah (tanpa kutip) → baca apa adanya.
+// Migrasi: data lama berupa string mentah (tanpa kutip) → dibaca apa adanya.
+// Whitelist menjaga nilai aneh/rusak tidak lolos jadi "level".
+const VALID_LEVELS = ['a2', 'n3', 'n2', 'n1']
+
 export function getSavedLevel() {
   try {
     const raw = localStorage.getItem(LEVEL_KEY)
     if (raw == null) return null
+    let v
     try {
-      return JSON.parse(raw) // format baru (JSON)
+      v = JSON.parse(raw) // format baru (JSON)
     } catch {
-      return raw // format lama (mentah) → pakai langsung + naikkan ke JSON
+      v = raw // format lama (mentah)
     }
+    return VALID_LEVELS.includes(v) ? v : null
   } catch {
     return null
   }

@@ -87,15 +87,17 @@ function pushStore(store) {
   const raw = readLocal(store.key)
   if (raw == null) return
   const meta = getMeta()
+  const now = Date.now()
   const payload = store.legacy
     ? { ...raw, syncedAt: serverTimestamp() }
-    : { data: raw, updated: Date.now(), syncedAt: serverTimestamp() }
-  const fingerprint = store.legacy ? JSON.stringify(raw) : JSON.stringify(raw)
+    : { data: raw, updated: now, syncedAt: serverTimestamp() }
+  const fingerprint = JSON.stringify(raw)
   try {
     setDoc(doc(db, store.path(uid)), payload, store.legacy ? { merge: true } : {})
       .then(() => {
         meta[store.key] = {
-          updated: store.legacy ? raw.updated || Date.now() : Date.now(),
+          // Samakan dengan cloud.updated (T1) agar meta konsisten & echo rapi.
+          updated: store.legacy ? raw.updated || now : now,
           fingerprint,
         }
         setMeta(meta)
