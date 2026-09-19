@@ -169,6 +169,7 @@
 }
 
 .nemo-flashcard {
+  position: relative; /* anchor untuk tombol TTS (.nemo-tts) */
   background: var(--card-face);
   color: var(--card-ink);
   border: 1px solid var(--card-line);
@@ -248,6 +249,86 @@
 .nemo-rating-btn.wrong { background: var(--shu); color: var(--washi); }
 .nemo-rating-btn.hard  { background: var(--kin); color: #2a2110; }
 .nemo-rating-btn.easy  { background: var(--moss); color: var(--washi); }
+
+/* ── Tombol navigasi prev/next (pengganti tombol rating) ── */
+.nemo-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+.nemo-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 48px;
+  padding: 13px 14px;
+  border-radius: 13px;
+  border: 1px solid var(--card-line);
+  background: var(--card-deep);
+  color: var(--card-ink);
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.12s, filter 0.15s, background 0.15s, opacity 0.15s;
+}
+.nemo-nav-btn:hover:not(:disabled) { filter: brightness(1.08); }
+.nemo-nav-btn:active:not(:disabled) { transform: translateY(1px); }
+.nemo-nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.nemo-nav-btn.next { background: var(--moss); color: var(--washi); border-color: transparent; }
+
+/* Petunjuk swipe */
+.nemo-swipe-hint {
+  text-align: center;
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  color: var(--page-soft);
+  margin: 14px 0 0;
+}
+
+/* Label besar di tengah kartu saat digeser */
+.nemo-swipe-tag {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-ui);
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: 0.08em;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+}
+
+/* ── Tombol voice (TTS) pada kartu ── */
+.nemo-tts {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 25;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--card-line);
+  background: var(--card-face);
+  color: var(--card-ink);
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22);
+  transition: transform 0.12s, filter 0.15s, background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.nemo-tts:hover { filter: brightness(1.08); }
+.nemo-tts:active { transform: translateY(1px); }
 
 .nemo-empty { text-align: center; color: var(--page-soft); font-family: var(--font-ui); }
 .nemo-done {

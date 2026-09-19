@@ -1,11 +1,19 @@
 import { useState } from 'react'
-import { Check, X } from 'lucide-react'
+import { Check, ChevronLeft, ChevronRight, Volume2 } from 'lucide-react'
 import { imgUrl } from '../../lib/nemonik'
+import { speak, ttsSupported } from '../../lib/tts'
+
+// Teks yang diucapkan TTS: utamakan bacaan kana (baca_utama), fallback ke kanji.
+function speakEntry(entry) {
+  const text = entry?.baca_utama || entry?.kanji || ''
+  if (text) speak(text)
+}
 
 function CardBody({ entry }) {
   const imgBersih = imgUrl(entry.img_kanji_bersih)
   const imgKonteks = imgUrl(entry.img_kanji_nama)
   const imgSelesai = imgUrl(entry.img_selesai_potong)
+  const canSpeak = ttsSupported() && !!(entry.baca_utama || entry.kanji)
 
   return (
     <div className="nemo-flashcard" style={{ width: '100%' }}>
@@ -27,13 +35,29 @@ function CardBody({ entry }) {
           ? <img src={imgSelesai} alt={`Kartu lengkap ${entry.kanji}`} loading="lazy" draggable="false" />
           : <div className="nemo-img-missing">Kartu lengkap tidak tersedia</div>}
       </div>
+
+      {/* Tombol voice (TTS) — membacakan bacaan kanji. onPointerDown di-stop
+          agar tidak memicu drag swipe pada kartu. */}
+      {canSpeak && (
+        <button
+          type="button"
+          className="nemo-tts"
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={() => speakEntry(entry)}
+          aria-label={`Dengarkan bacaan ${entry.kanji}`}
+          title="Dengarkan"
+        >
+          <Volume2 size={18} />
+          <span className="nemo-tts-label">Dengarkan</span>
+        </button>
+      )}
     </div>
   )
 }
 
 export default function NemonikStudy({ queue, onGrade, onFinish }) {
   const [index, setIndex] = useState(0)
-  
+
   // Drag state
   const [dragStartX, setDragStartX] = useState(null)
   const [dragCurrentX, setDragCurrentX] = useState(0)
@@ -62,13 +86,27 @@ export default function NemonikStudy({ queue, onGrade, onFinish }) {
   }
 
   const entry = queue[index]
+  const isFirst = index === 0
 
-  const rate = (rating) => {
-    onGrade(String(entry.no), rating)
-    setIndex((i) => i + 1)
+  const resetDrag = () => {
     setDragCurrentX(0)
     setIsDragging(false)
     setDragStartX(null)
+  }
+
+  // Lanjut (maju): tandai kartu ini "hafal" (rate 3) lalu pindah ke berikutnya.
+  // Jika sudah di kartu terakhir, biarkan index melewati length → tampil "selesai".
+  const goNext = () => {
+    onGrade(String(entry.no), 3)
+    setIndex((i) => i + 1)
+    resetDrag()
+  }
+
+  // Kembali (mundur): hanya navigasi, tanpa mengubah SRS.
+  const goPrev = () => {
+    if (isFirst) return
+    setIndex((i) => Math.max(0, i - 1))
+    resetDrag()
   }
 
   // Pointer event handlers for swipe
@@ -80,32 +118,30 @@ export default function NemonikStudy({ queue, onGrade, onFinish }) {
       setDragCurrentX(0)
     }
   }
-  
+
   const handlePointerMove = (e) => {
     if (!isDragging || dragStartX === null) return
     setDragCurrentX(e.clientX - dragStartX)
   }
-  
+
   const handlePointerUp = (e) => {
     if (!isDragging) return
     setIsDragging(false)
-    e.currentTarget.releasePointerCapture(e.pointerId)
-    
+    try { e.currentTarget.releasePointerCapture(e.pointerId) } catch {}
+
     // Threshold for swipe: 70px
     if (dragCurrentX < -70) {
-      rate(1) // Swipe kiri -> Tidak Tahu
-    } else if (dragCurrentX > 70) {
-      rate(3) // Swipe kanan -> Tahu
+      goNext() // Swipe kiri -> Lanjut
+    } else if (dragCurrentX > 70 && !isFirst) {
+      goPrev() // Swipe kanan -> Kembali
     } else {
       setDragCurrentX(0) // Kembali ke tengah
     }
     setDragStartX(null)
   }
-  
+
   const handlePointerCancel = () => {
-    setIsDragging(false)
-    setDragCurrentX(0)
-    setDragStartX(null)
+    resetDrag()
   }
 
   const rotation = dragCurrentX * 0.05
@@ -116,7 +152,7 @@ export default function NemonikStudy({ queue, onGrade, onFinish }) {
   const cardStyle = {
     transform: `translateX(${dragCurrentX}px) rotate(${rotation}deg)`,
     transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-    touchAction: 'none',
+    touchAction: 'pan-y',
     userSelect: 'none',
     cursor: isDragging ? 'grabbing' : 'grab',
     position: 'relative',
@@ -136,10 +172,13 @@ export default function NemonikStudy({ queue, onGrade, onFinish }) {
   }
 
   let overlayColor = 'transparent'
+  let overlayText = ''
   if (opacityLeft > 0) {
-    overlayColor = `rgba(239, 68, 68, ${opacityLeft})` // Red
-  } else if (opacityRight > 0) {
-    overlayColor = `rgba(34, 197, 94, ${opacityRight})` // Green
+    overlayColor = `rgba(34, 197, 94, ${opacityLeft})` // Hijau = Lanjut
+    overlayText = 'LANJUT'
+  } else if (opacityRight > 0 && !isFirst) {
+    overlayColor = `rgba(148, 163, 184, ${opacityRight})` // Abu = Kembali
+    overlayText = 'KEMBALI'
   }
 
   return (
@@ -148,36 +187,45 @@ export default function NemonikStudy({ queue, onGrade, onFinish }) {
         {index + 1} / {queue.length}
       </div>
 
-      <div 
+      <div
         style={cardStyle}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerCancel}
       >
-        <div style={{ ...overlayStyle, backgroundColor: overlayColor }}></div>
+        <div style={{ ...overlayStyle, backgroundColor: overlayColor }}>
+          {overlayText && (
+            <span className="nemo-swipe-tag" style={{ opacity: Math.max(opacityLeft, opacityRight) }}>
+              {overlayText}
+            </span>
+          )}
+        </div>
         <CardBody entry={entry} />
       </div>
 
-      <p style={{ textAlign: 'center', fontSize: '0.9rem', color: '#666', marginTop: '1rem', marginBottom: '0.5rem' }}>
-        Swipe kiri (Tdk Tahu) ↔ Swipe kanan (Tahu)
+      <p className="nemo-swipe-hint">
+        Geser kiri untuk lanjut · geser kanan untuk kembali
       </p>
 
-      {/* Alternative small buttons for desktop/mouse users */}
-      <div className="nemo-rating" style={{ gap: '1rem', justifyContent: 'center' }}>
-        <button 
-          className="nemo-rating-btn wrong" 
-          onClick={() => rate(1)}
-          style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', flex: '0 1 auto' }}
+      {/* Tombol navigasi interaktif (juga untuk pengguna mouse/desktop). */}
+      <div className="nemo-nav">
+        <button
+          type="button"
+          className="nemo-nav-btn prev"
+          onClick={goPrev}
+          disabled={isFirst}
+          aria-label="Kartu sebelumnya"
         >
-          <X size={14} style={{ marginRight: '4px' }} /> Tdk Tahu
+          <ChevronLeft size={18} /> Kembali
         </button>
-        <button 
-          className="nemo-rating-btn easy" 
-          onClick={() => rate(3)}
-          style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', flex: '0 1 auto' }}
+        <button
+          type="button"
+          className="nemo-nav-btn next"
+          onClick={goNext}
+          aria-label="Kartu berikutnya"
         >
-          <Check size={14} style={{ marginRight: '4px' }} /> Tahu
+          Lanjut <ChevronRight size={18} />
         </button>
       </div>
     </div>
