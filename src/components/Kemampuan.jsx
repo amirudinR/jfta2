@@ -76,9 +76,11 @@ export default function Kemampuan({ entries, cards, material, history, streak, a
           {perMaterial.map((m) => {
             const open = openMat === m.key
             return (
-              <div
+              <button
                 key={m.key}
+                type="button"
                 className="kp-card kp-click"
+                aria-expanded={open}
                 onClick={() => setOpenMat(open ? null : m.key)}
               >
                 <div className="kp-mat-main">
@@ -101,7 +103,7 @@ export default function Kemampuan({ entries, cards, material, history, streak, a
                     <span>🆕 {m.newCards} baru</span>
                   </div>
                 ) : null}
-              </div>
+              </button>
             )
           })}
         </div>

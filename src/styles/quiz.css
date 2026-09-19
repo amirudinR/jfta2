@@ -40,6 +40,11 @@
     repeating-linear-gradient(90deg, transparent 0 25px, var(--genkou-line) 25px 26px);
   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.35);
   color: var(--card-ink);
+  animation: quiz-card-in 0.34s var(--ios-ease, cubic-bezier(0.32,0.72,0,1)) both;
+}
+@keyframes quiz-card-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.99); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .opt-grid {
@@ -48,6 +53,16 @@
   gap: 8px;
   margin-top: 12px;
 }
+/* Opsi muncul berurutan (stagger) tiap kali soal baru. */
+.opt-grid .opt {
+  animation: ios-reveal-up 0.34s var(--ios-ease, cubic-bezier(0.32,0.72,0,1)) both;
+}
+.opt-grid .opt:nth-child(1) { animation-delay: 0.04s; }
+.opt-grid .opt:nth-child(2) { animation-delay: 0.08s; }
+.opt-grid .opt:nth-child(3) { animation-delay: 0.12s; }
+.opt-grid .opt:nth-child(4) { animation-delay: 0.16s; }
+.opt-grid .opt:nth-child(5) { animation-delay: 0.20s; }
+.opt-grid .opt:nth-child(6) { animation-delay: 0.24s; }
 
 .opt {
   padding: 12px 10px;
@@ -58,6 +73,15 @@
   font-size: 13.5px;
   text-align: center;
   cursor: pointer;
+  min-height: 44px;
+  transition:
+    transform var(--ios-dur-fast, 0.22s) var(--ios-ease, cubic-bezier(0.32,0.72,0,1)),
+    background 0.15s, border-color 0.15s, color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.opt:not(:disabled):active {
+  transform: scale(0.97);
 }
 
 .opt:disabled {
@@ -69,12 +93,27 @@
   background: rgba(111, 143, 82, 0.25);
   color: #cfe0b8;
   font-weight: 600;
+  animation: quiz-pop 0.4s var(--ios-spring, cubic-bezier(0.34,1.56,0.64,1));
 }
 
 .opt.wrong {
   border-color: var(--shu);
   background: rgba(193, 64, 42, 0.22);
   color: #e8a294;
+  animation: quiz-shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+@keyframes quiz-pop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+@keyframes quiz-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-5px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
 }
 
 .next-row {
@@ -178,4 +217,14 @@
   color: var(--kin);
   font-family: var(--font-mono);
   font-weight: 700;
+}
+
+/* Hormati preferensi user: matikan animasi kuis bila reduced-motion. */
+@media (prefers-reduced-motion: reduce) {
+  .quiz-card,
+  .opt-grid .opt,
+  .opt.correct,
+  .opt.wrong {
+    animation: none !important;
+  }
 }

@@ -159,11 +159,32 @@
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.05);
   flex-shrink: 0;
-  transition: background 0.15s;
+  transition: background 0.15s, transform var(--ios-dur-pop, 0.34s) var(--ios-spring, cubic-bezier(0.34,1.56,0.64,1));
 }
 
 .sidebar-item.active .sidebar-item-icon {
   background: rgba(193, 148, 63, 0.15);
+  transform: scale(1.05);
+}
+
+/* Stagger masuk: item muncul berurutan saat sidebar terbuka (ala iOS). */
+.sidebar.open .sidebar-item {
+  animation: ios-sidebar-item-in 0.4s var(--ios-ease, cubic-bezier(0.32,0.72,0,1)) both;
+}
+.sidebar.open .sidebar-item:nth-child(1) { animation-delay: 0.04s; }
+.sidebar.open .sidebar-item:nth-child(2) { animation-delay: 0.07s; }
+.sidebar.open .sidebar-item:nth-child(3) { animation-delay: 0.10s; }
+.sidebar.open .sidebar-item:nth-child(4) { animation-delay: 0.13s; }
+.sidebar.open .sidebar-item:nth-child(5) { animation-delay: 0.16s; }
+.sidebar.open .sidebar-item:nth-child(6) { animation-delay: 0.19s; }
+.sidebar.open .sidebar-item:nth-child(7) { animation-delay: 0.22s; }
+.sidebar.open .sidebar-item:nth-child(8) { animation-delay: 0.25s; }
+.sidebar.open .sidebar-item:nth-child(9) { animation-delay: 0.28s; }
+.sidebar.open .sidebar-item:nth-child(10) { animation-delay: 0.31s; }
+
+@keyframes ios-sidebar-item-in {
+  from { opacity: 0; transform: translateX(14px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
 .sidebar-avatar {

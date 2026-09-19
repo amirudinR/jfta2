@@ -278,4 +278,15 @@
   .ios-large-title {
     transition: none !important;
   }
+  .bnav-icon-wrap,
+  .bnav-item.active .bnav-icon-wrap,
+  .sidebar-item,
+  .sidebar.open .sidebar-item,
+  .sidebar-item-icon,
+  .sidebar-item.active .sidebar-item-icon,
+  .sidebar-active-dot {
+    transition: none !important;
+    transform: none !important;
+    animation: none !important;
+  }
 }

@@ -109,7 +109,7 @@ export default function Kuis({ entries, material, direction = 'jp2id' }) {
         </span>
       </div>
 
-      <div className="quiz-card">
+      <div className="quiz-card" key={q}>
         <div className="card-top">
           Kuis · {info?.label}
           {entry.groupLabel ? ` · ${entry.groupLabel}` : ''}

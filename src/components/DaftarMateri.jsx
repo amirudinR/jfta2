@@ -182,19 +182,23 @@ export default function DaftarMateri({ onGoHafalan, onGoKotobaLevel, onGoNemonik
       </div>
 
       {/* List */}
-      <div className="hh-list" ref={listRef}>
+      <div className="hh-list" ref={listRef} data-stagger>
         {pageItems.map(item => {
           const isHafal = !!masteredMap[item.id]
           return (
             <div key={item.id} className={`hh-row ${isHafal ? 'checked' : ''}`}>
               <span className="hh-num">{item.num}</span>
-              <div className="hh-content" onClick={() => setDetailItem(item)}>
+              <button
+                className="hh-content"
+                onClick={() => setDetailItem(item)}
+                aria-label={`Lihat detail ${item.front}`}
+              >
                 <div className="hh-front">
                   <span className="hh-jp">{item.front}</span>
                   {item.reading && <span className="hh-reading">{item.reading}</span>}
                 </div>
                 <div className="hh-meaning">{item.meaning}</div>
-              </div>
+              </button>
               <button className={`hh-check-btn ${isHafal ? 'checked' : ''}`} onClick={() => doToggle(item.id)}>
                 {isHafal ? <CheckSquare size={28} /> : <Square size={28} />}
               </button>

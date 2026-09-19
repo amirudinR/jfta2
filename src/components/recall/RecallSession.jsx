@@ -15,7 +15,7 @@ export default function RecallSession({ entry, opts, choice, score, q, order, on
         <span className="qstat" style={{ marginLeft: 'auto', fontSize: 11 }}>· Recall</span>
       </div>
 
-      <div className="quiz-card">
+      <div className="quiz-card" key={q}>
         <div className="card-top">
           Recall · {labelOf(entry.category)} · {entry.groupLabel || 'Materi lama'}
         </div>

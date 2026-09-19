@@ -60,6 +60,15 @@
 
 .kp-click {
   cursor: pointer;
+  width: 100%;
+  text-align: left;
+  font-family: var(--font-ui);
+  color: var(--card-ink);
+  display: block;
+  transition: border-color 0.15s, background 0.15s;
+}
+.kp-click:hover {
+  border-color: var(--kin);
 }
 
 .kp-label {
@@ -219,7 +228,20 @@
   max-width: 40px;
   background: var(--kin);
   border-radius: 6px 6px 0 0;
+  transform-origin: bottom;
+  animation: kp-bar-grow 0.55s var(--ios-ease, cubic-bezier(0.32,0.72,0,1)) both;
 }
+@keyframes kp-bar-grow {
+  from { transform: scaleY(0); opacity: 0.4; }
+  to   { transform: scaleY(1); opacity: 1; }
+}
+.kp-act-col:nth-child(1) .kp-act-bar { animation-delay: 0.02s; }
+.kp-act-col:nth-child(2) .kp-act-bar { animation-delay: 0.07s; }
+.kp-act-col:nth-child(3) .kp-act-bar { animation-delay: 0.12s; }
+.kp-act-col:nth-child(4) .kp-act-bar { animation-delay: 0.17s; }
+.kp-act-col:nth-child(5) .kp-act-bar { animation-delay: 0.22s; }
+.kp-act-col:nth-child(6) .kp-act-bar { animation-delay: 0.27s; }
+.kp-act-col:nth-child(7) .kp-act-bar { animation-delay: 0.32s; }
 
 .kp-act-bar.empty {
   background: var(--panel-line);
@@ -229,6 +251,22 @@
   font-size: 11px;
   color: var(--card-soft);
   margin-top: 6px;
+}
+
+/* Statistik tingkat atas muncul berurutan (stagger) */
+.kp-stats-row > .kp-stat {
+  animation: ios-reveal-up 0.4s var(--ios-ease, cubic-bezier(0.32,0.72,0,1)) both;
+}
+.kp-stats-row > .kp-stat:nth-child(1) { animation-delay: 0.02s; }
+.kp-stats-row > .kp-stat:nth-child(2) { animation-delay: 0.06s; }
+.kp-stats-row > .kp-stat:nth-child(3) { animation-delay: 0.10s; }
+.kp-stats-row > .kp-stat:nth-child(4) { animation-delay: 0.14s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .kp-act-bar,
+  .kp-stats-row > .kp-stat {
+    animation: none !important;
+  }
 }
 
 .kp-srs-grid {

@@ -33,7 +33,7 @@
   font-weight: 500;
   font-family: var(--font-ui);
   cursor: pointer;
-  transition: color 0.15s;
+  transition: color var(--ios-dur-fast, 0.22s) var(--ios-ease, cubic-bezier(0.32,0.72,0,1));
   -webkit-tap-highlight-color: transparent;
   overflow: hidden;
 }
@@ -62,6 +62,15 @@
   justify-content: center;
   width: 32px;
   height: 28px;
+  transition: transform var(--ios-dur-pop, 0.34s) var(--ios-spring, cubic-bezier(0.34,1.56,0.64,1));
+}
+
+/* Ikon naik sedikit & spring saat tab jadi aktif */
+.bnav-item.active .bnav-icon-wrap {
+  transform: translateY(-1px) scale(1.06);
+}
+.bnav-item:active .bnav-icon-wrap {
+  transform: scale(0.9);
 }
 
 .bnav-label {
