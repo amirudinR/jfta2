@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react'
 import { Search, X, Volume2 } from 'lucide-react'
-import { imgUrl } from '../../lib/nemonik'
 import { speak, ttsSupported } from '../../lib/tts'
 
 const STATUS_FILTERS = [
@@ -113,15 +112,28 @@ export default function NemonikBrowse({ data, srs, onStudyOne, onBack }) {
           const st = srs[String(k.no)]?.status || 'baru'
           return (
             <div className="nemo-browse-row" key={k.no}>
-              <button className="nemo-browse-num" onClick={() => setSelected(k)}>{k.no}</button>
-              <div className="nemo-browse-main" onClick={() => setSelected(k)}>
+              <button
+                className="nemo-browse-num"
+                onClick={() => setSelected(k)}
+                aria-label={`Lihat detail kanji nomor ${k.no}`}
+              >{k.no}</button>
+              <button
+                type="button"
+                className="nemo-browse-main"
+                onClick={() => setSelected(k)}
+                aria-label={`Buka detail ${k.kanji} — ${k.arti}`}
+              >
                 <span className="nemo-browse-kanji">{k.kanji}</span>
                 <span className="nemo-browse-read">{k.baca_utama}</span>
                 <span className="nemo-browse-arti">{k.arti}</span>
-              </div>
-              <span className={`nemo-status-dot st-${st}`} title={st} />
+              </button>
+              <span className={`nemo-status-dot st-${st}`} title={st} aria-hidden />
               {canSpeak && (
-                <button className="nemo-browse-tts" onClick={() => speak(k.baca_utama || k.kanji)} aria-label="Dengarkan">
+                <button
+                  className="nemo-browse-tts"
+                  onClick={() => speak(k.baca_utama || k.kanji)}
+                  aria-label={`Dengarkan bacaan ${k.kanji}`}
+                >
                   <Volume2 size={16} />
                 </button>
               )}

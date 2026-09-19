@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { X, Timer, Play } from 'lucide-react'
 import { penalizeNemonik } from '../../lib/nemonik'
 import { logDailyReview } from '../../lib/nemonik-sessions'
+import { addXp, XP_TABLE } from '../../lib/nemonik-achievements'
 
 // Opsi konfigurasi kuis.
 const QUESTION_COUNTS = [10, 20]
@@ -33,28 +34,37 @@ function promptOf(type) {
 // Bangun soal. `pool` = kumpulan target kandidat, `all` = seluruh data (untuk pengecoh).
 function buildQuestion(pool, all, optionCount) {
   if (!pool || pool.length === 0 || !all || all.length < 2) return null
-  const target = pool[Math.floor(Math.random() * pool.length)]
-  const type = Math.floor(Math.random() * 3) + 1
-  const correct = answerOf(target, type)
 
-  const options = [correct]
-  let guard = 0
-  while (options.length < optionCount && guard < 300) {
-    guard++
-    const cand = all[Math.floor(Math.random() * all.length)]
-    const wrong = answerOf(cand, type)
-    if (wrong && wrong !== '—' && !options.includes(wrong)) options.push(wrong)
-  }
+  // Coba beberapa kali agar target/tipe menghasilkan jawaban valid
+  // (sebagian kanji tak punya onyomi/kunyomi → `correct` bisa kosong).
+  for (let attempt = 0; attempt < 12; attempt++) {
+    const target = pool[Math.floor(Math.random() * pool.length)]
+    const type = Math.floor(Math.random() * 3) + 1
+    const correct = answerOf(target, type)
+    if (!correct || correct === '—') continue
 
-  // Jika pengecoh kurang dari target (data seragam), pakai apa adanya.
-  return {
-    target,
-    type,
-    correct,
-    prompt: promptOf(type),
-    questionText: type === 1 ? target.kanji : type === 2 ? target.arti : target.kanji,
-    options: shuffle(options),
+    const options = [correct]
+    let guard = 0
+    while (options.length < optionCount && guard < 300) {
+      guard++
+      const cand = all[Math.floor(Math.random() * all.length)]
+      const wrong = answerOf(cand, type)
+      if (wrong && wrong !== '—' && !options.includes(wrong)) options.push(wrong)
+    }
+
+    // Butuh minimal 2 opsi agar soal bermakna.
+    if (options.length < 2) continue
+
+    return {
+      target,
+      type,
+      correct,
+      prompt: promptOf(type),
+      questionText: type === 1 ? target.kanji : type === 2 ? target.arti : target.kanji,
+      options: shuffle(options),
+    }
   }
+  return null
 }
 
 // Layar setup pra-kuis.
@@ -133,6 +143,10 @@ export default function NemonikQuiz({ data, srs, onSrsChange, onFinish }) {
   const srsRef = useRef(srs)
   useEffect(() => { srsRef.current = srs }, [srs])
 
+  // Timer jeda feedback antar-soal (dibersihkan saat unmount).
+  const advanceTimerRef = useRef(null)
+  useEffect(() => () => { if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current) }, [])
+
   // Kumpulan target kandidat sesuai konfigurasi (fokus lemah / semua).
   const candidatePool = useCallback((cfg, srsMap) => {
     if (!data || !cfg) return []
@@ -168,6 +182,7 @@ export default function NemonikQuiz({ data, srs, onSrsChange, onFinish }) {
     if (isCorrect) {
       setScore((s) => s + 1)
       logDailyReview(3)
+      addXp(XP_TABLE.quizCorrect)
     } else {
       setMistakes((m) => [...m, q.target])
       logDailyReview(1)
@@ -178,7 +193,7 @@ export default function NemonikQuiz({ data, srs, onSrsChange, onFinish }) {
     const answeredNow = answered + 1
     setAnswered(answeredNow)
 
-    setTimeout(() => {
+    advanceTimerRef.current = setTimeout(() => {
       if (answeredNow >= config.count) finishQuiz()
       else next(config)
     }, 350)

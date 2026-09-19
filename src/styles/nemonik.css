@@ -946,6 +946,14 @@
   gap: 0 10px;
   align-items: center;
   cursor: pointer;
+  /* reset default button (kini <button> untuk aksesibilitas keyboard) */
+  border: none;
+  background: none;
+  padding: 0;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  -webkit-tap-highlight-color: transparent;
 }
 .nemo-browse-kanji {
   grid-row: span 2;

@@ -68,7 +68,7 @@ function CardBody({ entry }) {
   )
 }
 
-export default function NemonikStudy({ queue, onGrade, onFinish }) {
+export default function NemonikStudy({ queue, onGrade, onFinish, onRepeatWeak }) {
   const [index, setIndex] = useState(0)
 
   // Drag state

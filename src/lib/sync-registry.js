@@ -124,7 +124,7 @@ export const SYNC_STORES = [
   { key: 'hh2-nemonik-srs', path: (uid) => `users/${uid}/hh/nemonik-srs`, merge: lww },
   { key: 'hh2-nemonik-streak', path: (uid) => `users/${uid}/hh/nemonik-streak`, merge: lww },
   { key: 'hh2-nemonik-last-login', path: (uid) => `users/${uid}/hh/nemonik-last-login`, merge: lww },
-  // Log harian (union per tanggal) & riwayat sesi (append terbaru menang).
+  // Log harian (union per tanggal) & riwayat sesi (daftar; sisi terbaru menang).
   { key: 'hh2-nemonik-daily-log', path: (uid) => `users/${uid}/hh/nemonik-daily-log`, merge: mergeDays },
   { key: 'hh2-nemonik-sessions', path: (uid) => `users/${uid}/hh/nemonik-sessions`, merge: lww },
   // Achievement/XP Nemonik.
