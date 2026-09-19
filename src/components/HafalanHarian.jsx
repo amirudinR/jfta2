@@ -166,7 +166,7 @@ export default function HafalanHarian({ onGoMateri, onGoRecall, level = 'a2' }) 
       )}
 
       {/* Item List */}
-      <div className="hh-list">
+      <div className="hh-list" data-stagger>
         {items.map((item) => {
           const isChecked = !!checkedMap?.[item.id]
           return (
@@ -232,14 +232,12 @@ export default function HafalanHarian({ onGoMateri, onGoRecall, level = 'a2' }) 
         Total: {(totalMap[tab] || []).length} item
       </div>
 
-      {detailItem && (
-        <DetailModal
-          item={detailItem}
-          isChecked={!!checkedMap?.[detailItem.id]}
-          onToggle={() => toggle(tab, detailItem.id)}
-          onClose={() => setDetailItem(null)}
-        />
-      )}
+      <DetailModal
+        item={detailItem}
+        isChecked={!!(detailItem && checkedMap?.[detailItem.id])}
+        onToggle={() => detailItem && toggle(tab, detailItem.id)}
+        onClose={() => setDetailItem(null)}
+      />
       </>
       )}
     </div>

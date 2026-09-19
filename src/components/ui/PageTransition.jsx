@@ -2,8 +2,8 @@ import { useRef } from 'react'
 
 // Urutan hierarki navigasi (indeks makin besar = makin "dalam").
 // Dipakai untuk menentukan arah transisi ala iOS:
-//   maju (indeks naik)  → konten baru masuk dari KANAN (slide-in kanan)
-//   mundur (indeks turun) → konten baru masuk dari KIRI (slide-in kiri)
+//   maju (indeks naik)  → konten baru masuk dari KANAN (push)
+//   mundur (indeks turun) → konten baru masuk dari KIRI (pop)
 // Mode yang tidak terdaftar diperlakukan "maju".
 const NAV_ORDER = [
   'harian', 'kemampuan', 'referensi', 'daftar', 'materi', 'profil',
@@ -17,14 +17,22 @@ function rankOf(mode) {
   return i === -1 ? NAV_ORDER.length : i
 }
 
-// Membungkus konten halaman dengan animasi transisi halus (iOS-like).
+// Membungkus konten halaman dengan animasi transisi halus ala iOS.
+//
 // `mode` = kunci halaman. `key={mode}` memaksa remount → animasi masuk
-// dijalankan ulang. Arah dihitung IDEMPOTEN (aman untuk StrictMode render
-// ganda): bandingkan `mode` dengan mode yang tersimpan, dan hanya simpan mode
-// bila benar-benar berubah — sehingga render kedua dgn mode sama tak
-// membalik arah.
+// dijalankan ulang. Arah (push/pop) ditentukan dari perbandingan rank mode
+// sebelumnya vs sekarang.
+//
+// CATATAN DESAIN: kita sengaja TIDAK merender konten lama secara paralel
+// (parallax dua-layer) seperti di native. Merender dua React tree sekaligus
+// membuat useEffect anak (auto-focus, timer, fetch) jalan dua kali — rapuh &
+// boros pada web. Sebagai gantinya, konten baru masuk dengan kombinasi
+// slide + scale + fade yang dikalibrasi agar terasa push/pop: cukup meyakinkan,
+// tetap 60fps, dan nol risiko efek-samping ganda.
+//
+// Arah dihitung IDEMPOTEN (aman StrictMode render ganda): bandingkan `mode`
+// dgn mode tersimpan & hanya simpan bila benar-benar berubah.
 export default function PageTransition({ mode, children }) {
-  // stateRef: { prev, dir } — dihitung sekali per perubahan mode.
   const stateRef = useRef({ prev: mode, dir: 'forward' })
   if (mode !== stateRef.current.prev) {
     stateRef.current = {

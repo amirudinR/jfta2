@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Search, X, Volume2 } from 'lucide-react'
 import { speak, ttsSupported } from '../../lib/tts'
+import { useExitAnimation } from '../../hooks/useExitAnimation'
 
 const STATUS_FILTERS = [
   { key: 'all', label: 'Semua' },
@@ -55,6 +56,11 @@ export default function NemonikBrowse({ data, srs, onStudyOne, onBack }) {
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState('all')
   const [selected, setSelected] = useState(null)
+  const { mounted: detailMounted, closing: detailClosing } = useExitAnimation(!!selected, { duration: 220 })
+  // Simpan entri terakhir agar sheet tetap punya konten selama animasi keluar.
+  const lastSelectedRef = useRef(null)
+  if (selected) lastSelectedRef.current = selected
+  const detailEntry = selected || lastSelectedRef.current
 
   const list = useMemo(() => {
     if (!data) return []
@@ -108,7 +114,7 @@ export default function NemonikBrowse({ data, srs, onStudyOne, onBack }) {
 
       <div className="nemo-browse-count">{list.length} kanji</div>
 
-      <div className="nemo-browse-list">
+      <div className="nemo-browse-list" data-stagger>
         {list.map((k) => {
           const st = srs[String(k.no)]?.status || 'baru'
           return (
@@ -147,15 +153,21 @@ export default function NemonikBrowse({ data, srs, onStudyOne, onBack }) {
       {/* Detail modal (mnemonic + aksi belajar kartu ini). Di-portal ke body
           agar `position: fixed` benar-benar menutup viewport (tak ter-pin ke
           wrapper ber-transform). */}
-      {selected && createPortal(
-        <div className="nemo-browse-modal" onClick={() => setSelected(null)}>
-          <div className="nemo-browse-sheet" onClick={(e) => e.stopPropagation()}>
+      {detailMounted && detailEntry && createPortal(
+        <div
+          className={`nemo-browse-modal ${detailClosing ? 'ios-backdrop-out' : 'ios-backdrop-in'}`}
+          onClick={() => setSelected(null)}
+        >
+          <div
+            className={`nemo-browse-sheet ${detailClosing ? 'ios-sheet-out' : 'ios-sheet-in'}`}
+            onClick={(e) => e.stopPropagation()}
+          >
             <button className="nemo-browse-sheet-close" onClick={() => setSelected(null)} aria-label="Tutup">
               <X size={18} />
             </button>
-            <MnemonicPanel entry={selected} />
+            <MnemonicPanel entry={detailEntry} />
             <div className="nemo-browse-sheet-actions">
-              <button className="nemo-btn primary" onClick={() => onStudyOne(selected)}>Belajar kartu ini</button>
+              <button className="nemo-btn primary" onClick={() => onStudyOne(detailEntry)}>Belajar kartu ini</button>
             </div>
           </div>
         </div>,

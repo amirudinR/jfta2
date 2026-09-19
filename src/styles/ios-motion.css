@@ -1,0 +1,281 @@
+/* ============================================================
+   iOS Motion System — fondasi animasi terpusat (ala iPhone)
+   ------------------------------------------------------------
+   Semua transisi di app memakai token & keyframe dari file ini
+   agar terasa konsisten, spring, dan smooth 60fps.
+
+   Prinsip:
+   - Hanya animate `transform` + `opacity` (compositor-only).
+   - JANGAN `will-change` permanen pada elemen yang punya descendant
+     `position: fixed` (jadi containing-block → overlay ter-pin).
+   - Kurva spring iOS: cubic-bezier(0.32, 0.72, 0, 1).
+   ============================================================ */
+
+:root {
+  /* ── Easing ── */
+  --ios-ease: cubic-bezier(0.32, 0.72, 0, 1);        /* spring "decelerate" khas iOS */
+  --ios-ease-out: cubic-bezier(0.16, 1, 0.3, 1);     /* exit lembut */
+  --ios-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1); /* akselerasi simetris */
+  --ios-spring: cubic-bezier(0.34, 1.56, 0.64, 1);   /* sedikit overshoot (pop) */
+
+  /* ── Durasi ── */
+  --ios-dur: 0.36s;        /* transisi halaman */
+  --ios-dur-sheet: 0.42s;  /* bottom-sheet naik */
+  --ios-dur-fast: 0.22s;   /* toast, mikro-interaksi */
+  --ios-dur-pop: 0.34s;    /* pop/overshoot */
+
+  /* ── Jarak & skala ── */
+  --ios-page-slide: 30px;
+  --ios-scale-small: 0.97;
+  --ios-scale-page: 0.988;
+}
+
+/* ============================================================
+   1. PAGE TRANSITION — push/pop ala UINavigationController
+   ------------------------------------------------------------
+   Konten baru masuk dari arah sesuai hierarki navigasi, dengan
+   kombinasi slide + scale + fade yang dikalibrasi agar terasa
+   push (maju / masuk) & pop (mundur / kembali).
+   ============================================================ */
+
+/* Masuk — maju (push ke "dalam"): konten baru dari KANAN. */
+@keyframes ios-page-in-forward {
+  from {
+    opacity: 0;
+    transform: translateX(30px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+/* Masuk — mundur (pop ke "luar"): konten baru dari KIRI. */
+@keyframes ios-page-in-back {
+  from {
+    opacity: 0;
+    transform: translateX(-30px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+/* Masuk — default (fade + sedikit naik). */
+@keyframes ios-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.994);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.page-transition {
+  /* 'backwards' (bukan 'both'): transform translateX/Y(0) TIDAK melekat
+     permanen → elemen tidak jadi containing-block bagi `position: fixed`. */
+  animation: ios-page-in var(--ios-dur) var(--ios-ease) backwards;
+  overflow-anchor: none;
+  /* JANGAN pakai `will-change: transform` — lihat catatan di atas. */
+}
+
+.page-transition.page-forward {
+  animation-name: ios-page-in-forward;
+}
+.page-transition.page-back {
+  animation-name: ios-page-in-back;
+}
+
+/* ============================================================
+   2. BOTTOM SHEET / MODAL — naik dari bawah dgn spring
+   ============================================================ */
+
+@keyframes ios-sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes ios-sheet-out {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes ios-sheet-in-center {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes ios-sheet-out-center {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+}
+
+/* Backdrop: fade masuk & keluar. */
+@keyframes ios-backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes ios-backdrop-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+.ios-backdrop-in  { animation: ios-backdrop-in  var(--ios-dur-fast) ease-out both; }
+.ios-backdrop-out { animation: ios-backdrop-out var(--ios-dur-fast) ease-in  both; }
+
+/* Sheet (bottom) */
+.ios-sheet-in  { animation: ios-sheet-in  var(--ios-dur-sheet) var(--ios-ease) both; }
+.ios-sheet-out { animation: ios-sheet-out var(--ios-dur-fast)  var(--ios-ease-in-out) both; }
+
+/* Sheet (center pada layar besar) */
+.ios-sheet-center-in  { animation: ios-sheet-in-center  var(--ios-dur-sheet) var(--ios-ease) both; }
+.ios-sheet-center-out { animation: ios-sheet-out-center var(--ios-dur-fast)  var(--ios-ease-in-out) both; }
+
+/* ============================================================
+   3. TOAST / BADGE — muncul naik + pop, lalu turun saat hilang
+   ============================================================ */
+
+@keyframes ios-toast-in {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 20px) scale(0.9);
+  }
+  60% {
+    opacity: 1;
+    transform: translate(-50%, -2px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
+@keyframes ios-toast-out {
+  from {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, 16px) scale(0.94);
+  }
+}
+
+.ios-toast-in  { animation: ios-toast-in  var(--ios-dur-pop) var(--ios-ease) both; }
+.ios-toast-out { animation: ios-toast-out var(--ios-dur-fast) var(--ios-ease-in-out) both; }
+
+/* ============================================================
+   4. CONTENT REVEAL — item muncul berurutan (stagger)
+   ------------------------------------------------------------
+   Pakai ::before? Tidak. Cukup beri `--reveal-i` per item, atau
+   biarkan CSS animation-delay bertingkat via nth-child di skop
+   yang relevan. Helper `data-stagger` di container.
+   ============================================================ */
+
+@keyframes ios-reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Container dengan [data-stagger] → anak pertama muncul berurutan.
+   HANYA 12 anak pertama yang dianimasikan; sisanya tampil langsung —
+   penting untuk daftar panjang (mis. 361 kanji) agar tidak membebani
+   compositor & tidak memberi delay tak terbatas.
+   Empty-state (.hh-empty / .nemo-browse-empty) dikecualikan karena itu
+   bukan item daftar — animasinya justru mengganggu. */
+[data-stagger] > *:nth-child(-n+12):not(.hh-empty):not(.nemo-browse-empty) {
+  animation: ios-reveal-up 0.4s var(--ios-ease) both;
+}
+[data-stagger] > *:nth-child(1)  { animation-delay: 0.00s; }
+[data-stagger] > *:nth-child(2)  { animation-delay: 0.035s; }
+[data-stagger] > *:nth-child(3)  { animation-delay: 0.07s; }
+[data-stagger] > *:nth-child(4)  { animation-delay: 0.105s; }
+[data-stagger] > *:nth-child(5)  { animation-delay: 0.14s; }
+[data-stagger] > *:nth-child(6)  { animation-delay: 0.175s; }
+[data-stagger] > *:nth-child(7)  { animation-delay: 0.21s; }
+[data-stagger] > *:nth-child(8)  { animation-delay: 0.245s; }
+[data-stagger] > *:nth-child(9)  { animation-delay: 0.28s; }
+[data-stagger] > *:nth-child(10) { animation-delay: 0.315s; }
+[data-stagger] > *:nth-child(11) { animation-delay: 0.35s; }
+[data-stagger] > *:nth-child(12) { animation-delay: 0.385s; }
+
+/* ============================================================
+   5. TAB / SEGMENT — indikator geser halus
+   ============================================================ */
+
+.tab-indicator {
+  transition: transform var(--ios-dur-fast) var(--ios-ease);
+}
+
+/* Konten tab masuk halus saat berganti */
+@keyframes ios-tab-in {
+  from { opacity: 0; transform: translateX(8px); }
+  to   { opacity: 1; transform: none; }
+}
+.ios-tab-in { animation: ios-tab-in 0.28s var(--ios-ease) backwards; }
+
+/* ============================================================
+   6. LARGE TITLE (header collapse) — ditangani komponen dgn
+   menambah/hapus kelas. Di sini hanya transisi halusnya.
+   ============================================================ */
+
+.ios-large-title {
+  transition:
+    font-size 0.28s var(--ios-ease),
+    opacity 0.28s var(--ios-ease),
+    transform 0.28s var(--ios-ease),
+    padding 0.28s var(--ios-ease);
+  transform-origin: left center;
+}
+
+/* ============================================================
+   7. REDUCED MOTION — matikan semua gerak
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .page-transition,
+  [data-stagger] > *,
+  .ios-backdrop-in,
+  .ios-backdrop-out,
+  .ios-sheet-in,
+  .ios-sheet-out,
+  .ios-sheet-center-in,
+  .ios-sheet-center-out,
+  .ios-toast-in,
+  .ios-toast-out,
+  .ios-tab-in {
+    animation: none !important;
+  }
+  .ios-large-title {
+    transition: none !important;
+  }
+}

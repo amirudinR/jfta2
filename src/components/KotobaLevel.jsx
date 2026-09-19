@@ -139,7 +139,9 @@ export default function KotobaLevel({ material, label, hankoText, cards, prefs, 
         </div>
       ) : null}
 
-      {body()}
+      <div key={tab} className="ios-tab-in">
+        {body()}
+      </div>
     </div>
   )
 }

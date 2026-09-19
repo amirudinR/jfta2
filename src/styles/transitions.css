@@ -1,98 +1,15 @@
 /* ============================================================
-   Page Transition — smooth iOS-style saat ganti mode
-   - Kurva spring iOS: cubic-bezier(0.32, 0.72, 0, 1)
-   - Arah: maju (naik level navigasi) → masuk dari kanan;
-           mundur → masuk dari kiri. Durasi ~0.36s.
+   Transitions — sisa efek spesifik
+   ------------------------------------------------------------
+   CATATAN: token motion (:root `--ios-*`), keyframe halaman, dan
+   seluruh animasi overlay (sheet/toast/stagger/tab) kini terpusat
+   di `ios-motion.css` yang diimpor LEBIH DULU di index.css.
+   Jadi file ini hanya menampung efek yang belum pindah ke sana.
+   Reduced-motion untuk animasi utama ditangani di ios-motion.css.
    ============================================================ */
 
-/* Kurva & durasi halus ala iOS */
-:root {
-  --ios-ease: cubic-bezier(0.32, 0.72, 0, 1);
-  --ios-dur: 0.36s;
-}
-
-@keyframes page-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px) scale(0.994);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes page-in-forward {
-  from {
-    opacity: 0;
-    transform: translateX(28px) scale(0.988);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
-}
-
-@keyframes page-in-back {
-  from {
-    opacity: 0;
-    transform: translateX(-28px) scale(0.988);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
-}
-
-.page-transition {
-  /* 'backwards' (bukan 'both'): keyframe akhir TIDAK dipertahankan, sehingga
-     transform translateX/Y(0) tidak melekat permanen. Transform yang menempel
-     akan jadi containing-block bagi position:fixed (mis. modal) — membuat
-     overlay modal ter-pin ke wrapper, bukan viewport. */
-  animation: page-in var(--ios-dur) var(--ios-ease) backwards;
-  /* Cegah scroll-anchoring browser melompat ke bawah saat konten remount. */
-  overflow-anchor: none;
-  /* CATATAN: JANGAN pakai `will-change: transform` di sini — properti itu
-     (bersifat permanen) menjadikan elemen sebagai containing-block bagi
-     descendant `position: fixed` (mis. modal browse Nemonik), sehingga overlay
-     ter-pin ke wrapper, bukan viewport. Animasi tetap 60fps tanpa itu karena
-     hanya opacity/transform yang dianimasikan. */
-}
-
-/* Arah transisi ala iOS (ditentukan oleh komponen PageTransition) */
-.page-transition.page-forward {
-  animation-name: page-in-forward;
-}
-
-.page-transition.page-back {
-  animation-name: page-in-back;
-}
-
-/* Sidebar slide backdrop */
+/* Sidebar slide backdrop (keyframe dipakai oleh .sidebar-backdrop bila perlu) */
 @keyframes fade-in {
   from { opacity: 0; }
   to   { opacity: 1; }
-}
-
-/* Kartu flash saat grade */
-@keyframes flash-ok {
-  0%   { background: rgba(100, 200, 120, 0.15); }
-  100% { background: transparent; }
-}
-
-@keyframes flash-err {
-  0%   { background: rgba(200, 80, 60, 0.15); }
-  100% { background: transparent; }
-}
-
-.flash-ok  { animation: flash-ok  0.35s ease both; }
-.flash-err { animation: flash-err 0.35s ease both; }
-
-/* Reduced motion: matikan semua animasi */
-@media (prefers-reduced-motion: reduce) {
-  .page-transition,
-  .flash-ok,
-  .flash-err {
-    animation: none !important;
-  }
 }

@@ -1000,9 +1000,8 @@
   background: var(--card-face);
   border-radius: 20px 20px 0 0;
   padding: 18px;
-  animation: nemo-sheet-in 0.22s ease-out;
+  /* Animasi masuk/keluar via kelas ios-sheet-in/out (ios-motion.css). */
 }
-@keyframes nemo-sheet-in { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
 .nemo-browse-sheet-close {
   position: absolute;
   top: 12px; right: 12px;
@@ -1150,9 +1149,8 @@
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
   font-family: var(--font-ui);
   cursor: pointer;
-  animation: nemo-toast-in 0.25s ease-out;
+  /* Animasi masuk/keluar via kelas ios-toast-in/out (ios-motion.css). */
 }
-@keyframes nemo-toast-in { from { opacity: 0; transform: translate(-50%, 12px); } to { opacity: 1; transform: translate(-50%, 0); } }
 .nemo-toast svg { color: var(--kin); flex: none; }
 .nemo-toast-title { font-weight: 700; font-size: 0.9rem; }
 .nemo-toast-desc { font-size: 0.78rem; color: var(--page-soft, #8fa8c0); }

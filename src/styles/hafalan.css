@@ -1102,13 +1102,8 @@ html.dark-mode .hh-row.checked {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  animation: hh-fade-in .2s ease;
   -webkit-tap-highlight-color: transparent;
-}
-
-@keyframes hh-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  /* Animasi masuk/keluar via kelas ios-backdrop-in/out (ios-motion.css). */
 }
 
 .hh-modal {
@@ -1120,14 +1115,9 @@ html.dark-mode .hh-row.checked {
   padding: 24px 20px 32px;
   position: relative;
   overflow-y: auto;
-  animation: hh-slide-up .25s ease;
+  /* Animasi masuk/keluar via kelas ios-sheet-in/out (ios-motion.css). */
   /* Aman dari home indicator (iPhone berponi) — tombol aksi tidak tertutup */
   padding-bottom: calc(32px + env(safe-area-inset-bottom));
-}
-
-@keyframes hh-slide-up {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
 }
 
 @media (min-width: 480px) {

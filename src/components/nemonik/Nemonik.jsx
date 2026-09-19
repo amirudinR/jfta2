@@ -16,6 +16,7 @@ import NemonikStudy from './NemonikStudy'
 import NemonikQuiz from './NemonikQuiz'
 import NemonikBrowse from './NemonikBrowse'
 import NemonikAchievements from './NemonikAchievements'
+import { useExitAnimation } from '../../hooks/useExitAnimation'
 
 // Nemonik Kanji — kontainer halaman (port dari nemonik/ mandiri ke React).
 // Fase internal: 'dashboard' | 'study' | 'quiz'. Layout kartu (gambar kiri/kanan)
@@ -37,6 +38,11 @@ export default function Nemonik({ onBack }) {
   const [ach, setAch] = useState(() => getAchievements())
   // Notifikasi badge baru (toast kecil, auto-hilang).
   const [badgeToast, setBadgeToast] = useState(null)
+  // Simpan konten toast terakhir agar animasi keluar tetap punya data render.
+  const lastToastRef = useRef(null)
+  if (badgeToast) lastToastRef.current = badgeToast
+  // duration diselaraskan dgn --ios-dur-fast (0.22s) agar animasi keluar tak terpotong.
+  const { mounted: toastMounted, closing: toastClosing } = useExitAnimation(!!badgeToast, { duration: 220 })
 
   // Waktu mulai sesi study berjalan (perf.now) → untuk hitung durasi sesi.
   const sessionStartRef = useRef(0)
@@ -295,12 +301,16 @@ export default function Nemonik({ onBack }) {
         />
       )}
 
-      {badgeToast && createPortal(
-        <div className="nemo-toast" role="status" onClick={() => setBadgeToast(null)}>
+      {toastMounted && lastToastRef.current && createPortal(
+        <div
+          className={`nemo-toast ${toastClosing ? 'ios-toast-out' : 'ios-toast-in'}`}
+          role="status"
+          onClick={() => setBadgeToast(null)}
+        >
           <Award size={18} />
           <div className="nemo-toast-body">
-            <div className="nemo-toast-title">Badge baru: {badgeToast.label}</div>
-            <div className="nemo-toast-desc">{badgeToast.desc}</div>
+            <div className="nemo-toast-title">Badge baru: {lastToastRef.current.label}</div>
+            <div className="nemo-toast-desc">{lastToastRef.current.desc}</div>
           </div>
         </div>,
         document.body,

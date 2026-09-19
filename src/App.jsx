@@ -42,6 +42,7 @@ import { resetDailyProgress } from './lib/hafalan-storage'
 import { useAuth } from './hooks/useAuth'
 import { useLiveSync } from './hooks/useLiveSync'
 import { useAppSettings } from './hooks/useAppSettings'
+import { useScrollHeader } from './hooks/useScrollHeader'
 import { saveExamResult } from './lib/cloud-sync'
 import {
   getSavedLevel, saveLevel, pickQuote,
@@ -102,6 +103,8 @@ export default function App() {
   }
   useLiveSync(user, handleCloudApplied)
   useAppSettings(prefs)
+  // Efek "large title" ala iOS: header menciut & sembunyi saat scroll ke bawah.
+  useScrollHeader()
 
   const setPrefs = (partial) => {
     const next = { ...prefs, ...partial }

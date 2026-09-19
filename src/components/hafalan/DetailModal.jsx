@@ -2,11 +2,26 @@ import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { X, Volume2, CheckSquare, Square } from 'lucide-react'
 import { speak } from '../../lib/tts'
+import { useExitAnimation } from '../../hooks/useExitAnimation'
 
 export function DetailModal({ item, isChecked, onToggle, onClose }) {
   const panelRef = useRef(null)
+  const open = !!item
+  const { mounted, closing } = useExitAnimation(open, { duration: 220 })
+  // Simpan item terakhir agar panel tetap punya konten selama animasi keluar.
+  const lastItemRef = useRef(null)
+  if (item) lastItemRef.current = item
+  const shown = item || lastItemRef.current
+
+  // Simpan onClose di ref: parent sering membuat fungsi baru tiap render
+  // (mis. `() => setDetailItem(null)`), sehingga bila dipakai langsung sebagai
+  // dependency efek, efek akan re-run tiap render → fokus loncat & scroll-lock
+  // "churn". Dengan ref, efek hanya bergantung pada status buka + item.
+  const onCloseRef = useRef(onClose)
+  onCloseRef.current = onClose
 
   useEffect(() => {
+    if (!mounted) return
     const panel = panelRef.current
     const first = panel?.querySelector('.hh-modal-close')
     // preventScroll: jangan biarkan browser scroll dokumen saat focus
@@ -17,7 +32,7 @@ export function DetailModal({ item, isChecked, onToggle, onClose }) {
     const prevOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
 
-    const handler = (e) => { if (e.key === 'Escape') onClose() }
+    const handler = (e) => { if (e.key === 'Escape') onCloseRef.current?.() }
     const trap = (e) => {
       if (e.key !== 'Tab' || !panel) return
       const focusables = [...panel.querySelectorAll('button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')]
@@ -39,19 +54,34 @@ export function DetailModal({ item, isChecked, onToggle, onClose }) {
       window.removeEventListener('keydown', handler)
       panel?.removeEventListener('keydown', trap)
     }
-  }, [onClose])
+    // deps sengaja tanpa `item`: efek hanya perlu re-run saat modal dibuka/ditutup,
+    // bukan tiap ganti item. `item?.id` memicu reset fokus bila item berganti.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mounted, item?.id])
+
+  if (!mounted || !shown) return null
 
   return createPortal(
-    <div className="hh-modal-overlay" onClick={onClose}>
-      <div className="hh-modal" role="dialog" aria-modal="true" aria-label={item.front} ref={panelRef} onClick={e => e.stopPropagation()}>
+    <div
+      className={`hh-modal-overlay ${closing ? 'ios-backdrop-out' : 'ios-backdrop-in'}`}
+      onClick={onClose}
+    >
+      <div
+        className={`hh-modal ${closing ? 'ios-sheet-out' : 'ios-sheet-in'}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label={shown.front}
+        ref={panelRef}
+        onClick={e => e.stopPropagation()}
+      >
         <button className="hh-modal-close" onClick={onClose}><X size={20} /></button>
 
         <div className="hh-modal-main">
-          <span className="hh-modal-num">#{item.num}</span>
-          <div className="hh-modal-front">{item.front}</div>
-          {item.reading && <div className="hh-modal-reading">{item.reading}</div>}
-          <div className="hh-modal-meaning">{item.full || item.meaning}</div>
-          {item.example && <div className="hh-modal-example">例: {item.example}</div>}
+          <span className="hh-modal-num">#{shown.num}</span>
+          <div className="hh-modal-front">{shown.front}</div>
+          {shown.reading && <div className="hh-modal-reading">{shown.reading}</div>}
+          <div className="hh-modal-meaning">{shown.full || shown.meaning}</div>
+          {shown.example && <div className="hh-modal-example">例: {shown.example}</div>}
         </div>
 
         <div className="hh-modal-actions">
@@ -59,7 +89,7 @@ export function DetailModal({ item, isChecked, onToggle, onClose }) {
             {isChecked ? <CheckSquare size={22} /> : <Square size={22} />}
             {isChecked ? 'Sudah Hafal' : 'Tandai Hafal'}
           </button>
-          <button className="hh-modal-tts" onClick={() => speak(item.reading || item.front)} title="Dengarkan">
+          <button className="hh-modal-tts" onClick={() => speak(shown.reading || shown.front)} title="Dengarkan">
             <Volume2 size={20} />
           </button>
         </div>

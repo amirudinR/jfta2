@@ -208,3 +208,80 @@
   object-fit: cover;
   border: 2px solid rgba(193, 148, 63, 0.4);
 }
+
+/* ============================================================
+   Large-title collapse ala iOS (dikendalikan useScrollHeader.js)
+   ------------------------------------------------------------
+   - Sticky + backdrop blur khas iOS (frosted glass).
+   - Saat scroll melewati threshold → brand & tagline menciut.
+   - Saat scroll ke bawah → header menyembunyikan diri; ke atas → muncul.
+   Semua hanya transform/opacity/padding → 60fps.
+   ============================================================ */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  /* Full-bleed di dalam kolom `.stage` (yang punya padding 14px) supaya
+     lapisan frosted menutupi tepat sampai tepi kolom, tanpa celah bocor. */
+  margin-inline: -14px;
+  padding-inline: 14px;
+  padding-bottom: 8px;
+  background: color-mix(in srgb, #0e2433 76%, transparent);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  transition:
+    padding 0.3s var(--ios-ease, cubic-bezier(0.32, 0.72, 0, 1)),
+    transform 0.34s var(--ios-ease, cubic-bezier(0.32, 0.72, 0, 1)),
+    box-shadow 0.3s ease,
+    background-color 0.3s ease;
+}
+
+/* Brand + tagline: ciut saat halaman di-scroll (large-title shrink). */
+.brand,
+.tagline {
+  transform-origin: left center;
+  transition:
+    font-size 0.3s var(--ios-ease, cubic-bezier(0.32, 0.72, 0, 1)),
+    opacity 0.24s ease,
+    transform 0.3s var(--ios-ease, cubic-bezier(0.32, 0.72, 0, 1));
+}
+
+html[data-scrolled='true'] .topbar {
+  padding-top: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+}
+
+html[data-scrolled='true'] .brand {
+  font-size: 0.94em;
+}
+
+html[data-scrolled='true'] .tagline {
+  opacity: 0;
+  transform: translateY(-4px);
+  max-height: 0;
+}
+
+html[data-scrolled='true'] .hanko {
+  width: 38px;
+  height: 38px;
+  font-size: 13px;
+  transition: width 0.3s var(--ios-ease, cubic-bezier(0.32, 0.72, 0, 1)),
+    height 0.3s var(--ios-ease, cubic-bezier(0.32, 0.72, 0, 1));
+}
+
+/* Sembunyikan header saat scroll ke bawah (ala iOS Mail/Safari). */
+html[data-scroll-hidden='true'] .topbar {
+  transform: translateY(-100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topbar,
+  .brand,
+  .tagline,
+  .hanko {
+    transition: none !important;
+  }
+  html[data-scroll-hidden='true'] .topbar {
+    transform: none;
+  }
+}
