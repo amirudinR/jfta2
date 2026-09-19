@@ -1,12 +1,16 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ChevronLeft, Brain, Loader2 } from 'lucide-react'
 import {
   loadNemonik, getNemonikSrs, ensureSrs, gradeNemonik,
   nemonikStats, checkNemonikStreak,
 } from '../../lib/nemonik'
+import {
+  logDailyReview, saveSession, getSessions, sessionSummary,
+} from '../../lib/nemonik-sessions'
 import NemonikDashboard from './NemonikDashboard'
 import NemonikStudy from './NemonikStudy'
 import NemonikQuiz from './NemonikQuiz'
+import NemonikBrowse from './NemonikBrowse'
 
 // Nemonik Kanji — kontainer halaman (port dari nemonik/ mandiri ke React).
 // Fase internal: 'dashboard' | 'study' | 'quiz'. Layout kartu (gambar kiri/kanan)
@@ -18,6 +22,17 @@ export default function Nemonik({ onBack }) {
   const [error, setError] = useState('')
   const [phase, setPhase] = useState('dashboard')
   const [queue, setQueue] = useState([])
+  // Penanda sesi study: dinaikkan tiap mulai sesi baru (termasuk "ulangi kartu
+  // lemah") → dipasang sebagai `key` NemonikStudy agar state internal (index,
+  // rating, dsb) ter-reset/remount, bukan mewarisi state sesi sebelumnya.
+  const [studyKey, setStudyKey] = useState(0)
+  // Riwayat sesi (untuk ditampilkan di Dashboard).
+  const [sessions, setSessions] = useState(() => getSessions())
+
+  // Waktu mulai sesi study berjalan (perf.now) → untuk hitung durasi sesi.
+  const sessionStartRef = useRef(0)
+  // Papan skor sesi berjalan: jumlah per rating.
+  const sessionTallyRef = useRef({ total: 0, lupa: 0, sulit: 0, tahu: 0 })
 
   // Muat data + inisialisasi SRS + streak sekali.
   useEffect(() => {
@@ -42,24 +57,25 @@ export default function Nemonik({ onBack }) {
   )
 
   // Mulai sesi belajar: semua status 'baru'/'belajar' (fallback: semua kartu).
+  const beginStudy = useCallback((q) => {
+    sessionStartRef.current = (typeof performance !== 'undefined' ? performance.now() : Date.now())
+    sessionTallyRef.current = { total: 0, lupa: 0, sulit: 0, tahu: 0 }
+    setQueue(q)
+    setStudyKey((k) => k + 1)
+    setPhase('study')
+  }, [])
+
   const startStudy = useCallback((filterFn) => {
     if (!data) return
     let q = data.filter((k) => filterFn(srs[String(k.no)]))
     if (q.length === 0) q = data
-    setQueue(q)
-    setPhase('study')
-  }, [data, srs])
+    beginStudy(q)
+  }, [data, srs, beginStudy])
 
   const startLearn = useCallback(
     () => startStudy((s) => !s || s.status === 'baru' || s.status === 'belajar'),
     [startStudy],
   )
-
-  const startBrowseAll = useCallback(() => {
-    if (!data) return
-    setQueue(data)
-    setPhase('study')
-  }, [data])
 
   const startReview = useCallback(() => {
     if (!data) return
@@ -69,18 +85,62 @@ export default function Nemonik({ onBack }) {
       return s && s.status !== 'baru' && (s.nextReview || 0) <= now
     })
     if (q.length === 0) return
-    setQueue(q)
-    setPhase('study')
-  }, [data, srs])
+    beginStudy(q)
+  }, [data, srs, beginStudy])
 
   const handleGrade = useCallback((id, rating) => {
     setSrs((prev) => gradeNemonik(prev, id, rating))
+    // Log harian (per kartu) + akumulasi papan skor sesi.
+    logDailyReview(rating)
+    const t = sessionTallyRef.current
+    t.total += 1
+    if (rating === 1) t.lupa += 1
+    else if (rating === 2) t.sulit += 1
+    else t.tahu += 1
   }, [])
 
-  const backToDashboard = useCallback(() => {
+  // Simpan sesi berjalan ke riwayat lalu kembali ke dashboard.
+  const finishSession = useCallback(() => {
+    const t = sessionTallyRef.current
+    if (t.total > 0) {
+      const end = (typeof performance !== 'undefined' ? performance.now() : Date.now())
+      const dur = Math.max(0, end - sessionStartRef.current)
+      saveSession({ ...t, dur })
+      setSessions(getSessions())
+      sessionTallyRef.current = { total: 0, lupa: 0, sulit: 0, tahu: 0 }
+    }
     setPhase('dashboard')
     setQueue([])
   }, [])
+
+  const backToDashboard = finishSession
+
+  // Auto-lanjut sesi: bangun ulang queue dari kartu lemah (no. kanji) yang
+  // dikirim Study, lalu mulai ulang fase study tanpa keluar ke dashboard.
+  // Sesi pertama tetap disimpan ke riwayat sebelum sesi lanjutan dimulai.
+  const repeatWeak = useCallback((weakIds) => {
+    // Simpan dulu sesi yang baru selesai (kalau ada isinya).
+    const t = sessionTallyRef.current
+    if (t.total > 0) {
+      const end = (typeof performance !== 'undefined' ? performance.now() : Date.now())
+      saveSession({ ...t, dur: Math.max(0, end - sessionStartRef.current) })
+      setSessions(getSessions())
+    }
+    if (!data || !weakIds || weakIds.length === 0) { finishSession(); return }
+    const set = new Set(weakIds.map(String))
+    const q = data.filter((k) => set.has(String(k.no)))
+    if (q.length === 0) { finishSession(); return }
+    beginStudy(q)
+  }, [data, beginStudy, finishSession])
+
+  // Buka layar Jelajahi (browse/search).
+  const openBrowse = useCallback(() => setPhase('browse'), [])
+
+  // Belajar satu kartu tertentu (dari Browse) → mulai sesi 1 kartu.
+  const studyOne = useCallback((entry) => {
+    if (!entry) return
+    beginStudy([entry])
+  }, [beginStudy])
 
   // Loading / error states
   if (error) {
@@ -122,18 +182,30 @@ export default function Nemonik({ onBack }) {
         <NemonikDashboard
           stats={stats}
           streak={streak}
+          sessions={sessions}
           onLearn={startLearn}
-          onBrowseAll={startBrowseAll}
+          onBrowseAll={openBrowse}
           onReview={startReview}
           onQuiz={() => setPhase('quiz')}
         />
       )}
 
+      {phase === 'browse' && (
+        <NemonikBrowse
+          data={data}
+          srs={srs}
+          onStudyOne={studyOne}
+          onBack={backToDashboard}
+        />
+      )}
+
       {phase === 'study' && (
         <NemonikStudy
+          key={studyKey}
           queue={queue}
           onGrade={handleGrade}
           onFinish={backToDashboard}
+          onRepeatWeak={repeatWeak}
         />
       )}
 

@@ -78,6 +78,70 @@
 /* ── Dashboard ── */
 .nemo-dashboard { display: flex; flex-direction: column; gap: 14px; }
 
+/* Hero: ring progres + ringkasan */
+.nemo-hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--card-face);
+  color: var(--card-ink);
+  border: 1px solid var(--card-line);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+}
+.nemo-hero-info { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.nemo-hero-title {
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--card-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.nemo-hero-sub { font-family: var(--font-ui); font-size: 1.05rem; font-weight: 700; }
+.nemo-hero-sub strong { font-family: var(--font-mono); font-size: 1.35rem; color: var(--shu); }
+.nemo-hero-streak { font-family: var(--font-ui); font-size: 0.9rem; color: var(--kin); font-weight: 700; }
+
+/* Bar bertingkat status SRS */
+.nemo-progress {
+  background: var(--card-face);
+  border: 1px solid var(--card-line);
+  border-radius: 16px;
+  padding: 14px 16px;
+}
+.nemo-segbar {
+  display: flex;
+  width: 100%;
+  height: 14px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--card-deep);
+  border: 1px solid var(--card-line);
+}
+.nemo-segbar-part { height: 100%; transition: width 0.3s; }
+.nemo-segbar-part.seg-baru { background: #94a3b8; }
+.nemo-segbar-part.seg-belajar { background: var(--kin); }
+.nemo-segbar-part.seg-ulang { background: var(--shu); }
+.nemo-segbar-part.seg-hafal { background: var(--moss); }
+.nemo-progress-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 10px;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  color: var(--card-soft);
+}
+.nemo-progress-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.nemo-progress-legend .dot {
+  width: 9px; height: 9px; border-radius: 3px; display: inline-block; flex: none;
+}
+.nemo-progress-legend .dot.seg-baru { background: #94a3b8; }
+.nemo-progress-legend .dot.seg-belajar { background: var(--kin); }
+.nemo-progress-legend .dot.seg-ulang { background: var(--shu); }
+.nemo-progress-legend .dot.seg-hafal { background: var(--moss); }
+
 .nemo-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
 .nemo-stat-card {
@@ -330,6 +394,51 @@
 .nemo-tts:hover { filter: brightness(1.08); }
 .nemo-tts:active { transform: translateY(1px); }
 
+/* ── Gerbang rating (chips Lupa/Sulit/Tahu) ── */
+.nemo-rating-gate {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--card-face);
+  border: 1px solid var(--card-line);
+  text-align: center;
+  animation: nemo-fade-in 0.18s ease-out;
+}
+@keyframes nemo-fade-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.nemo-rating-q {
+  margin: 0 0 10px;
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--card-soft);
+}
+.nemo-rating-chips {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.nemo-rating-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 48px;
+  padding: 12px 8px;
+  border-radius: 13px;
+  border: 1px solid transparent;
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.12s, filter 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.nemo-rating-chip:hover { filter: brightness(1.08); }
+.nemo-rating-chip:active { transform: translateY(1px); }
+.nemo-rating-chip.lupa  { background: var(--shu); color: var(--washi); }
+.nemo-rating-chip.sulit { background: var(--kin); color: #2a2110; }
+.nemo-rating-chip.tahu  { background: var(--moss); color: var(--washi); }
+
 .nemo-empty { text-align: center; color: var(--page-soft); font-family: var(--font-ui); }
 .nemo-done {
   display: flex;
@@ -346,6 +455,15 @@
 }
 .nemo-done-icon { color: var(--moss); }
 .nemo-done h2 { margin: 0; font-family: var(--font-serif-jp); }
+.nemo-done-sub { margin: 0; font-size: 0.9rem; color: var(--kin); font-weight: 600; }
+.nemo-done-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 320px;
+  margin-top: 6px;
+}
 
 /* ── Quiz ── */
 .nemo-quiz {
@@ -452,4 +570,446 @@
 @media (max-width: 420px) {
   .nemo-stats { grid-template-columns: 1fr; }
   .nemo-rating { grid-template-columns: 1fr; }
+}
+
+/* ══ Fase 2: Analitik ══ */
+
+/* ── Heatmap aktivitas (ala GitHub) ── */
+.nemo-heatmap {
+  background: var(--card-face);
+  border: 1px solid var(--card-line);
+  border-radius: 16px;
+  padding: 14px 16px;
+}
+.nemo-heatmap-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.nemo-heatmap-title {
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--card-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.nemo-heatmap-total { font-family: var(--font-ui); font-size: 0.78rem; color: var(--card-soft); }
+.nemo-heatmap-body { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+.nemo-heatmap-daylabels {
+  display: grid;
+  grid-template-rows: repeat(7, 12px);
+  gap: 3px;
+  font-family: var(--font-ui);
+  font-size: 9px;
+  color: var(--card-soft);
+}
+.nemo-heatmap-daylabels span { line-height: 12px; height: 12px; }
+.nemo-heatmap-grid { display: flex; gap: 3px; }
+.nemo-heatmap-col { display: grid; grid-template-rows: repeat(7, 12px); gap: 3px; }
+.nemo-hm-cell {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--card-deep);
+  flex: none;
+}
+.nemo-hm-cell.empty { background: transparent; }
+.nemo-hm-cell.lv0 { background: rgba(148, 163, 184, 0.14); }
+.nemo-hm-cell.lv1 { background: rgba(152, 198, 130, 0.35); }
+.nemo-hm-cell.lv2 { background: rgba(152, 198, 130, 0.6); }
+.nemo-hm-cell.lv3 { background: var(--moss); }
+.nemo-hm-cell.lv4 { background: var(--moss-dark, #4f7a3a); }
+.nemo-heatmap-legend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 10px;
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  color: var(--card-soft);
+}
+.nemo-heatmap-legend .nemo-hm-cell { width: 11px; height: 11px; }
+
+/* ── Blok riwayat sesi (collapsible) ── */
+.nemo-history-block {
+  background: var(--card-face);
+  border: 1px solid var(--card-line);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.nemo-history-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 16px;
+  border: none;
+  background: none;
+  color: var(--card-ink);
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.nemo-history-count {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  background: var(--card-deep);
+  padding: 1px 7px;
+  border-radius: 99px;
+}
+.nemo-history-caret { margin-left: auto; font-size: 0.7rem; color: var(--card-soft); }
+.nemo-history { padding: 0 12px 12px; }
+.nemo-history-empty {
+  margin: 0;
+  padding: 0 16px 14px;
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  color: var(--card-soft);
+}
+.nemo-history-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 4px;
+  border-top: 1px solid var(--card-line);
+  font-family: var(--font-ui);
+}
+.nemo-history-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.nemo-history-acc { font-family: var(--font-mono); font-size: 1rem; font-weight: 800; color: var(--moss); }
+.nemo-history-meta { font-size: 0.78rem; color: var(--card-soft); }
+.nemo-history-date { font-size: 0.72rem; color: var(--card-soft); text-align: right; flex: none; }
+
+/* ── Ringkasan hasil sesi ── */
+.nemo-session-result { width: 100%; max-width: 360px; margin: 4px 0; }
+.nemo-session-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.nemo-session-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 10px 4px;
+  border-radius: 12px;
+  background: var(--card-deep);
+  color: var(--card-soft);
+}
+.nemo-session-num {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--card-ink);
+}
+.nemo-session-lbl { font-size: 0.68rem; text-align: center; }
+.nemo-session-breakdown {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 8px;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.nemo-session-breakdown .bd.lupa { color: var(--shu); }
+.nemo-session-breakdown .bd.sulit { color: var(--kin); }
+.nemo-session-breakdown .bd.tahu { color: var(--moss); }
+
+/* ══ Fase 3: Quiz cerdas · Browse · Mnemonic ══ */
+
+/* ── Setup pra-kuis ── */
+.nemo-quiz-setup {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: var(--card-face);
+  color: var(--card-ink);
+  border: 1px solid var(--card-line);
+  border-radius: 20px;
+  padding: 20px;
+}
+.nemo-setup-title { margin: 0; font-family: var(--font-serif-jp); font-size: 1.25rem; }
+.nemo-setup-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--font-ui);
+}
+.nemo-setup-label { font-size: 0.9rem; font-weight: 600; color: var(--card-soft); }
+.nemo-seg { display: inline-flex; gap: 6px; }
+.nemo-seg-btn {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border-radius: 11px;
+  border: 1px solid var(--card-line);
+  background: var(--card-deep);
+  color: var(--card-ink);
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.nemo-seg-btn.on { background: var(--shu); color: var(--washi); border-color: transparent; }
+.nemo-toggle {
+  min-width: 84px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border-radius: 11px;
+  border: 1px solid var(--card-line);
+  background: var(--card-deep);
+  color: var(--card-soft);
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.nemo-toggle.on { background: var(--moss); color: var(--washi); border-color: transparent; }
+.nemo-setup-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+
+/* Timer badge di header kuis */
+.nemo-quiz-timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--card-soft);
+}
+.nemo-quiz-timer.low { color: var(--shu); }
+.nemo-quiz-options.cols-2 { grid-template-columns: 1fr 1fr; }
+
+/* ── Toggle & panel mnemonic di Study ── */
+.nemo-mnemonic-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 44px;
+  margin-top: 12px;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px dashed var(--card-line);
+  background: transparent;
+  color: var(--card-soft);
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.nemo-mnemonic-toggle.on { color: var(--card-ink); border-style: solid; background: var(--card-deep); }
+
+.nemo-mnemonic {
+  margin-top: 10px;
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--card-face);
+  color: var(--card-ink);
+  border: 1px solid var(--card-line);
+}
+.nemo-mnemonic-head { display: flex; gap: 12px; align-items: center; }
+.nemo-mnemonic-kanji {
+  font-family: var(--font-serif-jp);
+  font-size: 2.4rem;
+  font-weight: 800;
+  line-height: 1;
+  flex: none;
+}
+.nemo-mnemonic-readings { display: flex; flex-direction: column; gap: 3px; font-family: var(--font-ui); font-size: 0.85rem; }
+.nemo-mnemonic-readings .ttl { color: var(--card-soft); font-size: 0.72rem; text-transform: uppercase; }
+.nemo-mnemonic-arti { font-weight: 700; margin-top: 2px; }
+.nemo-mnemonic-sub {
+  margin: 12px 0 6px;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--card-soft);
+}
+.nemo-kosakata-list { display: flex; flex-direction: column; gap: 4px; }
+.nemo-kosakata-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 9px;
+  background: var(--card-deep);
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+}
+.nemo-kosakata-badge {
+  flex: none;
+  width: 22px; height: 22px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 7px;
+  font-family: var(--font-serif-jp);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.nemo-kosakata-badge.onyomi { background: rgba(193, 64, 42, 0.18); color: var(--shu); }
+.nemo-kosakata-badge.kunyomi { background: rgba(152, 198, 130, 0.18); color: var(--moss); }
+.nemo-kosakata-kata { font-family: var(--font-serif-jp); font-weight: 700; }
+.nemo-kosakata-kana { color: var(--card-soft); }
+.nemo-kosakata-arti { margin-left: auto; text-align: right; color: var(--card-soft); font-size: 0.78rem; }
+.nemo-mnemonic-empty { font-family: var(--font-ui); font-size: 0.85rem; color: var(--card-soft); }
+
+/* ── Layar Browse/Jelajahi ── */
+.nemo-browse { display: flex; flex-direction: column; gap: 12px; }
+.nemo-browse-controls { display: flex; flex-direction: column; gap: 10px; }
+.nemo-browse-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid var(--card-line);
+  background: var(--card-face);
+}
+.nemo-browse-search .icon { color: var(--card-soft); flex: none; }
+.nemo-browse-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
+  outline: none;
+  padding: 13px 0;
+  color: var(--card-ink);
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+}
+.nemo-browse-clear {
+  border: none; background: none; color: var(--card-soft); cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 32px; min-height: 32px;
+}
+.nemo-browse-filters { display: flex; flex-wrap: wrap; gap: 6px; }
+.nemo-filter-chip {
+  min-height: 38px;
+  padding: 8px 13px;
+  border-radius: 99px;
+  border: 1px solid var(--card-line);
+  background: var(--card-face);
+  color: var(--card-soft);
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.nemo-filter-chip.on { background: var(--kin); color: #2a2110; border-color: transparent; }
+.nemo-browse-count { font-family: var(--font-ui); font-size: 0.8rem; color: var(--card-soft); }
+.nemo-browse-list {
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--card-line);
+  background: var(--card-face);
+}
+.nemo-browse-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--card-line);
+}
+.nemo-browse-row:last-child { border-bottom: none; }
+.nemo-browse-num {
+  flex: none;
+  width: 34px; height: 34px;
+  border-radius: 9px;
+  border: 1px solid var(--card-line);
+  background: var(--card-deep);
+  color: var(--card-soft);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+.nemo-browse-main {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  gap: 0 10px;
+  align-items: center;
+  cursor: pointer;
+}
+.nemo-browse-kanji {
+  grid-row: span 2;
+  font-family: var(--font-serif-jp);
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+.nemo-browse-read { font-family: var(--font-ui); font-size: 0.85rem; color: var(--card-soft); }
+.nemo-browse-arti { font-family: var(--font-ui); font-size: 0.9rem; color: var(--card-ink); }
+.nemo-status-dot { flex: none; width: 10px; height: 10px; border-radius: 50%; }
+.nemo-status-dot.st-baru { background: #94a3b8; }
+.nemo-status-dot.st-belajar { background: var(--kin); }
+.nemo-status-dot.st-ulang { background: var(--shu); }
+.nemo-status-dot.st-hafal { background: var(--moss); }
+.nemo-browse-tts {
+  flex: none;
+  width: 44px; height: 44px;
+  border-radius: 11px;
+  border: 1px solid var(--card-line);
+  background: var(--card-deep);
+  color: var(--card-ink);
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.nemo-browse-empty { padding: 24px; text-align: center; color: var(--card-soft); font-family: var(--font-ui); }
+
+/* Modal detail browse */
+.nemo-browse-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+}
+.nemo-browse-sheet {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: var(--card-face);
+  border-radius: 20px 20px 0 0;
+  padding: 18px;
+  animation: nemo-sheet-in 0.22s ease-out;
+}
+@keyframes nemo-sheet-in { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+.nemo-browse-sheet-close {
+  position: absolute;
+  top: 12px; right: 12px;
+  width: 40px; height: 40px;
+  border-radius: 11px;
+  border: 1px solid var(--card-line);
+  background: var(--card-deep);
+  color: var(--card-ink);
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  z-index: 2;
+}
+.nemo-browse-sheet-actions { margin-top: 14px; }
+
+@media (min-width: 560px) {
+  .nemo-browse-modal { align-items: center; }
+  .nemo-browse-sheet { border-radius: 20px; padding: 24px; }
 }
