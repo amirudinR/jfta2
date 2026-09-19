@@ -148,6 +148,7 @@ export default function Sprint({ entries, cards, onGrade, material, direction = 
 
       <div
         className="quiz-card"
+        key={pos}
         onClick={() => setFlipped((f) => !f)}
         role="button"
         tabIndex={0}
@@ -171,10 +172,9 @@ export default function Sprint({ entries, cards, onGrade, material, direction = 
         </div>
       </div>
 
-      <div className="actions mt no-print">
+      <div className="actions two mt no-print">
         <button
-          className="act-btn"
-          style={{ color: '#e2937f' }}
+          className="act-btn act-again"
           onClick={(e) => {
             e.stopPropagation()
             answer(false)
@@ -183,8 +183,7 @@ export default function Sprint({ entries, cards, onGrade, material, direction = 
           Belum hafal
         </button>
         <button
-          className="act-btn"
-          style={{ color: '#b9d4a1' }}
+          className="act-btn act-good"
           onClick={(e) => {
             e.stopPropagation()
             answer(true)

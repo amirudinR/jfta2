@@ -106,11 +106,11 @@ export default function NemonikDashboard({
         {showHistory && <SessionHistory sessions={sessions} limit={10} />}
       </div>
 
-      <div className="nemo-actions">
+      <div className="nemo-actions" data-stagger>
         <button className="nemo-btn primary" onClick={onLearn}>
           <BookOpen size={16} /> Lanjutkan Belajar
         </button>
-        <button className="nemo-btn primary" onClick={onBrowseAll} style={{ backgroundColor: '#6366f1' }}>
+        <button className="nemo-btn info" onClick={onBrowseAll}>
           <List size={16} /> Jelajahi Semua ({total})
         </button>
         <button className="nemo-btn warning" onClick={onReview} disabled={reviewCount === 0}>

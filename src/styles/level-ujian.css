@@ -64,18 +64,28 @@
   align-items: center;
   gap: 5px;
   padding: 8px 14px;
+  min-height: 44px;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.04);
   color: var(--page-soft);
   font-size: 13px;
+  font-family: var(--font-ui);
   cursor: pointer;
-  transition: border-color 0.12s, background 0.12s, color 0.12s;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    border-color var(--ios-dur-fast, 0.22s) var(--ios-ease, cubic-bezier(0.32,0.72,0,1)),
+    background 0.12s, color 0.12s,
+    transform var(--ios-dur-fast, 0.22s) var(--ios-ease, cubic-bezier(0.32,0.72,0,1));
 }
 
 .ujian-chip:hover {
   border-color: rgba(255, 255, 255, 0.2);
   color: var(--page-ink);
+}
+
+.ujian-chip:active {
+  transform: scale(0.97);
 }
 
 .ujian-chip.active {
@@ -103,15 +113,24 @@
   align-items: center;
   gap: 4px;
   padding: 14px 8px 12px;
+  min-height: 44px;
   border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.03);
   cursor: pointer;
-  transition: border-color 0.12s, background 0.12s;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    border-color var(--ios-dur-fast, 0.22s) var(--ios-ease, cubic-bezier(0.32,0.72,0,1)),
+    background 0.12s,
+    transform var(--ios-dur-fast, 0.22s) var(--ios-ease, cubic-bezier(0.32,0.72,0,1));
 }
 
 .ujian-diff:hover {
   border-color: rgba(255, 255, 255, 0.18);
+}
+
+.ujian-diff:active {
+  transform: scale(0.97);
 }
 
 .ujian-diff.active {
@@ -207,4 +226,22 @@
   text-decoration: underline;
   cursor: pointer;
   padding: 8px 14px;
+}
+
+/* Section setup ujian muncul berurutan (stagger ala iOS). */
+.ujian-setup .ujian-section {
+  animation: ios-reveal-up 0.4s var(--ios-ease, cubic-bezier(0.32,0.72,0,1)) both;
+}
+.ujian-setup .ujian-section:nth-child(2) { animation-delay: 0.04s; }
+.ujian-setup .ujian-section:nth-child(3) { animation-delay: 0.09s; }
+.ujian-setup .ujian-section:nth-child(4) { animation-delay: 0.14s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ujian-setup .ujian-section,
+  .ujian-chip,
+  .ujian-diff {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
 }

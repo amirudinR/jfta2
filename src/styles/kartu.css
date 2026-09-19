@@ -257,20 +257,43 @@ html.dark-mode .romaji-toggle.on {
   grid-template-columns: 46px 1fr 46px;
   gap: 8px;
 }
+/* Varian 2 tombol (mis. Sprint: Belum hafal / Sudah hafal). */
+.actions.two {
+  grid-template-columns: 1fr 1fr;
+}
 
 .act-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 12px 8px;
+  min-height: 48px;
   border-radius: 12px;
   border: 1px solid var(--panel-line);
   background: var(--panel);
   color: var(--page-ink);
+  font-family: var(--font-ui);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--ios-dur-fast, 0.22s) var(--ios-ease, cubic-bezier(0.32,0.72,0,1)),
+    background 0.15s, border-color 0.15s;
 }
 
 .act-btn:active {
-  transform: translateY(1px);
+  transform: scale(0.97);
+}
+
+/* Warna aksi (semantik, pakai token tema). */
+.act-btn.act-again {
+  color: #e2937f;
+  border-color: rgba(193, 64, 42, 0.35);
+}
+.act-btn.act-good {
+  color: #b9d4a1;
+  border-color: rgba(111, 143, 82, 0.4);
 }
 
 .grade-grid {

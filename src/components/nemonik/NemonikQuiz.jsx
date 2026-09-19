@@ -271,7 +271,7 @@ export default function NemonikQuiz({ data, srs, onSrsChange, onFinish }) {
       </div>
 
       <p className="nemo-quiz-prompt">{q.prompt}</p>
-      <div className="nemo-quiz-question">{q.questionText}</div>
+      <div className="nemo-quiz-question" key={`${q.target?.no}-${q.type}-${answered}`}>{q.questionText}</div>
 
       <div className={`nemo-quiz-options ${config.options === 2 ? 'cols-2' : ''}`}>
         {q.options.map((opt) => {

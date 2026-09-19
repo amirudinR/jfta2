@@ -33,7 +33,7 @@ export default function UjianSession({
         </span>
       </div>
 
-      <div className="quiz-card">
+      <div className="quiz-card" key={q}>
         <div className="card-top">
           Ujian · {entry.groupLabel || entry.material || 'Umum'}
         </div>

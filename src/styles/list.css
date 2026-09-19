@@ -69,10 +69,15 @@
   border-radius: 12px;
   border: 1px solid var(--panel-line);
   background: var(--panel);
+  transition: border-color var(--ios-dur-fast, 0.22s) var(--ios-ease, cubic-bezier(0.32,0.72,0,1));
 }
 
 .lrow.clickable {
   cursor: pointer;
+}
+
+.lrow.clickable:hover {
+  border-color: rgba(255, 255, 255, 0.22);
 }
 
 .lrow .fx {
@@ -193,7 +198,14 @@
   font-weight: 500;
   font-size: 20px;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background 0.15s, border-color 0.15s, color 0.15s,
+    transform var(--ios-dur-fast, 0.22s) var(--ios-ease, cubic-bezier(0.32,0.72,0,1));
+  /* 'backwards' (bukan 'both') → transform tak melekat, agar :active scale bekerja. */
+  animation: ios-reveal-up 0.34s var(--ios-ease, cubic-bezier(0.32,0.72,0,1)) backwards;
 }
+.ktile:active { transform: scale(0.94); }
 
 .ktile .tick {
   position: absolute;

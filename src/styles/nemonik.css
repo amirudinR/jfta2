@@ -119,7 +119,27 @@
   background: var(--card-deep);
   border: 1px solid var(--card-line);
 }
-.nemo-segbar-part { height: 100%; transition: width 0.3s; }
+/* Segmen status tumbuh dari kiri saat muncul (ala iOS). */
+.nemo-segbar-part {
+  height: 100%;
+  transition: width 0.3s;
+  animation: nemo-seg-grow 0.55s var(--ios-ease, cubic-bezier(0.32,0.72,0,1)) both;
+}
+@keyframes nemo-seg-grow {
+  from { transform: scaleX(0); opacity: 0.5; }
+  to   { transform: scaleX(1); opacity: 1; }
+}
+
+/* Tombol aksi muncul berurutan saat dashboard dibuka. */
+.nemo-actions[data-stagger] > .nemo-btn {
+  animation: ios-reveal-up 0.4s var(--ios-ease, cubic-bezier(0.32,0.72,0,1)) both;
+}
+.nemo-actions[data-stagger] > .nemo-btn:nth-child(1) { animation-delay: 0.02s; }
+.nemo-actions[data-stagger] > .nemo-btn:nth-child(2) { animation-delay: 0.06s; }
+.nemo-actions[data-stagger] > .nemo-btn:nth-child(3) { animation-delay: 0.10s; }
+.nemo-actions[data-stagger] > .nemo-btn:nth-child(4) { animation-delay: 0.14s; }
+.nemo-actions[data-stagger] > .nemo-btn:nth-child(5) { animation-delay: 0.18s; }
+
 .nemo-segbar-part.seg-baru { background: #94a3b8; }
 .nemo-segbar-part.seg-belajar { background: var(--kin); }
 .nemo-segbar-part.seg-ulang { background: var(--shu); }
@@ -203,21 +223,31 @@
   justify-content: center;
   gap: 8px;
   padding: 13px 18px;
+  min-height: 48px;
   border-radius: 13px;
   border: 1px solid transparent;
   font-family: var(--font-ui);
   font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
-  transition: transform 0.12s, filter 0.15s, opacity 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--ios-dur-fast, 0.22s) var(--ios-ease, cubic-bezier(0.32,0.72,0,1)),
+    filter 0.15s, background 0.15s, border-color 0.15s, opacity 0.15s;
 }
 .nemo-btn:hover:not(:disabled) { filter: brightness(1.08); }
-.nemo-btn:active:not(:disabled) { transform: translateY(1px); }
+.nemo-btn:active:not(:disabled) { transform: scale(0.97); }
 .nemo-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .nemo-btn.full { width: 100%; }
 .nemo-btn.primary { background: var(--shu); color: var(--washi); }
 .nemo-btn.warning { background: var(--kin); color: #2a2110; }
 .nemo-btn.danger  { background: var(--ai-700); color: var(--page-ink); border-color: var(--panel-line); }
+/* Varian aksen (Jelajahi) — pakai warna tema, bukan inline. */
+.nemo-btn.info {
+  background: rgba(43, 86, 116, 0.35);
+  color: var(--page-ink);
+  border-color: rgba(120, 170, 210, 0.35);
+}
 
 /* ── Study ── */
 .nemo-study { display: flex; flex-direction: column; gap: 14px; }
@@ -510,10 +540,16 @@
   font-weight: 800;
   text-align: center;
   padding: 10px 0;
+  animation: nemo-q-in 0.34s var(--ios-ease, cubic-bezier(0.32,0.72,0,1)) both;
+}
+@keyframes nemo-q-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 .nemo-quiz-options { display: grid; gap: 10px; }
 .nemo-quiz-option {
   padding: 14px;
+  min-height: 48px;
   border-radius: 12px;
   border: 1px solid var(--card-line);
   background: var(--card-deep);
@@ -522,12 +558,29 @@
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.12s, background 0.15s, border-color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--ios-dur-fast, 0.22s) var(--ios-ease, cubic-bezier(0.32,0.72,0,1)),
+    background 0.15s, border-color 0.15s;
+  animation: ios-reveal-up 0.34s var(--ios-ease, cubic-bezier(0.32,0.72,0,1)) both;
 }
+.nemo-quiz-options .nemo-quiz-option:nth-child(1) { animation-delay: 0.02s; }
+.nemo-quiz-options .nemo-quiz-option:nth-child(2) { animation-delay: 0.06s; }
+.nemo-quiz-options .nemo-quiz-option:nth-child(3) { animation-delay: 0.10s; }
+.nemo-quiz-options .nemo-quiz-option:nth-child(4) { animation-delay: 0.14s; }
+.nemo-quiz-options .nemo-quiz-option:nth-child(5) { animation-delay: 0.18s; }
+.nemo-quiz-options .nemo-quiz-option:nth-child(6) { animation-delay: 0.22s; }
 .nemo-quiz-option:hover:not(:disabled) { transform: translateY(-1px); border-color: var(--kin); }
+.nemo-quiz-option:active:not(:disabled) { transform: scale(0.98); }
 .nemo-quiz-option:disabled { cursor: default; }
-.nemo-quiz-option.correct { background: var(--moss); color: var(--washi); border-color: var(--moss-dark); }
-.nemo-quiz-option.wrong { background: var(--shu); color: var(--washi); border-color: var(--shu-dark); }
+.nemo-quiz-option.correct {
+  background: var(--moss); color: var(--washi); border-color: var(--moss-dark);
+  animation: quiz-pop 0.4s var(--ios-spring, cubic-bezier(0.34,1.56,0.64,1));
+}
+.nemo-quiz-option.wrong {
+  background: var(--shu); color: var(--washi); border-color: var(--shu-dark);
+  animation: quiz-shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
 
 .nemo-quiz-result {
   display: flex;
@@ -1154,3 +1207,15 @@
 .nemo-toast svg { color: var(--kin); flex: none; }
 .nemo-toast-title { font-weight: 700; font-size: 0.9rem; }
 .nemo-toast-desc { font-size: 0.78rem; color: var(--page-soft, #8fa8c0); }
+
+/* Hormati preferensi user: matikan animasi dekoratif bila reduced-motion. */
+@media (prefers-reduced-motion: reduce) {
+  .nemo-segbar-part,
+  .nemo-quiz-question,
+  .nemo-quiz-option,
+  .nemo-quiz-option.correct,
+  .nemo-quiz-option.wrong,
+  .nemo-actions[data-stagger] > .nemo-btn {
+    animation: none !important;
+  }
+}
