@@ -29,28 +29,30 @@ function CardBody({ entry }) {
   const canSpeak = ttsSupported() && !!(entry.baca_utama || entry.kanji)
 
   return (
-    <div className="nemo-flashcard" style={{ width: '100%' }}>
-      <div className="nemo-flashcard-top">
-        <div className="nemo-img-left" draggable="false">
-          {imgBersih
-            ? <img src={imgBersih} alt={`Kanji ${entry.kanji}`} loading="lazy" draggable="false" />
-            : <div className="nemo-img-missing">Kanji tidak tersedia</div>}
+    <div className="nemo-card-stack" style={{ width: '100%' }}>
+      <div className="nemo-flashcard">
+        <div className="nemo-flashcard-top">
+          <div className="nemo-img-left" draggable="false">
+            {imgBersih
+              ? <img src={imgBersih} alt={`Kanji ${entry.kanji}`} loading="lazy" draggable="false" />
+              : <div className="nemo-img-missing">Kanji tidak tersedia</div>}
+          </div>
+          <div className="nemo-img-right" draggable="false">
+            {imgKonteks
+              ? <img src={imgKonteks} alt={`Mnemonic ${entry.kanji}`} loading="lazy" draggable="false" />
+              : <div className="nemo-img-missing">Mnemonic tidak tersedia</div>}
+          </div>
         </div>
-        <div className="nemo-img-right" draggable="false">
-          {imgKonteks
-            ? <img src={imgKonteks} alt={`Mnemonic ${entry.kanji}`} loading="lazy" draggable="false" />
-            : <div className="nemo-img-missing">Mnemonic tidak tersedia</div>}
+
+        <div className="nemo-flashcard-bottom" draggable="false">
+          {imgSelesai
+            ? <img src={imgSelesai} alt={`Kartu lengkap ${entry.kanji}`} loading="lazy" draggable="false" />
+            : <div className="nemo-img-missing">Kartu lengkap tidak tersedia</div>}
         </div>
       </div>
 
-      <div className="nemo-flashcard-bottom" draggable="false">
-        {imgSelesai
-          ? <img src={imgSelesai} alt={`Kartu lengkap ${entry.kanji}`} loading="lazy" draggable="false" />
-          : <div className="nemo-img-missing">Kartu lengkap tidak tersedia</div>}
-      </div>
-
-      {/* Tombol voice (TTS) — membacakan bacaan kanji. onPointerDown di-stop
-          agar tidak memicu drag swipe pada kartu. */}
+      {/* Tombol voice (TTS) — diletakkan DI BAWAH kartu (bukan menutupi isi
+          kartu). onPointerDown di-stop agar tidak memicu drag swipe. */}
       {canSpeak && (
         <button
           type="button"
