@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import {
   LogOut, User as UserIcon, Flame, Library, CalendarCheck, Sparkles,
   Volume2, Play, Moon, Sun, Languages, Type,
@@ -63,6 +64,14 @@ export default function Profil({ user, loading, onLogin, onLogout, prefs = {}, o
   // Voices dimuat asinkron oleh browser — refresh saat siap.
   useEffect(() => { const un = onVoicesReady(() => setVoices(listJapaneseVoices())); return un }, [])
 
+  // Tutup modal konfirmasi dengan tombol Escape.
+  useEffect(() => {
+    if (!confirmOpen) return
+    const h = (e) => { if (e.key === 'Escape') setConfirmOpen(false) }
+    window.addEventListener('keydown', h)
+    return () => window.removeEventListener('keydown', h)
+  }, [confirmOpen])
+
   const stats = useHafalanStats()
   const nemo = useMemo(() => sessionSummary(), [])
   const ach = useMemo(() => getAchievements(), [])
@@ -77,17 +86,17 @@ export default function Profil({ user, loading, onLogin, onLogout, prefs = {}, o
   }, [])
 
   const applyVoice = (name) => {
-    const next = { voice: name }
-    setVoicePref(next)
+    setVoicePref({ voice: name })
     refreshVoice()
     setVoicePrefState(getVoicePref())
-    if (name) speak('こんにちは', { rate: getVoicePref().rate })
+    // Preview selalu (termasuk mode Otomatis) memakai suara terpilih.
+    speak('こんにちは', { rate: getVoicePref().rate })
   }
 
-  const applyRate = (rate) => {
+  const applyRate = (rate, { preview = true } = {}) => {
     setVoicePref({ rate })
     setVoicePrefState(getVoicePref())
-    speak('ありがとう', { rate })
+    if (preview) speak('ありがとう', { rate })
   }
 
   const handleLogout = () => setConfirmOpen(true)
@@ -128,7 +137,7 @@ export default function Profil({ user, loading, onLogin, onLogout, prefs = {}, o
       <h2 className="profil-title">Profil</h2>
 
       {/* Hero identitas */}
-      <div className="profil-hero" data-stagger>
+      <div className="profil-hero">
         {user.photoURL ? (
           <img src={user.photoURL} alt="" className="profil-avatar-lg" referrerPolicy="no-referrer" />
         ) : (
@@ -186,17 +195,23 @@ export default function Profil({ user, loading, onLogin, onLogout, prefs = {}, o
 
       {/* Badge */}
       <div className="profil-section-title"><Sparkles size={15} /> Badge</div>
-      <div className="profil-badges">
-        {BADGES.map((b) => {
-          const on = !!unlockedIds[b.id]
-          return (
-            <div key={b.id} className={`profil-badge ${on ? 'on' : 'off'}`} title={b.desc}>
-              <span className="profil-badge-icon">{b.icon}</span>
-              <span className="profil-badge-label">{b.label}</span>
-            </div>
-          )
-        })}
-      </div>
+      {unlockedCount === 0 ? (
+        <div className="profil-card profil-empty">
+          Belum ada badge terbuka. Selesaikan sesi belajar pertamamu untuk membuka lencana 🌱
+        </div>
+      ) : (
+        <div className="profil-badges">
+          {BADGES.map((b) => {
+            const on = !!unlockedIds[b.id]
+            return (
+              <div key={b.id} className={`profil-badge ${on ? 'on' : 'off'}`} title={b.desc}>
+                <span className="profil-badge-icon">{b.icon}</span>
+                <span className="profil-badge-label">{b.label}</span>
+              </div>
+            )
+          })}
+        </div>
+      )}
 
       {/* Heatmap aktivitas */}
       <div className="profil-section-title"><CalendarCheck size={15} /> Aktivitas</div>
@@ -278,7 +293,20 @@ export default function Profil({ user, loading, onLogin, onLogout, prefs = {}, o
             </div>
 
             <div className="profil-setting-row fixed col">
-              <span className="profil-setting-left"><Type size={17} /><span>Kecepatan</span></span>
+              <span className="profil-setting-left">
+                <Type size={17} /><span>Kecepatan</span>
+                <span className="profil-rate-value">×{voicePref.rate.toFixed(2)}</span>
+              </span>
+              <input
+                type="range"
+                className="profil-rate-slider"
+                min="0.5" max="1.5" step="0.05"
+                value={voicePref.rate}
+                aria-label="Kecepatan suara"
+                onChange={(e) => applyRate(parseFloat(e.target.value), { preview: false })}
+                onMouseUp={(e) => speak('ありがとう', { rate: parseFloat(e.target.value) })}
+                onTouchEnd={(e) => speak('ありがとう', { rate: parseFloat(e.target.value) })}
+              />
               <div className="profil-rate-pick">
                 {RATE_OPTIONS.map((r) => (
                   <button
@@ -301,10 +329,11 @@ export default function Profil({ user, loading, onLogin, onLogout, prefs = {}, o
         <span>Keluar</span>
       </button>
 
-      {/* Modal konfirmasi keluar */}
-      {confirmOpen && (
+      {/* Modal konfirmasi keluar (di-portal ke body agar `position: fixed`
+          tak ter-pin ke ancestor ber-transform, mis. .page-transition). */}
+      {confirmOpen && createPortal(
         <div className="profil-modal" onClick={() => setConfirmOpen(false)}>
-          <div className="profil-modal-sheet" onClick={(e) => e.stopPropagation()}>
+          <div className="profil-modal-sheet" role="dialog" aria-modal="true" aria-label="Konfirmasi keluar" onClick={(e) => e.stopPropagation()}>
             <div className="profil-modal-title">Keluar dari akun?</div>
             <p className="profil-modal-desc">
               Progress-mu tetap aman di cloud dan akan tersinkron saat login kembali.
@@ -314,7 +343,8 @@ export default function Profil({ user, loading, onLogin, onLogout, prefs = {}, o
               <button className="profil-modal-confirm" onClick={doLogout}>Keluar</button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   )
