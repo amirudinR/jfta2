@@ -5,7 +5,7 @@ import {
   nemonikStats, checkNemonikStreak, predictForgetting,
 } from '../../lib/nemonik'
 import {
-  logDailyReview, saveSession, getSessions, sessionSummary,
+  logDailyReview, saveSession, getSessions, sessionSummary, getDailyLog,
 } from '../../lib/nemonik-sessions'
 import {
   getAchievements, addXp, evaluateBadges, XP_TABLE,
@@ -53,7 +53,7 @@ export default function Nemonik({ onBack }) {
           const { srs: next, changed } = ensureSrs(json, prev)
           return changed ? next : prev
         })
-        setStreak(checkNemonikStreak())
+        setStreak(checkNemonikStreak(getDailyLog()))
       })
       .catch((e) => { if (alive) setError(e.message || 'Gagal memuat data nemonik.') })
     return () => { alive = false }
@@ -123,7 +123,10 @@ export default function Nemonik({ onBack }) {
       avgAcc: summ.avgAcc,
     }
     const { state, newly } = evaluateBadges(ctx)
-    setAch(state)
+    // Hindari render berlebih: hanya setAch bila isi benar-benar berubah.
+    setAch((prev) => (prev.xp === state.xp &&
+      Object.keys(prev.unlocked || {}).length === Object.keys(state.unlocked || {}).length
+      ? prev : state))
     if (newly.length > 0) {
       setBadgeToast(newly[newly.length - 1])
       if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
@@ -144,6 +147,8 @@ export default function Nemonik({ onBack }) {
     saveSession({ ...t, dur })
     setSessions(getSessions())
     sessionTallyRef.current = { total: 0, lupa: 0, sulit: 0, tahu: 0 }
+    // Streak naik karena aktivitas belajar (bukan sekadar buka halaman).
+    setStreak(checkNemonikStreak(getDailyLog()))
     // XP bonus sesi tuntas + evaluasi badge.
     setAch(addXp(XP_TABLE.sessionDone))
     refreshAchievements()

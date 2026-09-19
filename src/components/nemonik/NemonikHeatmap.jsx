@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
-import { dailySeries } from '../../lib/nemonik-sessions'
+import { getDailyLog } from '../../lib/nemonik-sessions'
+import { dayStr } from '../../lib/hafalan-storage'
 
 // Heatmap belajar Nemonik (ala GitHub) — grid 7 baris (hari) × N kolom (minggu).
 // Intensitas warna naik sesuai jumlah kartu yang di-review per hari.
@@ -14,31 +15,40 @@ function level(count) {
 const DAY_LABELS = ['', 'Sen', '', 'Rab', '', 'Jum', '']
 
 export default function NemonikHeatmap({ weeks = 13 }) {
-  const days = weeks * 7
-
-  const cells = useMemo(() => dailySeries(days), [days])
-
-  // Susun jadi kolom per minggu: index 0 = hari paling awal, isi kolom demi kolom.
+  // Grid = `weeks` minggu penuh (7 hari/minggu), mulai Senin minggu paling awal
+  // dan berakhir pada minggu berjalan. Ini menjaga tepat `weeks` kolom.
   const columns = useMemo(() => {
+    const today = new Date()
+    const todayDow = (today.getDay() + 6) % 7 // 0 = Senin … 6 = Minggu
+    // Minggu berjalan dimulai Senin lalu; minggu paling awal = (weeks-1) minggu sebelumnya.
+    const start = new Date(today)
+    start.setDate(start.getDate() - todayDow - (weeks - 1) * 7)
+
+    // Peta tanggal → jumlah review (untuk mengisi cepat).
+    const log = getDailyLog()
     const cols = []
-    let col = new Array(7).fill(null)
-    // Geser agar sel pertama jatuh pada baris (hari) yang tepat.
-    const firstDow = (cells[0]?.d.getDay() + 6) % 7 // 0 = Senin
-    for (let i = 0; i < firstDow; i++) col[i] = { empty: true }
-    for (const c of cells) {
-      const dow = (c.d.getDay() + 6) % 7 // 0 = Senin
-      col[dow] = c
-      if (dow === 6) { cols.push(col); col = new Array(7).fill(null) }
-    }
-    // Kolom ekor (minggu berjalan): sel yang belum terisi = kosong, bukan "0".
-    if (col.some(Boolean)) {
-      col = col.map((c) => c || { empty: true })
+    for (let w = 0; w < weeks; w++) {
+      const col = []
+      for (let d = 0; d < 7; d++) {
+        const date = new Date(start)
+        date.setDate(start.getDate() + w * 7 + d)
+        const key = dayStr(date)
+        // Hari masa depan (setelah hari ini) → kosong, bukan "0 kartu".
+        if (date > today) {
+          col.push({ empty: true })
+        } else {
+          col.push({ key, d: date, count: log[key]?.reviewed || 0 })
+        }
+      }
       cols.push(col)
     }
     return cols
-  }, [cells])
+  }, [weeks])
 
-  const total = useMemo(() => cells.reduce((a, c) => a + (c.count || 0), 0), [cells])
+  const total = useMemo(
+    () => columns.reduce((a, col) => a + col.reduce((b, c) => b + (c.count || 0), 0), 0),
+    [columns],
+  )
 
   return (
     <div className="nemo-heatmap">

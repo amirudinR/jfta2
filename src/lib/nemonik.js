@@ -11,9 +11,6 @@ import { lsGet, lsSet, STORAGE_PREFIX } from './hafalan-storage'
 // Key store (prefix `hh2-` agar ikut terhapus oleh resetDailyProgress).
 export const NEMONIK_SRS_KEY = `${STORAGE_PREFIX}-nemonik-srs`
 export const NEMONIK_STREAK_KEY = `${STORAGE_PREFIX}-nemonik-streak`
-export const NEMONIK_LOGIN_KEY = `${STORAGE_PREFIX}-nemonik-last-login`
-
-export const NEMONIK_STATUS = ['baru', 'belajar', 'hafal', 'ulang']
 
 const ONE_DAY = 24 * 60 * 60 * 1000
 
@@ -72,23 +69,32 @@ export function ensureSrs(data, srs = getNemonikSrs()) {
   return { srs: next, changed }
 }
 
+// Batas interval maksimum (hari) agar interval tak meledak (grade-3 berulang
+// bisa mencapai 1e48 hari → kanji "terkunci" selamanya). Spaced-repetition
+// praktis tak butuh > ~1 tahun.
+const MAX_INTERVAL = 365
+
 // Rating: 1 = Lupa, 2 = Sulit, 3 = Tahu/Mudah (sama seperti app.js asli).
 export function gradeNemonik(srs, id, rating) {
   const key = String(id)
   const cur = { ...defaultSrsEntry(), ...(srs[key] || {}) }
+  const r = Number(rating)
 
-  if (rating === 1) {
+  if (r === 1) {
     cur.status = 'ulang'
     cur.interval = 1
     cur.ease = Math.max(1.3, cur.ease - 0.2)
-  } else if (rating === 2) {
+  } else if (r === 2) {
     cur.status = 'belajar'
-    cur.interval = Math.max(1, cur.interval * 1.2)
+    cur.interval = Math.min(MAX_INTERVAL, Math.max(1, cur.interval * 1.2))
     cur.ease = Math.max(1.3, cur.ease - 0.15)
-  } else if (rating === 3) {
+  } else if (r === 3) {
     cur.status = 'hafal'
-    cur.interval = Math.max(1, cur.interval * cur.ease)
-    cur.ease = cur.ease + 0.15
+    cur.interval = Math.min(MAX_INTERVAL, Math.max(1, cur.interval * cur.ease))
+    cur.ease = Math.min(3.5, cur.ease + 0.15)
+  } else {
+    // Rating tak dikenal → jangan ubah apa pun (hindari interval 'baru' aneh).
+    return srs
   }
 
   cur.nextReview = Date.now() + cur.interval * ONE_DAY
@@ -148,36 +154,39 @@ export function predictForgetting(data, srs, now = Date.now()) {
 }
 
 // ── Streak ──
-// Port checkStreak dari app.js: naik kalau login di hari berbeda berturut-turut.
-// `now` bisa di-inject untuk pengujian.
-export function checkNemonikStreak(now = new Date()) {
-  const todayKey = dayKey(now)
-  const lastLogin = lsGet(NEMONIK_LOGIN_KEY, null)
-  let streak = lsGet(NEMONIK_STREAK_KEY, 0)
-
-  if (lastLogin === todayKey) return streak
-
-  if (lastLogin) {
-    const diff = diffDaysKey(lastLogin, todayKey)
-    if (diff === 1) streak += 1
-    else if (diff > 1) streak = 1
-    else streak = streak || 1
-  } else {
-    streak = 1
+// Streak Nemonik = jumlah HARI BERTURUT-TURUT ada aktivitas review (bukan sekadar
+// membuka halaman). Dihitung dari tanggal log harian. `checkNemonikStreak`
+// menyinkronkan streak tersimpan dengan riwayat log (bisa naik/turun-mundur),
+// dan di-INJECT `hasToday` agar tak bergantung impor silang.
+export function computeNemonikStreak(log, now = new Date()) {
+  const today = dayKey(now)
+  const has = (d) => (log?.[d]?.reviewed || 0) > 0
+  // Mulai dari hari ini bila ada review; kalau belum, mulai dari kemarin
+  // (streak tetap "hidup" sampai hari ini dituntaskan).
+  const start = has(today) ? 0 : 1
+  let streak = 0
+  for (let i = start; i <= 365; i++) {
+    const d = new Date(now)
+    d.setDate(d.getDate() - i)
+    if (has(dayKey(d))) streak++
+    else break
   }
-
-  lsSet(NEMONIK_LOGIN_KEY, todayKey)
-  lsSet(NEMONIK_STREAK_KEY, streak)
   return streak
 }
 
-export const getNemonikStreak = () => lsGet(NEMONIK_STREAK_KEY, 0)
+// Baca & sinkronkan streak tersimpan dengan riwayat log (`log` dari
+// getDailyLog()). Menulis hanya bila nilainya berubah.
+export function checkNemonikStreak(log) {
+  const streak = computeNemonikStreak(log)
+  const saved = lsGet(NEMONIK_STREAK_KEY, null)
+  if (saved !== streak) {
+    lsSet(NEMONIK_STREAK_KEY, streak)
+    return streak
+  }
+  return streak
+}
 
 // ── Util tanggal (lokal file ini, hindari impor berlebih) ──
 function dayKey(d) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
-
-function diffDaysKey(a, b) {
-  return Math.round((new Date(`${b}T00:00:00`) - new Date(`${a}T00:00:00`)) / ONE_DAY)
 }

@@ -22,8 +22,9 @@ export const getSessions = () => {
 }
 
 // Tambah hasil satu kartu ke log harian (dipanggil per penilaian).
-// rating: 1 = Lupa, 2 = Sulit, 3 = Tahu.
+// rating: 1 = Lupa, 2 = Sulit, 3 = Tahu. Rating lain diabaikan (tidak dihitung).
 export function logDailyReview(rating, now = new Date()) {
+  if (rating !== 1 && rating !== 2 && rating !== 3) return getDailyLog()
   const key = dayStr(now)
   const log = getDailyLog()
   const day = log[key] || { reviewed: 0, lupa: 0, sulit: 0, tahu: 0 }
@@ -64,20 +65,5 @@ export function sessionSummary() {
   const avgAcc = sessions > 0
     ? Math.round(list.reduce((a, s) => a + (s.accuracy || 0), 0) / sessions)
     : 0
-  const last = list[0] || null
-  return { sessions, totalCards, avgAcc, last }
-}
-
-// Interval hari untuk heatmap: array { key, d, count } dari `days` hari terakhir.
-export function dailySeries(days = 91, now = new Date()) {
-  const log = getDailyLog()
-  const out = []
-  for (let i = days - 1; i >= 0; i--) {
-    const d = new Date(now)
-    d.setDate(d.getDate() - i)
-    const key = dayStr(d)
-    const entry = log[key]
-    out.push({ key, d, count: entry?.reviewed || 0, entry })
-  }
-  return out
+  return { sessions, totalCards, avgAcc }
 }

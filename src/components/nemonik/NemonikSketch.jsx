@@ -14,9 +14,6 @@ export default function NemonikSketch({ entry }) {
   // Riwayat snapshot untuk undo (ImageData disimpan terbatas).
   const strokesRef = useRef([])
   const [canUndo, setCanUndo] = useState(false)
-  // Penanda kartu terakhir agar resize TIDAK menghapus coretan (hanya kartu
-  // baru yang mereset kanvas).
-  const lastEntryNoRef = useRef(undefined)
 
   const bg = entry ? imgUrl(entry.img_kanji_bersih) : ''
 
@@ -64,7 +61,6 @@ export default function NemonikSketch({ entry }) {
 
   // Reset penuh saat kartu (entry) berubah — bukan saat resize.
   useEffect(() => {
-    lastEntryNoRef.current = entry?.no
     setupCanvas(false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entry?.no])
