@@ -144,7 +144,7 @@
 }
 
 .font-select:hover {
-  border-color: rgba(255, 255, 255, 0.22);
+  border-color: var(--layer-3);
 }
 
 .icon-btn {
@@ -226,7 +226,7 @@
   margin-inline: -14px;
   padding-inline: 14px;
   padding-bottom: 8px;
-  background: color-mix(in srgb, #0e2433 76%, transparent);
+  background: var(--nav-solid);
   backdrop-filter: saturate(180%) blur(14px);
   -webkit-backdrop-filter: saturate(180%) blur(14px);
   transition:

@@ -1,25 +1,47 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Eraser, Undo2 } from 'lucide-react'
+import { Eraser, Undo2, PenLine, Info } from 'lucide-react'
 import { imgUrl } from '../../lib/nemonik'
 
-// Canvas latihan tulis kanji (tanpa validasi goresan).
-// Background: gambar kanji (img_kanji_bersih) dengan opacity rendah sebagai panduan.
+// Canvas latihan tulis kanji dengan panduan profesional:
+//  • Grid genkou (田字格): kotak + crosshair horizontal/vertikal/diagonal.
+//  • Bayangan kanji (img_kanji_bersih) sebagai acuan bentuk.
+//  • Kontrol ketebalan pena (halus/sedang/tebal), undo & hapus.
+//  • Panel informasi kanji (arti, on'yomi, kun'yomi, bacaan utama).
 
 // Batas riwayat undo agar memori terjaga (tiap snapshot = full ImageData).
-const MAX_UNDO = 15
+const MAX_UNDO = 20
+
+// Ketebalan pena (dalam px CSS; di-skala otomatis oleh DPR).
+const BRUSHES = [
+  { key: 'thin', label: 'Halus', width: 6, dot: 6 },
+  { key: 'mid', label: 'Sedang', width: 10, dot: 10 },
+  { key: 'bold', label: 'Tebal', width: 15, dot: 15 },
+]
 
 export default function NemonikSketch({ entry }) {
   const canvasRef = useRef(null)
   const drawingRef = useRef(false)
-  // Riwayat snapshot untuk undo (ImageData disimpan terbatas).
+  const brushRef = useRef(10)
   const strokesRef = useRef([])
   const [canUndo, setCanUndo] = useState(false)
+  const [brush, setBrush] = useState('mid')
+  const [showGuide, setShowGuide] = useState(true)
 
   const bg = entry ? imgUrl(entry.img_kanji_bersih) : ''
 
+  // Terapkan ketebalan ke context (tanpa reset coretan).
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const w = BRUSHES.find((b) => b.key === brush)?.width || 10
+    brushRef.current = w
+    const ctx = canvas.getContext('2d')
+    ctx.lineWidth = w
+  }, [brush])
+
   // Ukuran canvas mengikuti kontainer (device pixel ratio aware).
   // `preserve` = true → gambar yang ada dipertahankan (untuk resize).
-  const setupCanvas = useCallback((preserve = false) => {
+  const setupCanvas = useCallback((preserve = false, width = 10) => {
     const canvas = canvasRef.current
     if (!canvas) return
     const rect = canvas.getBoundingClientRect()
@@ -38,7 +60,7 @@ export default function NemonikSketch({ entry }) {
     canvas.height = rect.height * dpr
     const ctx = canvas.getContext('2d')
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-    ctx.lineWidth = 10
+    ctx.lineWidth = width
     ctx.lineCap = 'round'
     ctx.lineJoin = 'round'
     ctx.strokeStyle = '#c1402a'
@@ -61,13 +83,13 @@ export default function NemonikSketch({ entry }) {
 
   // Reset penuh saat kartu (entry) berubah — bukan saat resize.
   useEffect(() => {
-    setupCanvas(false)
+    setupCanvas(false, brushRef.current)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entry?.no])
 
   // Resize → pertahankan coretan.
   useEffect(() => {
-    const onResize = () => setupCanvas(true)
+    const onResize = () => setupCanvas(true, brushRef.current)
     window.addEventListener('resize', onResize)
     return () => window.removeEventListener('resize', onResize)
   }, [setupCanvas])
@@ -119,10 +141,71 @@ export default function NemonikSketch({ entry }) {
     setCanUndo(strokesRef.current.length > 0)
   }
 
+  const reading = entry?.baca_utama || entry?.onyomi || ''
+  const kunyomi = entry?.kunyomi || ''
+  const onyomi = entry?.onyomi || ''
+
   return (
     <div className="nemo-sketch">
+      {/* ── Panel informasi kanji ── */}
+      {entry && (
+        <div className="nemo-sketch-info">
+          <div className="nemo-sketch-kanji" aria-hidden>{entry.kanji}</div>
+          <div className="nemo-sketch-meta">
+            <div className="nemo-sketch-arti">{entry.arti}</div>
+            <div className="nemo-sketch-read">
+              {onyomi && <span className="nemo-read-chip on">音 {onyomi}</span>}
+              {kunyomi && <span className="nemo-read-chip kun">訓 {kunyomi}</span>}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Kontrol pena ── */}
+      <div className="nemo-sketch-tools">
+        <div className="nemo-brush-group" role="radiogroup" aria-label="Ketebalan pena">
+          {BRUSHES.map((b) => (
+            <button
+              key={b.key}
+              type="button"
+              role="radio"
+              aria-checked={brush === b.key}
+              className={`nemo-brush ${brush === b.key ? 'on' : ''}`}
+              onClick={() => setBrush(b.key)}
+              title={`Pena ${b.label}`}
+              aria-label={`Pena ${b.label}`}
+            >
+              <span className="nemo-brush-dot" style={{ width: b.dot, height: b.dot }} />
+              {b.label}
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          className={`nemo-guide-toggle ${showGuide ? 'on' : ''}`}
+          onClick={() => setShowGuide((v) => !v)}
+          aria-pressed={showGuide}
+          title="Tampilkan/sembunyikan grid & bayangan"
+        >
+          <PenLine size={15} /> Panduan
+        </button>
+      </div>
+
+      {/* ── Panggung tulis ── */}
       <div className="nemo-sketch-stage">
-        {bg && <img className="nemo-sketch-bg" src={bg} alt="" draggable="false" aria-hidden />}
+        {bg && showGuide && <img className="nemo-sketch-bg" src={bg} alt="" draggable="false" aria-hidden />}
+
+        {/* Grid genkou 田字格: kotak luar + crosshair + diagonal. */}
+        {showGuide && (
+          <svg className="nemo-sketch-grid" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
+            <rect x="0.5" y="0.5" width="99" height="99" rx="2" className="g-outline" />
+            <line x1="50" y1="0" x2="50" y2="100" className="g-mid" />
+            <line x1="0" y1="50" x2="100" y2="50" className="g-mid" />
+            <line x1="0" y1="0" x2="100" y2="100" className="g-diag" />
+            <line x1="100" y1="0" x2="0" y2="100" className="g-diag" />
+          </svg>
+        )}
+
         <canvas
           ref={canvasRef}
           className="nemo-sketch-canvas"
@@ -133,6 +216,8 @@ export default function NemonikSketch({ entry }) {
           onPointerCancel={end}
         />
       </div>
+
+      {/* ── Aksi ── */}
       <div className="nemo-sketch-actions">
         <button type="button" className="nemo-nav-btn" onClick={undo} disabled={!canUndo}>
           <Undo2 size={16} /> Undo
@@ -141,7 +226,13 @@ export default function NemonikSketch({ entry }) {
           <Eraser size={16} /> Hapus
         </button>
       </div>
-      <p className="nemo-sketch-hint">Tulis kanji mengikuti bayangan di belakang.</p>
+
+      <p className="nemo-sketch-hint">
+        <Info size={13} aria-hidden />
+        {reading
+          ? <> Tulis <b>{entry.kanji}</b> (baca: {reading}) mengikuti panduan. Tekan "Panduan" untuk sembunyikan grid & bayangan saat uji ingatan.</>
+          : <> Tulis kanji mengikuti panduan di baliknya.</>}
+      </p>
     </div>
   )
 }

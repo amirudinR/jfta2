@@ -168,7 +168,7 @@ html.dark-mode .mnenonic {
 }
 
 html.dark-mode .speak-btn {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--layer-1);
 }
 
 .romaji-toggle {
@@ -195,7 +195,7 @@ html.dark-mode .speak-btn {
 }
 
 html.dark-mode .romaji-toggle {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--layer-1);
 }
 
 html.dark-mode .romaji-toggle.on {
@@ -234,7 +234,7 @@ html.dark-mode .romaji-toggle.on {
   flex: 1;
   height: 5px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--layer-3);
   overflow: hidden;
 }
 

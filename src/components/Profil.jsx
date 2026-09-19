@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import {
   LogOut, User as UserIcon, Flame, Library, CalendarCheck, Sparkles,
-  Volume2, Play, Moon, Sun, Languages, Type,
+  Volume2, Play, Moon, Sun, Monitor, MonitorSmartphone, Languages, Type,
 } from 'lucide-react'
 import GoogleIcon from './GoogleIcon'
 import NemonikHeatmap from './nemonik/NemonikHeatmap'
@@ -13,6 +13,7 @@ import {
 import { buildItems } from '../lib/hafalan-items'
 import { sessionSummary, getSessions } from '../lib/nemonik-sessions'
 import { getAchievements, levelInfo, BADGES } from '../lib/nemonik-achievements'
+import { useWakeLock, wakeLockSupported } from '../hooks/useWakeLock'
 import {
   ttsSupported, listJapaneseVoices, voiceLabel, getVoicePref, setVoicePref,
   refreshVoice, speak, onVoicesReady,
@@ -60,6 +61,10 @@ export default function Profil({ user, loading, onLogin, onLogout, prefs = {}, o
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [voices, setVoices] = useState(() => listJapaneseVoices())
   const [voicePref, setVoicePrefState] = useState(() => getVoicePref())
+
+  // Status wake lock (layar tetap nyala) — hook ini terpasang juga di App,
+  // di sini hanya untuk menampilkan badge "aktif".
+  const wakeLock = useWakeLock(!!prefs.keepAwake)
 
   // Voices dimuat asinkron oleh browser — refresh saat siap.
   useEffect(() => { const un = onVoicesReady(() => setVoices(listJapaneseVoices())); return un }, [])
@@ -222,15 +227,34 @@ export default function Profil({ user, loading, onLogin, onLogout, prefs = {}, o
       {/* Pengaturan tampilan */}
       <div className="profil-section-title"><Type size={15} /> Pengaturan</div>
       <div className="profil-card profil-settings">
-        <button className="profil-setting-row" onClick={() => onPrefs({ darkMode: !prefs.darkMode })}>
+        <div className="profil-setting-block">
           <span className="profil-setting-left">
-            {prefs.darkMode ? <Moon size={17} /> : <Sun size={17} />}
-            <span>Tema {prefs.darkMode ? 'Gelap' : 'Terang'}</span>
+            <Sun size={17} />
+            <span>Tema</span>
           </span>
-          <span className={`hh-switch ${prefs.darkMode ? 'on' : ''}`} aria-hidden>
-            <span className="hh-switch-knob" />
-          </span>
-        </button>
+          <div className="profil-seg" role="radiogroup" aria-label="Pilih tema">
+            {[
+              { key: 'light', label: 'Terang', Icon: Sun },
+              { key: 'dark', label: 'Gelap', Icon: Moon },
+              { key: 'system', label: 'Sistem', Icon: Monitor },
+            ].map(({ key, label, Icon }) => {
+              const active = (prefs.themeMode || (prefs.darkMode ? 'dark' : 'light')) === key
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  className={`profil-seg-btn ${active ? 'on' : ''}`}
+                  onClick={() => onPrefs({ themeMode: key, darkMode: key === 'dark' })}
+                >
+                  <Icon size={15} />
+                  {label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
 
         <button className="profil-setting-row" onClick={() => onPrefs({ showRomaji: !prefs.showRomaji })}>
           <span className="profil-setting-left">
@@ -241,6 +265,30 @@ export default function Profil({ user, loading, onLogin, onLogout, prefs = {}, o
             <span className="hh-switch-knob" />
           </span>
         </button>
+
+        <button
+          className="profil-setting-row"
+          onClick={() => onPrefs({ keepAwake: !prefs.keepAwake })}
+          aria-pressed={!!prefs.keepAwake}
+          title={wakeLockSupported() ? undefined : 'Browser ini tidak mendukung fitur ini'}
+        >
+          <span className="profil-setting-left">
+            <MonitorSmartphone size={17} />
+            <span>
+              Layar tetap nyala
+              {prefs.keepAwake && wakeLock.supported && wakeLock.active && (
+                <em className="profil-awake-live">aktif</em>
+              )}
+            </span>
+          </span>
+          <span className={`hh-switch ${prefs.keepAwake ? 'on' : ''}`} aria-hidden>
+            <span className="hh-switch-knob" />
+          </span>
+        </button>
+        <p className="muted profil-voice-note profil-awake-note">
+          Saat aktif, layar tidak otomatis mati selama aplikasi terbuka — cocok untuk sesi hafalan panjang.
+          {!wakeLockSupported() && ' (Tidak didukung browser ini.)'}
+        </p>
 
         <div className="profil-setting-row fixed col">
           <span className="profil-setting-left"><Type size={17} /><span>Gaya huruf Kanji</span></span>

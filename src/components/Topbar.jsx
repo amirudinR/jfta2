@@ -1,7 +1,17 @@
-import { Sun, Moon, Type, LogIn, Menu } from 'lucide-react'
+import { Sun, Moon, Monitor, Type, LogIn, Menu } from 'lucide-react'
 import { KANJI_FONTS } from '../lib/fonts'
 
-export default function Topbar({ stats, darkMode, onToggleDark, font, onFont, user, onLogin, onMenuOpen, showStats = true }) {
+// Urutan siklus tombol tema cepat: sistem → terang → gelap → sistem.
+const THEME_CYCLE = { system: 'light', light: 'dark', dark: 'system' }
+const THEME_META = {
+  system: { label: 'Tema: Ikut Sistem', Icon: Monitor },
+  light: { label: 'Tema: Terang', Icon: Sun },
+  dark: { label: 'Tema: Gelap', Icon: Moon },
+}
+
+export default function Topbar({ stats, themeMode = 'system', onTheme, font, onFont, user, onLogin, onMenuOpen, showStats = true }) {
+  const { label, Icon } = THEME_META[themeMode] || THEME_META.system
+  const nextLabel = THEME_META[THEME_CYCLE[themeMode]]?.label || ''
   return (
     <header className="topbar">
       <div className="tb-row">
@@ -31,11 +41,11 @@ export default function Topbar({ stats, darkMode, onToggleDark, font, onFont, us
           </div>
           <button
             className="icon-btn no-print"
-            onClick={onToggleDark}
-            title={darkMode ? 'Mode terang' : 'Mode gelap'}
-            aria-label={darkMode ? 'Aktifkan mode terang' : 'Aktifkan mode gelap'}
+            onClick={() => onTheme(THEME_CYCLE[themeMode])}
+            title={`${label} — tekan untuk ${nextLabel.replace('Tema: ', '').toLowerCase()}`}
+            aria-label={`${label}. Tekan untuk ganti`}
           >
-            {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+            <Icon size={18} />
           </button>
           {user?.photoURL ? (
             <img

@@ -9,10 +9,10 @@
   z-index: 900;
   display: flex;
   align-items: stretch;
-  background: rgba(10, 25, 40, 0.96);
+  background: var(--nav-solid);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  border-top: 1px solid var(--layer-3);
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
@@ -28,7 +28,7 @@
   min-height: 56px;
   border: none;
   background: none;
-  color: rgba(255, 255, 255, 0.38);
+  color: var(--ink-50);
   font-size: 10px;
   font-weight: 500;
   font-family: var(--font-ui);
@@ -93,7 +93,7 @@
   height: 24px;
   border-radius: 50%;
   object-fit: cover;
-  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  border: 1.5px solid var(--layer-3);
 }
 
 .bnav-item.active .bnav-avatar {
@@ -146,8 +146,8 @@
 }
 
 .profil-card {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--layer-1);
+  border: 1px solid var(--layer-3);
   border-radius: 16px;
   padding: 20px;
 }
@@ -193,7 +193,7 @@
 .profil-sync-note {
   margin: 14px 0 0;
   padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid var(--layer-1);
   font-size: 12px;
   color: var(--moss);
 }
@@ -222,8 +222,8 @@
   width: 100%;
   padding: 13px 20px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--layer-3);
+  background: var(--layer-1);
   color: var(--page-ink);
   font-size: 14px;
   font-weight: 600;
@@ -234,8 +234,8 @@
 }
 
 .profil-login-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.25);
+  background: var(--layer-3);
+  border-color: var(--layer-3);
 }
 
 .profil-login-btn:active {
@@ -276,8 +276,8 @@
   gap: 16px;
   padding: 18px;
   border-radius: 18px;
-  background: linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03));
-  border: 1px solid rgba(255,255,255,0.08);
+  background: linear-gradient(135deg, var(--layer-3), var(--layer-1));
+  border: 1px solid var(--layer-3);
 }
 .profil-avatar-lg {
   width: 64px; height: 64px;
@@ -314,8 +314,8 @@
 .profil-level-card {
   padding: 16px;
   border-radius: 16px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--layer-1);
+  border: 1px solid var(--layer-3);
 }
 .profil-level-head { display: flex; align-items: center; justify-content: space-between; }
 .profil-level-badge {
@@ -327,7 +327,7 @@
 .profil-level-xp { font-size: 13px; font-weight: 700; color: var(--page-soft); }
 .profil-xp-bar {
   height: 8px; margin-top: 12px;
-  border-radius: 999px; background: rgba(255,255,255,0.08);
+  border-radius: 999px; background: var(--layer-3);
   overflow: hidden;
 }
 .profil-xp-fill {
@@ -347,8 +347,8 @@
 .profil-stat {
   padding: 14px;
   border-radius: 15px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--layer-1);
+  border: 1px solid var(--layer-3);
   display: flex; flex-direction: column; gap: 2px;
 }
 .profil-stat-icon { color: var(--page-soft); margin-bottom: 4px; }
@@ -362,8 +362,8 @@
 .profil-badge {
   display: flex; flex-direction: column; align-items: center; gap: 5px;
   padding: 12px 6px; border-radius: 14px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--layer-1);
+  border: 1px solid var(--layer-3);
   text-align: center;
 }
 .profil-badge.off { opacity: 0.38; filter: grayscale(0.8); }
@@ -374,8 +374,8 @@
 .profil-heatmap-wrap {
   padding: 12px;
   border-radius: 16px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--layer-1);
+  border: 1px solid var(--layer-3);
 }
 
 .profil-settings { padding: 6px; }
@@ -384,7 +384,7 @@
   gap: 12px; width: 100%;
   padding: 14px 12px;
   background: none; border: none;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid var(--layer-3);
   color: var(--page-ink); font-family: var(--font-ui);
   font-size: 14px; font-weight: 600; text-align: left; cursor: pointer;
 }
@@ -394,11 +394,53 @@
 .profil-setting-left { display: flex; align-items: center; gap: 10px; color: var(--page-ink); }
 .profil-setting-left svg { color: var(--page-soft); flex: none; }
 
+/* Badge "aktif" untuk fitur yang punya status runtime (mis. wake lock). */
+.profil-awake-live {
+  display: inline-block; margin-left: 8px; padding: 1px 8px;
+  font-size: 10.5px; font-weight: 700; font-style: normal;
+  border-radius: 999px; vertical-align: middle;
+  color: var(--moss-dark);
+  background: rgba(111, 143, 82, 0.16);
+  border: 1px solid rgba(111, 143, 82, 0.4);
+}
+.profil-awake-note { padding: 0 14px 12px; margin: -2px 0 0; font-size: 12px; line-height: 1.5; }
+
+/* Blok setting dengan kontrol di bawah label (mis. segmented Tema). */
+.profil-setting-block {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--layer-3);
+}
+.profil-setting-block:last-child { border-bottom: none; }
+
+/* Segmented control (ala iOS) untuk pilih tema 3-arah. */
+.profil-seg {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;
+  padding: 4px; border-radius: 12px;
+  background: var(--layer-1);
+  border: 1px solid var(--layer-3);
+}
+.profil-seg-btn {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 9px 6px; min-height: 40px;
+  border: none; border-radius: 9px; cursor: pointer;
+  background: transparent;
+  color: var(--page-soft);
+  font-family: var(--font-ui); font-size: 12.5px; font-weight: 600;
+  transition: background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+.profil-seg-btn.on {
+  background: var(--card-face);
+  color: var(--page-ink);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+.profil-seg-btn svg { flex: none; }
+
 .profil-font-pick { display: flex; flex-wrap: wrap; gap: 6px; }
 .profil-font-btn {
   padding: 8px 12px; border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--layer-3);
+  background: var(--layer-1);
   color: var(--page-soft); font-family: var(--font-jp);
   font-size: 12.5px; font-weight: 600; cursor: pointer;
   min-height: 38px;
@@ -414,8 +456,8 @@
 .profil-voice-opt {
   display: flex; align-items: center; gap: 8px;
   padding: 12px 14px; border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--layer-3);
+  background: var(--layer-1);
   color: var(--page-ink); font-family: var(--font-ui);
   font-size: 13.5px; font-weight: 600; cursor: pointer; text-align: left;
   min-height: 46px;
@@ -437,7 +479,7 @@
 .profil-rate-slider {
   -webkit-appearance: none; appearance: none;
   width: 100%; height: 6px; border-radius: 999px;
-  background: rgba(255,255,255,0.1); outline: none; cursor: pointer;
+  background: var(--layer-3); outline: none; cursor: pointer;
 }
 .profil-rate-slider::-webkit-slider-thumb {
   -webkit-appearance: none; appearance: none;
@@ -458,8 +500,8 @@
 }
 .profil-rate-btn {
   padding: 9px 12px; border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--layer-3);
+  background: var(--layer-1);
   color: var(--page-soft); font-family: var(--font-ui);
   font-size: 12px; font-weight: 600; cursor: pointer; min-height: 38px;
 }
@@ -494,8 +536,8 @@
   font-family: var(--font-ui); cursor: pointer; min-height: 48px; border: 1px solid transparent;
 }
 .profil-modal-cancel {
-  background: rgba(255,255,255,0.07); color: var(--page-ink);
-  border-color: rgba(255,255,255,0.12);
+  background: var(--layer-3); color: var(--page-ink);
+  border-color: var(--layer-3);
 }
 .profil-modal-confirm { background: #c1402a; color: #fff; }
 
@@ -515,8 +557,8 @@
   text-align: center;
   margin-bottom: 20px;
   padding: 20px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--layer-1);
+  border: 1px solid var(--layer-3);
   border-radius: 16px;
 }
 
@@ -562,8 +604,8 @@
 }
 
 .review-item {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--layer-1);
+  border: 1px solid var(--layer-3);
   border-radius: 12px;
   padding: 14px;
 }
@@ -627,7 +669,7 @@
 .review-explanation {
   margin-top: 8px;
   padding-top: 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid var(--layer-1);
   font-size: 12px;
   color: var(--page-soft);
   line-height: 1.5;

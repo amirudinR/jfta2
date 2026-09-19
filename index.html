@@ -14,10 +14,16 @@
       rel="stylesheet"
     />
     <script>
-      // Anti-flash: terapkan dark mode sebelum React render.
+      // Anti-flash: terapkan tema sebelum React render agar tidak berkedip.
       try {
         var _s = JSON.parse(localStorage.getItem('hafalan-jft-a2-progress-v2') || '{}')
-        if (_s.prefs && _s.prefs.darkMode) document.documentElement.classList.add('dark-mode')
+        var _p = (_s && _s.prefs) || {}
+        var _m = _p.themeMode || (_p.darkMode ? 'dark' : 'light')
+        var _dark = _m === 'dark' ||
+          (_m === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+        if (_dark) document.documentElement.classList.add('dark-mode')
+        var _meta = document.querySelector('meta[name="theme-color"]')
+        if (_meta) _meta.setAttribute('content', _dark ? '#0c1f2f' : '#f6f1e2')
       } catch (e) {}
     </script>
   </head>

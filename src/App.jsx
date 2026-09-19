@@ -42,6 +42,7 @@ import { resetDailyProgress } from './lib/hafalan-storage'
 import { useAuth } from './hooks/useAuth'
 import { useLiveSync } from './hooks/useLiveSync'
 import { useAppSettings } from './hooks/useAppSettings'
+import { useWakeLock } from './hooks/useWakeLock'
 import { useScrollHeader } from './hooks/useScrollHeader'
 import { saveExamResult } from './lib/cloud-sync'
 import {
@@ -109,6 +110,8 @@ export default function App() {
   }
   useLiveSync(user, handleCloudApplied)
   useAppSettings(prefs)
+  // Layar tetap menyala (opsional, dari Pengaturan) untuk sesi belajar panjang.
+  useWakeLock(!!prefs.keepAwake)
   // Efek "large title" ala iOS: header menciut & sembunyi saat scroll ke bawah.
   useScrollHeader()
 
@@ -386,8 +389,8 @@ export default function App() {
     <div className="stage">
       <Topbar
         stats={stats}
-        darkMode={prefs.darkMode}
-        onToggleDark={() => setPrefs({ darkMode: !prefs.darkMode })}
+        themeMode={prefs.themeMode || (prefs.darkMode ? 'dark' : 'light')}
+        onTheme={(themeMode) => setPrefs({ themeMode, darkMode: themeMode === 'dark' })}
         font={prefs.font}
         onFont={(font) => setPrefs({ font })}
         user={user}

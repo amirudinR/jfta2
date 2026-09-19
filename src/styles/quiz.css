@@ -17,15 +17,15 @@
 }
 
 .qstat b {
-  color: #f2ecd9;
+  color: var(--page-ink);
 }
 
 .qstat.ok b {
-  color: #b9d4a1;
+  color: var(--good-ink);
 }
 
 .qstat.err b {
-  color: #e2937f;
+  color: var(--wrong-ink);
 }
 
 .quiz-card {
@@ -67,8 +67,8 @@
 .opt {
   padding: 12px 10px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--layer-3);
+  background: var(--layer-1);
   color: var(--page-ink);
   font-size: 13.5px;
   text-align: center;
@@ -91,7 +91,7 @@
 .opt.correct {
   border-color: var(--moss);
   background: rgba(111, 143, 82, 0.25);
-  color: #cfe0b8;
+  color: var(--good-ink);
   font-weight: 600;
   animation: quiz-pop 0.4s var(--ios-spring, cubic-bezier(0.34,1.56,0.64,1));
 }
@@ -99,7 +99,7 @@
 .opt.wrong {
   border-color: var(--shu);
   background: rgba(193, 64, 42, 0.22);
-  color: #e8a294;
+  color: var(--wrong-ink);
   animation: quiz-shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
 }
 
@@ -144,12 +144,12 @@
 }
 
 .feedback-ok {
-  color: #b9d4a1;
+  color: var(--good-ink);
   font-weight: 600;
 }
 
 .feedback-err {
-  color: #e2937f;
+  color: var(--wrong-ink);
   font-weight: 600;
 }
 
@@ -173,7 +173,7 @@
 }
 
 .meta-box b {
-  color: #f2ecd9;
+  color: var(--page-ink);
 }
 
 .meta-link {
@@ -190,7 +190,7 @@
 /* ---------- Panel (ujian / kosong / ringkasan) ---------- */
 .panel {
   background: rgba(0, 0, 0, 0.22);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--layer-3);
   border-radius: 16px;
   padding: 26px 18px;
   text-align: center;
@@ -204,7 +204,7 @@
 .panel h3 {
   margin: 10px 0 4px;
   font-size: 16px;
-  color: #f2ecd9;
+  color: var(--page-ink);
 }
 
 .panel p {

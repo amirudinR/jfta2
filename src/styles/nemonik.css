@@ -38,7 +38,7 @@
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s, transform 0.12s;
 }
-.nemo-back:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255,255,255,0.22); }
+.nemo-back:hover { background: var(--layer-3); border-color: var(--layer-3); }
 .nemo-back:active { transform: translateY(1px); }
 
 .nemo-brand {
@@ -1097,7 +1097,7 @@
   border-radius: 16px;
   border: 1px solid rgba(193, 64, 42, 0.35);
   background: rgba(193, 64, 42, 0.1);
-  color: #e2937f;
+  color: var(--wrong-ink);
   cursor: pointer;
   font-family: var(--font-ui);
   min-height: 60px;
@@ -1158,6 +1158,80 @@
 .nemo-view-tab.on { background: var(--shu); color: var(--washi); border-color: transparent; }
 .nemo-study-sketch { margin-top: 10px; }
 .nemo-sketch { display: flex; flex-direction: column; gap: 10px; }
+
+/* ── Panel info kanji di atas kanvas ── */
+.nemo-sketch-info {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--card-face);
+  border: 1px solid var(--card-line);
+}
+.nemo-sketch-kanji {
+  font-family: var(--font-jp);
+  font-size: 2.6rem; line-height: 1; font-weight: 700;
+  color: var(--shu);
+  flex: none;
+  width: 3.2rem; text-align: center;
+}
+.nemo-sketch-meta { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.nemo-sketch-arti {
+  font-size: 0.95rem; font-weight: 700; color: var(--card-ink);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.nemo-sketch-read { display: flex; flex-wrap: wrap; gap: 6px; }
+.nemo-read-chip {
+  font-family: var(--font-jp);
+  font-size: 0.75rem; font-weight: 600;
+  padding: 3px 9px; border-radius: 999px;
+  border: 1px solid var(--card-line);
+  color: var(--card-soft);
+  background: rgba(0, 0, 0, 0.04);
+}
+.nemo-read-chip.on { color: var(--shu); border-color: rgba(193, 64, 42, 0.35); }
+.nemo-read-chip.kun { color: var(--moss-dark); border-color: rgba(111, 143, 82, 0.4); }
+
+/* ── Kontrol pena ── */
+.nemo-sketch-tools {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; flex-wrap: wrap;
+}
+.nemo-brush-group {
+  display: flex; gap: 4px; padding: 4px;
+  border-radius: 12px;
+  background: var(--layer-1);
+  border: 1px solid var(--layer-3);
+}
+.nemo-brush {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 10px; min-height: 34px;
+  border: none; border-radius: 8px; cursor: pointer;
+  background: transparent; color: var(--page-soft);
+  font-family: var(--font-ui); font-size: 12px; font-weight: 600;
+  transition: background-color 0.16s ease, color 0.16s ease;
+}
+.nemo-brush.on { background: var(--card-face); color: var(--page-ink); box-shadow: 0 1px 5px rgba(0,0,0,0.16); }
+.nemo-brush-dot {
+  display: inline-block; border-radius: 50%;
+  background: var(--shu); flex: none;
+}
+.nemo-guide-toggle {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 12px; min-height: 34px;
+  border-radius: 10px; cursor: pointer;
+  border: 1px solid var(--layer-3);
+  background: var(--layer-1);
+  color: var(--page-soft);
+  font-family: var(--font-ui); font-size: 12px; font-weight: 600;
+  transition: background-color 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+}
+.nemo-guide-toggle.on {
+  color: var(--page-ink);
+  border-color: rgba(193, 148, 63, 0.5);
+  background: rgba(193, 148, 63, 0.14);
+}
+
+/* ── Panggung ── */
 .nemo-sketch-stage {
   position: relative;
   width: 100%;
@@ -1175,15 +1249,25 @@
   width: 78%; height: 78%; object-fit: contain;
   opacity: 0.16; pointer-events: none; user-select: none;
 }
+.nemo-sketch-grid {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  pointer-events: none;
+}
+.nemo-sketch-grid .g-outline { fill: none; stroke: var(--genkou-line); stroke-width: 0.6; }
+.nemo-sketch-grid .g-mid { stroke: var(--genkou-line); stroke-width: 0.5; stroke-dasharray: 3 2; }
+.nemo-sketch-grid .g-diag { stroke: var(--genkou-line); stroke-width: 0.4; stroke-dasharray: 2 3; opacity: 0.7; }
 .nemo-sketch-canvas {
   position: absolute; inset: 0; width: 100%; height: 100%;
   touch-action: none; cursor: crosshair;
 }
 .nemo-sketch-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .nemo-sketch-hint {
-  text-align: center; font-family: var(--font-ui); font-size: 0.8rem;
-  color: var(--page-soft); margin: 0;
+  display: flex; align-items: flex-start; gap: 6px;
+  text-align: left; font-family: var(--font-ui); font-size: 0.8rem;
+  color: var(--page-soft); margin: 0; line-height: 1.5;
 }
+.nemo-sketch-hint svg { flex: none; margin-top: 2px; opacity: 0.7; }
+.nemo-sketch-hint b { color: var(--page-ink); font-family: var(--font-jp); }
 
 /* ── Toast badge baru ── */
 .nemo-toast {
@@ -1198,7 +1282,7 @@
   max-width: 92vw;
   padding: 12px 16px;
   border-radius: 14px;
-  background: rgba(10, 25, 40, 0.97);
+  background: var(--sheet-solid);
   border: 1px solid rgba(193, 148, 63, 0.5);
   color: var(--page-ink, #f0ebe0);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);

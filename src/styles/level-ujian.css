@@ -66,8 +66,8 @@
   padding: 8px 14px;
   min-height: 44px;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--layer-3);
+  background: var(--layer-1);
   color: var(--page-soft);
   font-size: 13px;
   font-family: var(--font-ui);
@@ -80,7 +80,7 @@
 }
 
 .ujian-chip:hover {
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: var(--layer-3);
   color: var(--page-ink);
 }
 
@@ -115,8 +115,8 @@
   padding: 14px 8px 12px;
   min-height: 44px;
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--layer-3);
+  background: var(--layer-1);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition:
@@ -126,7 +126,7 @@
 }
 
 .ujian-diff:hover {
-  border-color: rgba(255, 255, 255, 0.18);
+  border-color: var(--layer-3);
 }
 
 .ujian-diff:active {
@@ -174,8 +174,8 @@
   gap: 6px;
   padding: 6px 12px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--layer-3);
+  background: var(--layer-1);
   color: var(--page-soft);
   font-size: 12px;
   cursor: pointer;
@@ -183,7 +183,7 @@
 }
 
 .ujian-date-chip:hover {
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: var(--layer-3);
 }
 
 .ujian-date-chip.active {
@@ -208,7 +208,7 @@
   text-align: center;
   margin-top: 24px;
   padding-top: 18px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid var(--layer-1);
 }
 
 .ujian-pool-info {
