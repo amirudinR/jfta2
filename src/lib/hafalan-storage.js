@@ -74,6 +74,13 @@ export const setTargets = (v) => lsSet(`${STORAGE_PREFIX}-targets`, v)
 
 export const getHistory = (mode) => lsGet(`${STORAGE_PREFIX}-hist-${mode}`, {})
 
+// Daftar tanggal valid (YYYY-MM-DD) dari riwayat, terurut menaik. Menyaring
+// kunci non-tanggal (mis. `resetAt` sisa reset) agar tak dianggap hari.
+export const historyDates = (mode) =>
+  Object.keys(getHistory(mode))
+    .filter((k) => /^\d{4}-\d{2}-\d{2}$/.test(k))
+    .sort()
+
 function isDone(dayData, t) {
   const kc = Object.values(dayData.kotoba || {}).filter(Boolean).length
   const jc = Object.values(dayData.kanji || {}).filter(Boolean).length

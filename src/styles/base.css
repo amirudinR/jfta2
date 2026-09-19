@@ -160,3 +160,51 @@ button {
   border-color: var(--shu);
   color: #fff;
 }
+
+/* ============================================================
+   iOS-like micro-interactions
+   ============================================================ */
+
+/* Scroll halus + momentum ala iOS. */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  /* Hilangkan highlight biru saat tap (kita ganti dgn feedback sendiri). */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Feedback tap LEMBUT: tombol menyusut sedikit saat ditekan & kembali
+   dengan kurva spring iOS. Hanya transform/opacity → tetap 60fps.
+   Elemen yang punya transform sendiri (.card-wrap flip) dikecualikan agar
+   tidak bertabrakan. */
+button,
+[role='button'],
+.tb-hamburger,
+.sidebar-item {
+  transition:
+    transform 0.18s var(--ios-ease, cubic-bezier(0.32, 0.72, 0, 1)),
+    background-color 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease,
+    opacity 0.18s ease;
+}
+
+button:not(:disabled):not(.card-wrap):active,
+[role='button']:not([aria-disabled='true']):not(.card-wrap):active {
+  transform: scale(0.97);
+}
+
+/* Hormati preferensi user: matikan gerak halus saat reduced-motion. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  button:not(:disabled):active,
+  [role='button']:active {
+    transform: none;
+  }
+}
+

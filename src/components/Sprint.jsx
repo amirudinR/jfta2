@@ -15,6 +15,7 @@ export default function Sprint({ entries, cards, onGrade, material, direction = 
   const [done, setDone] = useState({ ok: 0, ulang: 0 })
   const [elapsed, setElapsed] = useState(0)
   const startAt = useRef(0)
+  const answeringRef = useRef(false) // cegah double-grade (klik/Enter cepat)
 
   useEffect(() => {
     reset()
@@ -45,6 +46,7 @@ export default function Sprint({ entries, cards, onGrade, material, direction = 
     setDone({ ok: 0, ulang: 0 })
     setElapsed(0)
     startAt.current = Date.now()
+    answeringRef.current = false
     setRunning(true)
   }
 
@@ -60,6 +62,7 @@ export default function Sprint({ entries, cards, onGrade, material, direction = 
     setDone({ ok: 0, ulang: 0 })
     setElapsed(0)
     startAt.current = Date.now()
+    answeringRef.current = false
   }
 
   const finish = () => {
@@ -68,8 +71,10 @@ export default function Sprint({ entries, cards, onGrade, material, direction = 
   }
 
   const answer = (ok) => {
+    if (answeringRef.current) return // abaikan input kedua sebelum re-render
     const entry = queue[pos]
     if (!entry) return
+    answeringRef.current = true
     onGrade(entry.id, ok ? 'good' : 'again', cards[entry.id] || null)
     setDone((d) => (ok ? { ...d, ok: d.ok + 1 } : { ...d, ulang: d.ulang + 1 }))
     const wasLast = pos + 1 >= queue.length
@@ -78,6 +83,10 @@ export default function Sprint({ entries, cards, onGrade, material, direction = 
     if (wasLast && ok) finish()
     else setPos((p) => p + 1)
   }
+
+  // Buka kembali kunci setelah kartu berganti (pos berubah) — bukan sinkron,
+  // agar input kedua sebelum re-render tetap tertahan.
+  useEffect(() => { answeringRef.current = false }, [pos])
 
   const fmtTime = (s) =>
     `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`

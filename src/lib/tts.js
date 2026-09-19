@@ -17,10 +17,19 @@ function hookVoices() {
   if (!ttsSupported() || voicesHooked) return
   voicesHooked = true
   jaVoice = pickVoice()
-  window.speechSynthesis.addEventListener?.('voiceschanged', () => {
-    jaVoice = pickVoice()
-  })
+  // Simpan referensi listener agar bisa dilepas (hindari kebocoran).
+  try {
+    window.speechSynthesis.addEventListener?.('voiceschanged', onVoicesChanged)
+  } catch { /* abaikan */ }
 }
+
+function onVoicesChanged() {
+  jaVoice = pickVoice()
+}
+
+// Inisialisasi lebih awal (saat modul dimuat) agar voice Jepang tersedia
+// sebelum ucapan pertama — voices sering dimuat asinkron oleh browser.
+if (typeof window !== 'undefined') hookVoices()
 
 // Mengucapkan teks Jepang; mengembalikan true jika percobaan dilakukan.
 export function speak(text) {
@@ -31,6 +40,7 @@ export function speak(text) {
     const u = new SpeechSynthesisUtterance(text)
     u.lang = 'ja-JP'
     u.rate = 0.95
+    // Pilih ulang bila belum ada (voices baru tiba) agar tak pakai suara default.
     const v = jaVoice || pickVoice()
     if (v) u.voice = v
     window.speechSynthesis.speak(u)

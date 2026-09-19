@@ -61,6 +61,7 @@ export default function Recall({ onBack, onSaveResult, onQueueChange }) {
   const [queueTick, setQueueTick] = useState(0)
   const wrongRef = useRef([])
   const wrongEntriesRef = useRef([])
+  const finishRanRef = useRef(false)
 
   const stats = useMemo(() => recallStats(), [queueTick, phase])
   const duePool = useMemo(
@@ -109,6 +110,7 @@ export default function Recall({ onBack, onSaveResult, onQueueChange }) {
     setResult(null)
     wrongRef.current = []
     wrongEntriesRef.current = []
+    finishRanRef.current = false
     setPhase('scene')
   }
 
@@ -121,6 +123,7 @@ export default function Recall({ onBack, onSaveResult, onQueueChange }) {
     setScore(0)
     wrongRef.current = []
     wrongEntriesRef.current = []
+    finishRanRef.current = false
     setPhase('scene')
   }
 
@@ -131,10 +134,13 @@ export default function Recall({ onBack, onSaveResult, onQueueChange }) {
     setScore(0)
     wrongRef.current = []
     wrongEntriesRef.current = []
+    finishRanRef.current = false
     setPhase('scene')
   }
 
   const finish = () => {
+    if (finishRanRef.current) return // cegah simpan/jadwal ganda (double-click/Enter)
+    finishRanRef.current = true
     const wrongIds = wrongRef.current.map((w) => w.id)
     const { perCat, notPassed } = buildRecallResult(order, wrongIds, ALL_CATS)
 

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { ChevronLeft, Brain, Loader2, Award } from 'lucide-react'
 import {
   loadNemonik, getNemonikSrs, ensureSrs, gradeNemonik,
@@ -294,14 +295,15 @@ export default function Nemonik({ onBack }) {
         />
       )}
 
-      {badgeToast && (
+      {badgeToast && createPortal(
         <div className="nemo-toast" role="status" onClick={() => setBadgeToast(null)}>
           <Award size={18} />
           <div className="nemo-toast-body">
             <div className="nemo-toast-title">Badge baru: {badgeToast.label}</div>
             <div className="nemo-toast-desc">{badgeToast.desc}</div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   )

@@ -34,6 +34,7 @@ import UjianBaru from './components/UjianBaru'
 import Recall from './components/Recall'
 import Profil from './components/Profil'
 import Nemonik from './components/nemonik/Nemonik'
+import PageTransition from './components/ui/PageTransition'
 import { recordStudy, getHistory, computeStreak } from './lib/history'
 import { addExamRecord } from './lib/exam-history'
 import { recallStats } from './lib/recall-queue'
@@ -431,9 +432,9 @@ export default function App() {
         </div>
       ) : null}
 
-      <div key={mode} className="page-transition">
+      <PageTransition mode={mode}>
         {renderBody()}
-      </div>
+      </PageTransition>
 
       <footer className="foot">
         <span>

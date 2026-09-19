@@ -1,11 +1,11 @@
 // State + efek + aksi layar Hafalan Harian (logika dipisah dari render).
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import {
-  HAFALAN_MODES, DEFAULT_TARGETS, REMINDER_HOUR,
+  HAFALAN_MODES, DEFAULT_TARGETS, REMINDER_HOUR, STORAGE_PREFIX,
   MAX_BACKFILL_DAYS, MAX_FORWARD_DAYS,
-  todayStr, addDays, diffDays, getTargets, setTargets, getHistory,
+  todayStr, addDays, diffDays, getTargets, setTargets, getHistory, historyDates,
   getChecked, setCheckedStorage, getCheckedForDate, setCheckedForDate,
-  getCustom, setCustomStorage,
+  getCustom, setCustomStorage, lsGet, lsSet,
   flushToHistory, computeStreak, newCustomId,
 } from '../lib/hafalan-storage'
 import { buildItems, appendCustom, dailySliceForDate } from '../lib/hafalan-items'
@@ -26,6 +26,10 @@ export function useHafalan({ level = 'a2' }) {
   const [confirmDeleteKey, setConfirmDeleteKey] = useState(null)
   // Aksi borongan butuh konfirmasi singkat (klik dua kali) sebelum eksekusi.
   const [confirmBulk, setConfirmBulk] = useState(null) // 'mark' | 'clear' | null
+  const confirmTimerRef = useRef(null)
+
+  // Bersihkan timer konfirmasi saat unmount.
+  useEffect(() => () => { if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current) }, [])
 
   const setTab = (t) => {
     _setTab(t)
@@ -101,14 +105,17 @@ export function useHafalan({ level = 'a2' }) {
   const bunpouWithCustom = useMemo(() => appendCustom(bunpouAll, custom.bunpou), [bunpouAll, custom])
 
   // Anchor = hari pertama ada riwayat → rotasi konsisten lintas tanggal.
-  // Anchor tetap = hari pertama ada riwayat (atau hari ini bila belum ada).
-  // Dipakai agar tiap tanggal kalender memetakan rotasi yang konsisten, baik
-  // untuk hari ini, kemarin (offset negatif), maupun besok (offset positif).
+  // Disimpan (persist) agar TIDAK bergeser saat backfill menambah tanggal lebih
+  // awal (yang dulu membuat daftar item hari ini berubah sendiri).
   const anchorDate = useMemo(() => {
-    const dates = Object.keys(getHistory(activeMode)).sort()
-    return dates[0] || today
+    const key = `${STORAGE_PREFIX}-anchor-${activeMode}`
+    const saved = lsGet(key, null)
+    if (saved) return saved
+    const first = historyDates(activeMode)[0] || today
+    lsSet(key, first)
+    return first
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeMode, checked])
+  }, [activeMode])
 
   const kotobaSlice = useMemo(() => dailySliceForDate(kotobaWithCustom, anchorDate, selectedDate, t.kotoba), [kotobaWithCustom, anchorDate, selectedDate, t.kotoba])
   const kanjiSlice = useMemo(() => dailySliceForDate(kanjiWithCustom, anchorDate, selectedDate, t.kanji), [kanjiWithCustom, anchorDate, selectedDate, t.kanji])
@@ -148,20 +155,28 @@ export function useHafalan({ level = 'a2' }) {
     setCheckedForDate(activeMode, next)
   }
 
-  // Actions
+  // Actions — pakai functional update agar perubahan cepat berturut-turut
+  // (double-tap / bulk) tidak saling menimpa.
   const toggle = (type, id) => {
-    const next = { ...checked, [type]: { ...checked[type], [id]: !checked[type]?.[id] } }
-    persist(next)
+    setChecked((prev) => {
+      const next = { ...prev, [type]: { ...prev[type], [id]: !prev[type]?.[id] } }
+      setCheckedForDate(activeMode, next)
+      return next
+    })
   }
 
   // Terapkan bulk pada tab aktif. `mode` = 'mark' (tandai semua) | 'clear'.
   const applyBulk = (type, mode) => {
     const list = itemsMap[type] || []
-    if (!list.length) return
-    const map = { ...(checked[type] || {}) }
-    if (mode === 'mark') for (const it of list) map[it.id] = true
-    else for (const it of list) delete map[it.id]
-    persist({ ...checked, [type]: map })
+    if (!list.length) { setConfirmBulk(null); return }
+    setChecked((prev) => {
+      const map = { ...(prev[type] || {}) }
+      if (mode === 'mark') for (const it of list) map[it.id] = true
+      else for (const it of list) delete map[it.id]
+      const next = { ...prev, [type]: map }
+      setCheckedForDate(activeMode, next)
+      return next
+    })
     setConfirmBulk(null)
   }
 
@@ -170,7 +185,8 @@ export function useHafalan({ level = 'a2' }) {
   const markAll = (type) => {
     if (confirmBulk !== 'mark') {
       setConfirmBulk('mark')
-      setTimeout(() => setConfirmBulk((c) => (c === 'mark' ? null : c)), 4000)
+      if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current)
+      confirmTimerRef.current = setTimeout(() => setConfirmBulk((c) => (c === 'mark' ? null : c)), 4000)
       return
     }
     applyBulk(type, 'mark')
@@ -180,7 +196,8 @@ export function useHafalan({ level = 'a2' }) {
   const uncheckAll = (type) => {
     if (confirmBulk !== 'clear') {
       setConfirmBulk('clear')
-      setTimeout(() => setConfirmBulk((c) => (c === 'clear' ? null : c)), 4000)
+      if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current)
+      confirmTimerRef.current = setTimeout(() => setConfirmBulk((c) => (c === 'clear' ? null : c)), 4000)
       return
     }
     applyBulk(type, 'clear')

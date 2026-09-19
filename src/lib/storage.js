@@ -76,6 +76,12 @@ export function getProgress() {
   return cache
 }
 
+// Invalidasi cache module-level (dipakai saat ganti akun / data lokal dibersihkan
+// langsung) agar `getProgress()` membaca ulang dari localStorage.
+export function invalidateProgressCache() {
+  cache = null
+}
+
 export function saveProgress(state) {
   state.updated = Date.now()
   cache = state

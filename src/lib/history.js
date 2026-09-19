@@ -41,7 +41,8 @@ export function getHistory() {
     const raw = localStorage.getItem(KEY)
     if (raw) {
       const history = JSON.parse(raw)
-      history.days = history.days || {}
+      if (!history || typeof history !== 'object') return emptyHistory()
+      history.days = (history.days && typeof history.days === 'object') ? history.days : {}
       return history
     }
   } catch (e) {

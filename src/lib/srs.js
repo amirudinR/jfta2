@@ -3,7 +3,14 @@
 
 export const DAY_MS = 24 * 60 * 60 * 1000
 
+// Batas interval maksimum (hari). Tanpa ini, grade 'good'/'easy' berulang
+// menumbuhkan interval secara multiplikatif → meledak (~1e47 hari) dan
+// `new Date(due)` jadi Invalid Date → kartu "terkunci" (tak pernah due lagi).
+// Spaced repetition praktis tak butuh > ~1 tahun.
+export const MAX_INTERVAL = 365
+
 const DECIMAL_FLOOR = (x) => Math.floor(x * 10) / 10
+const capInterval = (n) => Math.min(MAX_INTERVAL, Math.max(1, Math.round(n)))
 
 export function defaultCard() {
   return { reps: 0, ease: 2.5, interval: 0, due: 0, lapses: 0 }
@@ -19,6 +26,9 @@ export function isMastered(card) {
 
 export function gradeCard(card, grade) {
   const c = { ...defaultCard(), ...(card || {}) }
+  // Clamp data lama yang mungkin sudah korup (interval raksasa / non-finite).
+  if (!Number.isFinite(c.interval)) c.interval = 0
+  c.interval = Math.min(c.interval, MAX_INTERVAL)
   const now = Date.now()
   // firstPass hanya benar jika kartu belum pernah dipelajari sama sekali (lapses=0 juga)
   // kartu lapsed (again) punya reps:0 tapi lapses>0 — bukan firstPass
@@ -34,29 +44,18 @@ export function gradeCard(card, grade) {
         due: now,
         lapses: c.lapses + 1,
       }
-    case 'hard':
-      return {
-        ...c,
-        ease: Math.max(1.3, DECIMAL_FLOOR(c.ease - 0.15)),
-        interval: firstPass ? 1 : Math.max(1, Math.round(c.interval * 1.2)),
-        reps: firstPass ? 0 : c.reps,
-        due: now + DAY_MS * (firstPass ? 1 : Math.max(1, Math.round(c.interval * 1.2))),
-      }
-    case 'good':
-      return {
-        ...c,
-        reps: firstPass ? 1 : c.reps + 1,
-        interval: firstPass ? 1 : Math.round(c.interval * c.ease),
-        due: now + DAY_MS * (firstPass ? 1 : Math.round(c.interval * c.ease)),
-      }
-    case 'easy':
-      return {
-        ...c,
-        reps: firstPass ? 1 : c.reps + 1,
-        ease: Math.min(3.0, DECIMAL_FLOOR(c.ease + 0.15)),
-        interval: firstPass ? 4 : Math.round(c.interval * c.ease * 1.3),
-        due: now + DAY_MS * (firstPass ? 4 : Math.round(c.interval * c.ease * 1.3)),
-      }
+    case 'hard': {
+      const iv = firstPass ? 1 : capInterval(c.interval * 1.2)
+      return { ...c, ease: Math.max(1.3, DECIMAL_FLOOR(c.ease - 0.15)), interval: iv, reps: firstPass ? 0 : c.reps, due: now + DAY_MS * iv }
+    }
+    case 'good': {
+      const iv = firstPass ? 1 : capInterval(c.interval * c.ease)
+      return { ...c, reps: firstPass ? 1 : c.reps + 1, interval: iv, due: now + DAY_MS * iv }
+    }
+    case 'easy': {
+      const iv = firstPass ? 4 : capInterval(c.interval * c.ease * 1.3)
+      return { ...c, reps: firstPass ? 1 : c.reps + 1, ease: Math.min(3.0, DECIMAL_FLOOR(c.ease + 0.15)), interval: iv, due: now + DAY_MS * iv }
+    }
     default:
       return c
   }

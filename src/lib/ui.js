@@ -21,6 +21,7 @@ export function fmtInterval(days, reps) {
 }
 
 export function fmtDue(dueMs) {
+  if (!Number.isFinite(dueMs)) return '—'
   const now = new Date()
   const due = new Date(dueMs)
   const diffDays = Math.ceil((due - now) / (24 * 3600 * 1000))

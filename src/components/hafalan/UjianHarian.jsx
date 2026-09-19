@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from 'react'
 import { ArrowLeft, Check } from 'lucide-react'
 import { availableDays, listDayItems, friendlyDate } from '../../lib/ujian-harian'
+import { todayStr } from '../../lib/hafalan-storage'
 import { axisQuestionOf, buildOptionsAxis } from '../../lib/quiz'
 import { shuffle } from '../../lib/ui'
 
@@ -22,7 +23,8 @@ const catOfId = (id) => String(id).split(':')[1]
 // Ujian Harian: uji item yang dicentang pada satu tanggal (riwayat).
 export function UjianHarian({ onBack }) {
   const days = useMemo(() => availableDays(), [])
-  const [date, setDate] = useState(() => days.length ? days[0].date : null)
+  const today = todayStr()
+  const [date, setDate] = useState(() => (days.some((d) => d.date === today) ? today : (days[0]?.date ?? null)))
   const [cats, setCats] = useState(ALL_CATS)
   const [axis, setAxis] = useState('kanji')
   const [phase, setPhase] = useState('intro') // intro | scene | summary
@@ -98,7 +100,7 @@ export function UjianHarian({ onBack }) {
                   onClick={() => setDate(d.date)}
                 >
                   <span className="hh-day-label">
-                    {d.date === days[0].date ? 'Hari Ini' : friendlyDate(d.date)}
+                    {d.date === today ? 'Hari Ini' : friendlyDate(d.date)}
                   </span>
                   <span className="hh-day-count">{d.count}</span>
                 </button>
@@ -145,7 +147,7 @@ export function UjianHarian({ onBack }) {
                 .map((c) => `${breakdown[c.key]} ${c.label.toLowerCase()}`)
                 .join(' + ')}{' '}
               = <span className="kin-count">{pool.length}</span> soal
-              {date === days[0].date ? ' hari ini' : ` pada ${friendlyDate(date)}`},
+              {date === today ? ' hari ini' : ` pada ${friendlyDate(date)}`},
               mode {axis === 'kanji' ? 'kanji → arti' : axis === 'hiragana' ? 'hiragana → arti' : 'arti → kanji'}.
             </p>
 

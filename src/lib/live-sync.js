@@ -13,7 +13,7 @@ import { doc, setDoc, onSnapshot, serverTimestamp } from 'firebase/firestore'
 import { db } from './firebase'
 import { SYNC_STORES, storeByKey } from './sync-registry'
 import { mergeProgress } from './cloud-sync'
-import { saveProgress } from './storage'
+import { saveProgress, invalidateProgressCache } from './storage'
 import { onStoreChanged, dispatchSyncApplied } from './sync-events'
 
 const META_KEY = 'hh2-sync-meta'
@@ -194,6 +194,9 @@ function resetLocalStores() {
   for (const k of keys) {
     try { localStorage.removeItem(k) } catch {}
   }
+  // Cache module-level storage.js juga harus di-reset, jika tidak user baru
+  // masih melihat progress user lama (getProgress membaca cache).
+  invalidateProgressCache()
 }
 
 export function startLiveSync(userUid) {

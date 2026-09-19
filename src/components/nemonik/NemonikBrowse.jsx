@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Search, X, Volume2 } from 'lucide-react'
 import { speak, ttsSupported } from '../../lib/tts'
 
@@ -143,8 +144,10 @@ export default function NemonikBrowse({ data, srs, onStudyOne, onBack }) {
         {list.length === 0 && <div className="nemo-browse-empty">Tidak ditemukan.</div>}
       </div>
 
-      {/* Detail modal (mnemonic + aksi belajar kartu ini) */}
-      {selected && (
+      {/* Detail modal (mnemonic + aksi belajar kartu ini). Di-portal ke body
+          agar `position: fixed` benar-benar menutup viewport (tak ter-pin ke
+          wrapper ber-transform). */}
+      {selected && createPortal(
         <div className="nemo-browse-modal" onClick={() => setSelected(null)}>
           <div className="nemo-browse-sheet" onClick={(e) => e.stopPropagation()}>
             <button className="nemo-browse-sheet-close" onClick={() => setSelected(null)} aria-label="Tutup">
@@ -155,7 +158,8 @@ export default function NemonikBrowse({ data, srs, onStudyOne, onBack }) {
               <button className="nemo-btn primary" onClick={() => onStudyOne(selected)}>Belajar kartu ini</button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   )
