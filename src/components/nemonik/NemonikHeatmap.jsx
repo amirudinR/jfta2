@@ -18,7 +18,7 @@ export default function NemonikHeatmap({ weeks = 13 }) {
 
   const cells = useMemo(() => dailySeries(days), [days])
 
-  // Susun jadi kolom per minggu: index 0 = hari paling awal, kita isi kolom demi kolom.
+  // Susun jadi kolom per minggu: index 0 = hari paling awal, isi kolom demi kolom.
   const columns = useMemo(() => {
     const cols = []
     let col = new Array(7).fill(null)
@@ -30,7 +30,11 @@ export default function NemonikHeatmap({ weeks = 13 }) {
       col[dow] = c
       if (dow === 6) { cols.push(col); col = new Array(7).fill(null) }
     }
-    if (col.some(Boolean)) cols.push(col)
+    // Kolom ekor (minggu berjalan): sel yang belum terisi = kosong, bukan "0".
+    if (col.some(Boolean)) {
+      col = col.map((c) => c || { empty: true })
+      cols.push(col)
+    }
     return cols
   }, [cells])
 

@@ -91,6 +91,9 @@ export default function NemonikStudy({ queue, onGrade, onFinish, onRepeatWeak })
   const [viewMode, setViewMode] = useState('kartu')
 
   const autoTimer = useRef(null)
+  // Guard re-entrancy: cegah satu kartu dinilai 2x (mis. klik chip tepat saat
+  // timer auto-"Tahu" menyala). Di-reset tiap pindah kartu.
+  const appliedRef = useRef(false)
 
   const clearAutoTimer = useCallback(() => {
     if (autoTimer.current) {
@@ -101,6 +104,9 @@ export default function NemonikStudy({ queue, onGrade, onFinish, onRepeatWeak })
 
   // Bersihkan timer saat unmount.
   useEffect(() => () => clearAutoTimer(), [clearAutoTimer])
+
+  // Reset guard penilaian setiap kali index berubah → kartu baru boleh dinilai.
+  useEffect(() => { appliedRef.current = false }, [index])
 
   const entry = queue[index]
   const isFirst = index === 0
@@ -113,7 +119,8 @@ export default function NemonikStudy({ queue, onGrade, onFinish, onRepeatWeak })
 
   // Terapkan rating untuk kartu saat ini + maju ke kartu berikutnya.
   const applyRating = useCallback((value) => {
-    if (!entry) return
+    if (!entry || appliedRef.current) return
+    appliedRef.current = true
     clearAutoTimer()
     onGrade(String(entry.no), value)
     if (value < 3) setWeakIds((w) => (w.includes(String(entry.no)) ? w : [...w, String(entry.no)]))

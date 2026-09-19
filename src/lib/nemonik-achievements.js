@@ -45,7 +45,12 @@ export const BADGES = [
 // Level dari total XP. Tiap level butuh 100 XP (naik linear sederhana).
 const XP_PER_LEVEL = 100
 
-export const getAchievements = () => lsGet(NEMONIK_ACH_KEY, { xp: 0, unlocked: {} })
+// Selalu kembalikan bentuk valid (tahan localStorage korup: null/non-objek).
+export const getAchievements = () => {
+  const v = lsGet(NEMONIK_ACH_KEY, { xp: 0, unlocked: {} })
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return { xp: 0, unlocked: {} }
+  return { xp: Number(v.xp) || 0, unlocked: (v.unlocked && typeof v.unlocked === 'object') ? v.unlocked : {} }
+}
 
 export function levelInfo(xp) {
   const level = Math.floor(xp / XP_PER_LEVEL) + 1

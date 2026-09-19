@@ -11,8 +11,15 @@ export const NEMONIK_SESSIONS_KEY = `${STORAGE_PREFIX}-nemonik-sessions`
 // Batasi panjang riwayat sesi agar storage tidak membengkak.
 const MAX_SESSIONS = 100
 
-export const getDailyLog = () => lsGet(NEMONIK_DAILY_KEY, {})
-export const getSessions = () => lsGet(NEMONIK_SESSIONS_KEY, [])
+// Selalu kembalikan objek/array valid (tahan localStorage korup).
+export const getDailyLog = () => {
+  const v = lsGet(NEMONIK_DAILY_KEY, {})
+  return v && typeof v === 'object' && !Array.isArray(v) ? v : {}
+}
+export const getSessions = () => {
+  const v = lsGet(NEMONIK_SESSIONS_KEY, [])
+  return Array.isArray(v) ? v : []
+}
 
 // Tambah hasil satu kartu ke log harian (dipanggil per penilaian).
 // rating: 1 = Lupa, 2 = Sulit, 3 = Tahu.

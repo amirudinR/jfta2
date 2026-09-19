@@ -134,44 +134,51 @@ export default function Nemonik({ onBack }) {
   // Bersihkan timer toast saat unmount.
   useEffect(() => () => { if (toastTimerRef.current) clearTimeout(toastTimerRef.current) }, [])
 
-  // Simpan sesi berjalan ke riwayat lalu kembali ke dashboard.
-  const finishSession = useCallback(() => {
+  // Simpan sesi berjalan ke riwayat. Idempoten: jika tally kosong, tak melakukan
+  // apa-apa dan mengembalikan false. Selalu mengosongkan tally setelah simpan.
+  const persistCurrentSession = useCallback(() => {
     const t = sessionTallyRef.current
-    if (t.total > 0) {
-      const end = (typeof performance !== 'undefined' ? performance.now() : Date.now())
-      const dur = Math.max(0, end - sessionStartRef.current)
-      saveSession({ ...t, dur })
-      setSessions(getSessions())
-      sessionTallyRef.current = { total: 0, lupa: 0, sulit: 0, tahu: 0 }
-      // XP bonus sesi tuntas + evaluasi badge.
-      setAch(addXp(XP_TABLE.sessionDone))
-      refreshAchievements()
-    }
+    if (!t || t.total <= 0) return false
+    const end = (typeof performance !== 'undefined' ? performance.now() : Date.now())
+    const dur = Math.max(0, end - sessionStartRef.current)
+    saveSession({ ...t, dur })
+    setSessions(getSessions())
+    sessionTallyRef.current = { total: 0, lupa: 0, sulit: 0, tahu: 0 }
+    // XP bonus sesi tuntas + evaluasi badge.
+    setAch(addXp(XP_TABLE.sessionDone))
+    refreshAchievements()
+    return true
+  }, [refreshAchievements])
+
+  // Selesai & kembali ke dashboard.
+  const finishSession = useCallback(() => {
+    persistCurrentSession()
     setPhase('dashboard')
     setQueue([])
-  }, [refreshAchievements])
+  }, [persistCurrentSession])
 
   const backToDashboard = finishSession
 
-  // Auto-lanjut sesi: bangun ulang queue dari kartu lemah (no. kanji) yang
-  // dikirim Study, lalu mulai ulang fase study tanpa keluar ke dashboard.
-  // Sesi pertama tetap disimpan ke riwayat sebelum sesi lanjutan dimulai.
+  // Auto-lanjut sesi: simpan sesi yang baru tuntas (sekali, idempoten) lalu
+  // bangun queue baru dari kartu lemah (no. kanji). Jika tak ada kartu lemah,
+  // kembali ke dashboard (tanpa menyimpan ulang).
   const repeatWeak = useCallback((weakIds) => {
-    // Simpan dulu sesi yang baru selesai (kalau ada isinya).
-    const t = sessionTallyRef.current
-    if (t.total > 0) {
-      const end = (typeof performance !== 'undefined' ? performance.now() : Date.now())
-      saveSession({ ...t, dur: Math.max(0, end - sessionStartRef.current) })
-      setSessions(getSessions())
-      setAch(addXp(XP_TABLE.sessionDone))
-      refreshAchievements()
-    }
-    if (!data || !weakIds || weakIds.length === 0) { finishSession(); return }
+    persistCurrentSession()
+    if (!data || !weakIds || weakIds.length === 0) { setPhase('dashboard'); setQueue([]); return }
     const set = new Set(weakIds.map(String))
     const q = data.filter((k) => set.has(String(k.no)))
-    if (q.length === 0) { finishSession(); return }
+    if (q.length === 0) { setPhase('dashboard'); setQueue([]); return }
     beginStudy(q)
-  }, [data, beginStudy, finishSession, refreshAchievements])
+  }, [data, beginStudy, persistCurrentSession])
+
+  // Keluar dari kuis: XP kuis disimpan langsung oleh NemonikQuiz, jadi muat ulang
+  // achievement dari disk agar level/badge di dashboard mencerminkan XP terbaru.
+  const finishQuiz = useCallback(() => {
+    setAch(getAchievements())
+    refreshAchievements()
+    setPhase('dashboard')
+    setQueue([])
+  }, [refreshAchievements])
 
   // Buka layar Jelajahi (browse/search).
   const openBrowse = useCallback(() => setPhase('browse'), [])
@@ -182,11 +189,12 @@ export default function Nemonik({ onBack }) {
     beginStudy([entry])
   }, [beginStudy])
 
-  // Evaluasi badge begitu data & streak siap (menangkap progres historis).
+  // Evaluasi badge begitu data & srs & streak siap (menangkap progres historis
+  // dan perubahan srs, mis. dari cloud sync).
   useEffect(() => {
     if (data) refreshAchievements()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, streak])
+  }, [data, streak, srs])
 
   // Prediksi kanji berisiko lupa (untuk kartu dashboard).
   const forgetting = useMemo(
@@ -277,7 +285,7 @@ export default function Nemonik({ onBack }) {
           data={data}
           srs={srs}
           onSrsChange={setSrs}
-          onFinish={backToDashboard}
+          onFinish={finishQuiz}
         />
       )}
 

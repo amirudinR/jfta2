@@ -143,6 +143,10 @@ export default function NemonikQuiz({ data, srs, onSrsChange, onFinish }) {
   const srsRef = useRef(srs)
   useEffect(() => { srsRef.current = srs }, [srs])
 
+  // Kunci sinkron anti-double-answer: cegah satu soal dihitung 2x (klik ganda
+  // atau klik tepat saat timer habis). Di-reset saat soal baru dimuat.
+  const lockedRef = useRef(false)
+
   // Timer jeda feedback antar-soal (dibersihkan saat unmount).
   const advanceTimerRef = useRef(null)
   useEffect(() => () => { if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current) }, [])
@@ -162,20 +166,23 @@ export default function NemonikQuiz({ data, srs, onSrsChange, onFinish }) {
 
   const startQuiz = useCallback((cfg) => {
     setConfig(cfg)
+    lockedRef.current = false
     setQ(buildQuestion(candidatePool(cfg, srsRef.current), data, cfg.options))
   }, [candidatePool, data])
 
   const next = useCallback((cfg) => {
+    lockedRef.current = false
     setPicked(null)
     setQ(buildQuestion(candidatePool(cfg, srsRef.current), data, cfg.options))
     setTimeLeft(TIMER_SECONDS)
   }, [candidatePool, data])
 
-  const finishQuiz = useCallback(() => setFinished(true), [])
+  const finishQuiz = useCallback(() => { lockedRef.current = true; setFinished(true) }, [])
 
   // Pilih jawaban (opt bisa null = waktu habis).
   const choose = useCallback((opt) => {
-    if (picked !== null || !q || !config) return
+    if (lockedRef.current || !q || !config) return
+    lockedRef.current = true
     setPicked(opt ?? '__timeout__')
     const isCorrect = opt === q.correct
     let nextSrs = srsRef.current
@@ -187,6 +194,7 @@ export default function NemonikQuiz({ data, srs, onSrsChange, onFinish }) {
       setMistakes((m) => [...m, q.target])
       logDailyReview(1)
       nextSrs = penalizeNemonik(srsRef.current, q.target.no)
+      srsRef.current = nextSrs // sinkron agar soal berikut pakai basis terbaru
       onSrsChange(nextSrs)
     }
 
@@ -197,7 +205,7 @@ export default function NemonikQuiz({ data, srs, onSrsChange, onFinish }) {
       if (answeredNow >= config.count) finishQuiz()
       else next(config)
     }, 350)
-  }, [picked, q, config, answered, next, onSrsChange, finishQuiz])
+  }, [q, config, answered, next, onSrsChange, finishQuiz])
 
   // Timer per-soal.
   useEffect(() => {

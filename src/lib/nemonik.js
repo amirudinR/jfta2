@@ -45,7 +45,11 @@ export function imgUrl(path) {
 }
 
 // ── SRS ──
-export const getNemonikSrs = () => lsGet(NEMONIK_SRS_KEY, {})
+// Selalu kembalikan objek (tahan localStorage korup: null/array/string).
+export const getNemonikSrs = () => {
+  const v = lsGet(NEMONIK_SRS_KEY, {})
+  return v && typeof v === 'object' && !Array.isArray(v) ? v : {}
+}
 
 const saveNemonikSrs = (srs) => lsSet(NEMONIK_SRS_KEY, srs)
 
