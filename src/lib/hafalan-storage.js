@@ -238,6 +238,7 @@ export function resetDailyProgress() {
     const k = localStorage.key(i)
     if (!k) continue
     if (k === 'hh2-sync-meta') continue // jangan sentuh meta anti-echo
+    if (k === 'hh2-sync-owner') continue // jangan sentuh penanda pemilik akun (guard ganti-akun)
     if (k.startsWith(`${STORAGE_PREFIX}-`)) removals.push(k) // hh2-*
     else if (k === 'ankichou-exam-history') removals.push(k)
     else if (k === 'hafalan-jft-a2-history-v1') removals.push(k)

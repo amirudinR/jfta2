@@ -191,6 +191,10 @@ function resetLocalStores() {
   dirty.clear()
   const keys = new Set(SYNC_STORES.map((s) => s.key))
   keys.add(META_KEY)
+  // `hh2-anchor-*` bukan store yang di-sync, tapi bersifat per-akun (anchor hari
+  // pertama). WAJIB dibersihkan saat ganti akun — kalau tidak, user baru memakai
+  // anchor user lama → potongan item harian salah.
+  for (const m of ['a2', 'n3', 'n2', 'n1']) keys.add(`hh2-anchor-${m}`)
   for (const k of keys) {
     try { localStorage.removeItem(k) } catch {}
   }

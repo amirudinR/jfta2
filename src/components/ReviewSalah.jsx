@@ -29,7 +29,7 @@ export default function ReviewSalah({ wrongItems, score, total, difficulty, onRe
 
           <div className="review-list">
             {wrongItems.map((item, i) => (
-              <div key={i} className="review-item">
+              <div key={`${item.id ?? item.question}-${i}`} className="review-item">
                 <div className="review-item-q">
                   <span className="review-num">{i + 1}</span>
                   <span className="review-question">{item.question}</span>

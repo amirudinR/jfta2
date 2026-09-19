@@ -130,9 +130,10 @@
   to   { transform: scaleX(1); opacity: 1; }
 }
 
-/* Tombol aksi muncul berurutan saat dashboard dibuka. */
+/* Tombol aksi muncul berurutan saat dashboard dibuka.
+   'backwards' (bukan 'both') → transform tak melekat, agar :active scale bekerja. */
 .nemo-actions[data-stagger] > .nemo-btn {
-  animation: ios-reveal-up 0.4s var(--ios-ease, cubic-bezier(0.32,0.72,0,1)) both;
+  animation: ios-reveal-up 0.4s var(--ios-ease, cubic-bezier(0.32,0.72,0,1)) backwards;
 }
 .nemo-actions[data-stagger] > .nemo-btn:nth-child(1) { animation-delay: 0.02s; }
 .nemo-actions[data-stagger] > .nemo-btn:nth-child(2) { animation-delay: 0.06s; }
@@ -562,7 +563,8 @@
   transition:
     transform var(--ios-dur-fast, 0.22s) var(--ios-ease, cubic-bezier(0.32,0.72,0,1)),
     background 0.15s, border-color 0.15s;
-  animation: ios-reveal-up 0.34s var(--ios-ease, cubic-bezier(0.32,0.72,0,1)) both;
+  /* 'backwards' → transform tak melekat, agar hover/active + pop/shake bekerja. */
+  animation: ios-reveal-up 0.34s var(--ios-ease, cubic-bezier(0.32,0.72,0,1)) backwards;
 }
 .nemo-quiz-options .nemo-quiz-option:nth-child(1) { animation-delay: 0.02s; }
 .nemo-quiz-options .nemo-quiz-option:nth-child(2) { animation-delay: 0.06s; }
@@ -575,11 +577,11 @@
 .nemo-quiz-option:disabled { cursor: default; }
 .nemo-quiz-option.correct {
   background: var(--moss); color: var(--washi); border-color: var(--moss-dark);
-  animation: quiz-pop 0.4s var(--ios-spring, cubic-bezier(0.34,1.56,0.64,1));
+  animation: quiz-pop 0.4s var(--ios-spring, cubic-bezier(0.34,1.56,0.64,1)) both;
 }
 .nemo-quiz-option.wrong {
   background: var(--shu); color: var(--washi); border-color: var(--shu-dark);
-  animation: quiz-shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+  animation: quiz-shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 
 .nemo-quiz-result {
@@ -1215,7 +1217,10 @@
   .nemo-quiz-option,
   .nemo-quiz-option.correct,
   .nemo-quiz-option.wrong,
-  .nemo-actions[data-stagger] > .nemo-btn {
+  .nemo-actions[data-stagger] > .nemo-btn,
+  .nemo-rating-gate {
     animation: none !important;
   }
+  /* Spinner memutar terus-menerus → hentikan bagi motion-sensitive. */
+  .nemo-spin { animation: none !important; }
 }

@@ -207,13 +207,23 @@ export default function NemonikQuiz({ data, srs, onSrsChange, onFinish }) {
     }, 350)
   }, [q, config, answered, next, onSrsChange, finishQuiz])
 
-  // Timer per-soal.
+  // Timer per-soal — pakai setInterval STABIL (deps hanya identitas soal), bukan
+  // setTimeout yang restart tiap tick (yang bikin churn & drift). `choose`
+  // dibaca lewat ref agar interval tidak perlu di-recreate tiap render.
+  const chooseRef = useRef(choose)
+  useEffect(() => { chooseRef.current = choose }, [choose])
   useEffect(() => {
     if (!config?.timer || finished || !q || picked !== null) return
-    if (timeLeft <= 0) { choose(null); return }
-    const t = setTimeout(() => setTimeLeft((s) => s - 1), 1000)
-    return () => clearTimeout(t)
-  }, [config, finished, q, picked, timeLeft, choose])
+    const startedAt = Date.now()
+    const totalMs = TIMER_SECONDS * 1000
+    const id = setInterval(() => {
+      const left = Math.max(0, Math.ceil((totalMs - (Date.now() - startedAt)) / 1000))
+      setTimeLeft(left)
+      if (left <= 0) { clearInterval(id); chooseRef.current(null) }
+    }, 250)
+    return () => clearInterval(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config?.timer, finished, q, picked])
 
   // ── Setup dulu ──
   if (!config) {

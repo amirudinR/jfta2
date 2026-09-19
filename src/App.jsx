@@ -84,8 +84,14 @@ export default function App() {
   useEffect(() => {
     const k = pageKey(mode, level)
     const saved = readScroll(k)
-    const raf = requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, saved)))
-    return () => cancelAnimationFrame(raf)
+    let inner = 0
+    const outer = requestAnimationFrame(() => {
+      inner = requestAnimationFrame(() => window.scrollTo(0, saved))
+    })
+    return () => {
+      cancelAnimationFrame(outer)
+      if (inner) cancelAnimationFrame(inner)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, level])
 

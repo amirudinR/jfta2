@@ -58,8 +58,9 @@ export function saveSession(entry, now = new Date()) {
 }
 
 // Agregat ringkas untuk ditampilkan (mis. total sesi, streak belajar, akurasi rata2).
+// Tahan elemen korup/non-objek di localStorage (jangan crash).
 export function sessionSummary() {
-  const list = getSessions()
+  const list = getSessions().filter((s) => s && typeof s === 'object')
   const sessions = list.length
   const totalCards = list.reduce((a, s) => a + (s.total || 0), 0)
   const avgAcc = sessions > 0

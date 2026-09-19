@@ -691,3 +691,15 @@
   margin: 0;
   padding-left: 4px;
 }
+
+/* Hormati preferensi user: matikan animasi modal profil bila reduced-motion. */
+@media (prefers-reduced-motion: reduce) {
+  .profil-modal,
+  .profil-modal-sheet,
+  .bnav-icon-wrap,
+  .bnav-item.active .bnav-icon-wrap {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}

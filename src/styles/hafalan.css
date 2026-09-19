@@ -269,6 +269,12 @@
   .hh-switch-knob {
     transition: none;
   }
+  /* Matikan animasi (terutama yang infinite) agar aman bagi motion-sensitive. */
+  .hh-reminder,
+  .hh-bulk-btn.confirming,
+  .kal-pop {
+    animation: none !important;
+  }
 }
 
 .hh-input-sm {
@@ -869,7 +875,8 @@ html.dark-mode .hh-row.checked {
 /* Popup kalender */
 .kal-pop {
   position: absolute;
-  z-index: 1200;
+  /* Di atas konten (900 nav) tapi DI BAWAH modal (1000) & toast (1100). */
+  z-index: 950;
   top: calc(100% + 8px);
   left: 0;
   width: 300px;

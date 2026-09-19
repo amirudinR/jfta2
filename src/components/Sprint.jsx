@@ -150,6 +150,9 @@ export default function Sprint({ entries, cards, onGrade, material, direction = 
         className="quiz-card"
         key={pos}
         onClick={() => setFlipped((f) => !f)}
+        onKeyDown={(e) => {
+          if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); setFlipped((f) => !f) }
+        }}
         role="button"
         tabIndex={0}
         aria-label="Kartu sprint, ketuk untuk membalik"

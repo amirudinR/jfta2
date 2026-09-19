@@ -8,7 +8,9 @@
 .sidebar-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  /* Skala z-index app: konten < bottom-nav(900) < modal-conten(1000) <
+     sidebar-backdrop(1002) < sidebar(1003) < toast(1100). */
+  z-index: 1002;
   background: rgba(0, 0, 0, 0.55);
   -webkit-backdrop-filter: blur(0px) saturate(100%);
   backdrop-filter: blur(0px) saturate(100%);
@@ -53,7 +55,7 @@
   top: 0;
   right: 0;
   bottom: 0;
-  z-index: 1001;
+  z-index: 1003;
   width: 300px;
   max-width: 85vw;
   display: flex;
@@ -62,7 +64,8 @@
   border-left: 1px solid rgba(255, 255, 255, 0.07);
   transform: translateX(100%);
   transition: transform var(--ios-dur, 0.36s) var(--ios-ease, cubic-bezier(0.32, 0.72, 0, 1));
-  will-change: transform;
+  /* Tanpa `will-change` permanen: menghindari containing-block bagi descendant
+     `position: fixed` & hemat memori. Browser tetap promote saat transisi jalan. */
   overflow-y: auto;
 }
 
@@ -169,7 +172,7 @@
 
 /* Stagger masuk: item muncul berurutan saat sidebar terbuka (ala iOS). */
 .sidebar.open .sidebar-item {
-  animation: ios-sidebar-item-in 0.4s var(--ios-ease, cubic-bezier(0.32,0.72,0,1)) both;
+  animation: ios-sidebar-item-in 0.4s var(--ios-ease, cubic-bezier(0.32,0.72,0,1)) backwards;
 }
 .sidebar.open .sidebar-item:nth-child(1) { animation-delay: 0.04s; }
 .sidebar.open .sidebar-item:nth-child(2) { animation-delay: 0.07s; }

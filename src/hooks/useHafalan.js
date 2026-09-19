@@ -162,28 +162,21 @@ export function useHafalan({ level = 'a2' }) {
     setCheckedForDate(activeMode, next)
   }
 
-  // Actions — pakai functional update agar perubahan cepat berturut-turut
-  // (double-tap / bulk) tidak saling menimpa.
+  // Actions — hitung `next` dari state saat ini lalu persist lewat `persist`
+  // (yang menulis di luar updater). Updater tetap murni → aman StrictMode.
   const toggle = (type, id) => {
-    setChecked((prev) => {
-      const next = { ...prev, [type]: { ...prev[type], [id]: !prev[type]?.[id] } }
-      setCheckedForDate(activeMode, next)
-      return next
-    })
+    const next = { ...checked, [type]: { ...checked[type], [id]: !checked[type]?.[id] } }
+    persist(next)
   }
 
   // Terapkan bulk pada tab aktif. `mode` = 'mark' (tandai semua) | 'clear'.
   const applyBulk = (type, mode) => {
     const list = itemsMap[type] || []
     if (!list.length) { setConfirmBulk(null); return }
-    setChecked((prev) => {
-      const map = { ...(prev[type] || {}) }
-      if (mode === 'mark') for (const it of list) map[it.id] = true
-      else for (const it of list) delete map[it.id]
-      const next = { ...prev, [type]: map }
-      setCheckedForDate(activeMode, next)
-      return next
-    })
+    const map = { ...(checked[type] || {}) }
+    if (mode === 'mark') for (const it of list) map[it.id] = true
+    else for (const it of list) delete map[it.id]
+    persist({ ...checked, [type]: map })
     setConfirmBulk(null)
   }
 
