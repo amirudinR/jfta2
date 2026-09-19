@@ -239,6 +239,8 @@ export default function App() {
             loading={authLoading}
             onLogin={loginGoogle}
             onLogout={logout}
+            prefs={prefs}
+            onPrefs={setPrefs}
           />
         )
       case 'harian':
