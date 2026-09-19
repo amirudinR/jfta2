@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Check, X, ChevronLeft, ChevronRight, Volume2, RotateCcw, BookText } from 'lucide-react'
+import { Check, X, ChevronLeft, ChevronRight, Volume2, RotateCcw, BookText, PenLine } from 'lucide-react'
 import { imgUrl } from '../../lib/nemonik'
 import { speak, ttsSupported } from '../../lib/tts'
 import { SessionResult } from './NemonikSessionStats'
 import { MnemonicPanel } from './NemonikBrowse'
+import NemonikSketch from './NemonikSketch'
 
 // Auto-pilih "Tahu" bila user tidak menekan chip rating dalam sekian ms.
 const AUTO_RATE_MS = 3000
@@ -86,6 +87,8 @@ export default function NemonikStudy({ queue, onGrade, onFinish }) {
   const startedAtRef = useRef(typeof performance !== 'undefined' ? performance.now() : Date.now())
   // Toggle panel mnemonic (kosakata pendukung) untuk kartu aktif.
   const [showMnemonic, setShowMnemonic] = useState(false)
+  // Mode tampilan kartu: 'kartu' (flashcard) atau 'tulis' (sketch kanji).
+  const [viewMode, setViewMode] = useState('kartu')
 
   const autoTimer = useRef(null)
 
@@ -277,22 +280,48 @@ export default function NemonikStudy({ queue, onGrade, onFinish }) {
         {index + 1} / {queue.length}
       </div>
 
-      <div
-        style={cardStyle}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerCancel}
-      >
-        <div style={{ ...overlayStyle, backgroundColor: overlayColor }}>
-          {overlayText && !rating && (
-            <span className="nemo-swipe-tag" style={{ opacity: Math.max(opacityLeft, opacityRight) }}>
-              {overlayText}
-            </span>
-          )}
+      {/* Tab kartu / tulis */}
+      {!rating && (
+        <div className="nemo-view-tabs">
+          <button
+            type="button"
+            className={`nemo-view-tab ${viewMode === 'kartu' ? 'on' : ''}`}
+            onClick={() => setViewMode('kartu')}
+          >
+            <BookText size={14} /> Kartu
+          </button>
+          <button
+            type="button"
+            className={`nemo-view-tab ${viewMode === 'tulis' ? 'on' : ''}`}
+            onClick={() => setViewMode('tulis')}
+          >
+            <PenLine size={14} /> Tulis
+          </button>
         </div>
-        <CardBody entry={entry} />
-      </div>
+      )}
+
+      {viewMode === 'tulis' ? (
+        <div className="nemo-study-sketch">
+          <NemonikSketch entry={entry} />
+        </div>
+      ) : (
+        <div
+          style={cardStyle}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerCancel}
+        >
+          <div style={{ ...overlayStyle, backgroundColor: overlayColor }}>
+            {overlayText && !rating && (
+              <span className="nemo-swipe-tag" style={{ opacity: Math.max(opacityLeft, opacityRight) }}>
+                {overlayText}
+              </span>
+            )}
+          </div>
+          <CardBody entry={entry} />
+        </div>
+      )}
 
       {!rating ? (
         <>

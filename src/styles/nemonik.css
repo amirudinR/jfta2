@@ -1013,3 +1013,138 @@
   .nemo-browse-modal { align-items: center; }
   .nemo-browse-sheet { border-radius: 20px; padding: 24px; }
 }
+
+/* ══ Fase 4: Gamifikasi · Sketch · Prediksi lupa ══ */
+
+/* Baris level di hero */
+.nemo-hero-level {
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--kin);
+}
+
+/* Kartu risiko lupa */
+.nemo-forget-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(193, 64, 42, 0.35);
+  background: rgba(193, 64, 42, 0.1);
+  color: #e2937f;
+  cursor: pointer;
+  font-family: var(--font-ui);
+  min-height: 60px;
+}
+.nemo-forget-card:active { transform: translateY(1px); }
+.nemo-forget-body { display: flex; flex-direction: column; gap: 2px; }
+.nemo-forget-title { font-weight: 700; font-size: 0.92rem; }
+.nemo-forget-sub { font-size: 0.78rem; color: var(--card-soft); }
+
+/* ── Panel pencapaian ── */
+.nemo-ach {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--card-face);
+  color: var(--card-ink);
+  border: 1px solid var(--card-line);
+  border-radius: 20px;
+  padding: 18px;
+}
+.nemo-ach-head { display: flex; align-items: center; justify-content: space-between; }
+.nemo-ach-level {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-ui); font-weight: 800; font-size: 1.05rem;
+  color: var(--kin);
+}
+.nemo-ach-xp { font-family: var(--font-mono); font-weight: 700; color: var(--card-soft); }
+.nemo-ach-xpbar {
+  width: 100%; height: 12px; border-radius: 7px; overflow: hidden;
+  background: var(--card-deep); border: 1px solid var(--card-line);
+}
+.nemo-ach-xpfill { height: 100%; background: var(--kin); border-radius: 7px; transition: width 0.3s; }
+.nemo-ach-xpnote { font-family: var(--font-ui); font-size: 0.75rem; color: var(--card-soft); }
+.nemo-ach-sub {
+  margin-top: 6px; font-family: var(--font-ui); font-size: 0.78rem; font-weight: 700;
+  color: var(--card-soft); text-transform: uppercase; letter-spacing: 0.03em;
+}
+.nemo-ach-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.nemo-ach-badge {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 14px 10px; border-radius: 14px; text-align: center;
+  border: 1px solid var(--card-line);
+}
+.nemo-ach-badge.on { background: rgba(152, 198, 130, 0.12); border-color: rgba(152, 198, 130, 0.4); }
+.nemo-ach-badge.off { background: var(--card-deep); opacity: 0.6; }
+.nemo-ach-icon { font-size: 1.6rem; line-height: 1; }
+.nemo-ach-icon svg { color: var(--card-soft); }
+.nemo-ach-label { font-family: var(--font-ui); font-size: 0.82rem; font-weight: 700; }
+.nemo-ach-desc { font-family: var(--font-ui); font-size: 0.7rem; color: var(--card-soft); }
+
+/* ── Sketch kanji ── */
+.nemo-view-tabs { display: flex; gap: 8px; margin: 12px 0 4px; }
+.nemo-view-tab {
+  flex: 1; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  border-radius: 12px; border: 1px solid var(--card-line); background: var(--card-deep);
+  color: var(--card-soft); font-family: var(--font-ui); font-size: 0.85rem; font-weight: 700; cursor: pointer;
+}
+.nemo-view-tab.on { background: var(--shu); color: var(--washi); border-color: transparent; }
+.nemo-study-sketch { margin-top: 10px; }
+.nemo-sketch { display: flex; flex-direction: column; gap: 10px; }
+.nemo-sketch-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-width: 360px;
+  margin: 0 auto;
+  border-radius: 16px;
+  background: var(--card-face);
+  border: 1px solid var(--card-line);
+  overflow: hidden;
+  touch-action: none;
+}
+.nemo-sketch-bg {
+  position: absolute; inset: 0; margin: auto;
+  width: 78%; height: 78%; object-fit: contain;
+  opacity: 0.16; pointer-events: none; user-select: none;
+}
+.nemo-sketch-canvas {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  touch-action: none; cursor: crosshair;
+}
+.nemo-sketch-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.nemo-sketch-hint {
+  text-align: center; font-family: var(--font-ui); font-size: 0.8rem;
+  color: var(--page-soft); margin: 0;
+}
+
+/* ── Toast badge baru ── */
+.nemo-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 92vw;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba(10, 25, 40, 0.97);
+  border: 1px solid rgba(193, 148, 63, 0.5);
+  color: var(--page-ink, #f0ebe0);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  font-family: var(--font-ui);
+  cursor: pointer;
+  animation: nemo-toast-in 0.25s ease-out;
+}
+@keyframes nemo-toast-in { from { opacity: 0; transform: translate(-50%, 12px); } to { opacity: 1; transform: translate(-50%, 0); } }
+.nemo-toast svg { color: var(--kin); flex: none; }
+.nemo-toast-title { font-weight: 700; font-size: 0.9rem; }
+.nemo-toast-desc { font-size: 0.78rem; color: var(--page-soft, #8fa8c0); }

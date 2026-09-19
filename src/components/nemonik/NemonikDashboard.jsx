@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { BookOpen, RotateCcw, Gamepad2, List, History } from 'lucide-react'
+import { BookOpen, RotateCcw, Gamepad2, List, History, Award, AlertTriangle } from 'lucide-react'
 import ProgressRing from '../ui/ProgressRing'
 import NemonikHeatmap from './NemonikHeatmap'
 import { SessionHistory } from './NemonikSessionStats'
+import { levelInfo } from '../../lib/nemonik-achievements'
 
 // Bar bertingkat status SRS: Baru · Belajar · Perlu Diulang · Hafal.
 function SegmentedBar({ baru, belajar, ulang, hafal, total }) {
@@ -31,13 +32,18 @@ function SegmentedBar({ baru, belajar, ulang, hafal, total }) {
 }
 
 // Dashboard Nemonik — ringkasan progres + pintu masuk 3 mode.
-export default function NemonikDashboard({ stats, streak, sessions, onLearn, onReview, onQuiz, onBrowseAll }) {
+export default function NemonikDashboard({
+  stats, streak, sessions, ach, forgetting,
+  onLearn, onReview, onQuiz, onBrowseAll, onAchievements, onReviewForgetting,
+}) {
   const [showHistory, setShowHistory] = useState(false)
   // Semua hook dipanggil sebelum guard agar urutan hooks stabil antar render.
   if (!stats) return null
   const { total, baru, belajar, hafal, ulang, reviewCount } = stats
   const pctHafal = total > 0 ? Math.round((hafal / total) * 100) : 0
   const sessionCount = (sessions || []).length
+  const lv = ach ? levelInfo(ach.xp) : null
+  const forgettingCount = (forgetting || []).length
 
   return (
     <div className="nemo-dashboard">
@@ -50,8 +56,26 @@ export default function NemonikDashboard({ stats, streak, sessions, onLearn, onR
             <strong>{hafal}</strong> dari {total} kanji ({pctHafal}%)
           </div>
           <div className="nemo-hero-streak">🔥 Streak {streak} hari</div>
+          {lv && (
+            <div className="nemo-hero-level">⭐ Level {lv.level} · {ach.xp} XP</div>
+          )}
         </div>
       </div>
+
+      {/* Kartu risiko lupa (prediksi SRS) */}
+      {forgettingCount > 0 && (
+        <button
+          type="button"
+          className="nemo-forget-card"
+          onClick={onReviewForgetting}
+        >
+          <AlertTriangle size={18} />
+          <div className="nemo-forget-body">
+            <div className="nemo-forget-title">{forgettingCount} kanji berisiko lupa</div>
+            <div className="nemo-forget-sub">Tap untuk review sekarang →</div>
+          </div>
+        </button>
+      )}
 
       {/* Bar bertingkat status SRS */}
       <div className="nemo-progress">
@@ -94,6 +118,9 @@ export default function NemonikDashboard({ stats, streak, sessions, onLearn, onR
         </button>
         <button className="nemo-btn danger" onClick={onQuiz}>
           <Gamepad2 size={16} /> Mode Kuis
+        </button>
+        <button className="nemo-btn" onClick={onAchievements}>
+          <Award size={16} /> Pencapaian{lv ? ` · Lv ${lv.level}` : ''}
         </button>
       </div>
     </div>

@@ -118,6 +118,31 @@ export function nemonikStats(data, srs) {
   return { total: (data || []).length, ...counts, reviewCount }
 }
 
+// Prediksi kanji "berisiko lupa" dari model SRS yang ada (tanpa data baru).
+// Skor risiko naik bila: ease rendah, status 'ulang', dan waktu review lewat.
+// Mengembalikan daftar { entry, score } terurut menurun (skor > 0 saja).
+export function predictForgetting(data, srs, now = Date.now()) {
+  const scored = []
+  for (const k of data || []) {
+    const s = srs[String(k.no)]
+    if (!s || s.status === 'baru') continue
+    const ease = s.ease ?? 2.5
+    const interval = s.interval ?? 1
+    const overdueDays = Math.max(0, (now - (s.nextReview || now)) / ONE_DAY)
+    // Risiko dasar: ease rendah + status ulang.
+    let score = Math.max(0, 2.5 - ease) * 10
+    if (s.status === 'ulang') score += 8
+    else if (s.status === 'belajar') score += 3
+    // Tambah bila sudah lewat jadwal (makin lama makin berisiko).
+    score += Math.min(overdueDays, 14) * 0.8
+    // Interval panjang = retensi rapuh (bonus kecil).
+    if (interval >= 7) score += 2
+    if (score > 0) scored.push({ entry: k, score: Math.round(score * 10) / 10 })
+  }
+  scored.sort((a, b) => b.score - a.score)
+  return scored
+}
+
 // ── Streak ──
 // Port checkStreak dari app.js: naik kalau login di hari berbeda berturut-turut.
 // `now` bisa di-inject untuk pengujian.
