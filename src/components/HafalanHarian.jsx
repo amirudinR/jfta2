@@ -1,7 +1,8 @@
+import { useEffect, useState } from 'react'
 import {
   CheckSquare, Square, Plus, ChevronDown, ChevronUp,
   Trash2, Settings, Flame, BookText, ListChecks, History,
-  CheckCheck, Eraser, Volume2,
+  CheckCheck, Eraser, Volume2, Focus,
 } from 'lucide-react'
 import { useHafalan } from '../hooks/useHafalan'
 import { speak, ttsSupported } from '../lib/tts'
@@ -32,6 +33,39 @@ export default function HafalanHarian({ onGoMateri, onGoRecall, level = 'a2' }) 
 
   // Apakah TTS tersedia di browser ini (tombol audio hanya tampil bila ada).
   const canSpeak = ttsSupported()
+
+  // ── Mode Fokus (khusus desktop) ────────────────────────────
+  // Toggle preferensi hafalan desktop: card lebih lega (2 kolom),
+  // nomor & checkbox disembunyikan sampai hover. Default OFF agar
+  // tampilan mobile/tablet tidak terpengaruh (mode ini hanya aktif
+  // lewat CSS @media ≥1024px).
+  const [focusMode, setFocusMode] = useState(() => {
+    try { return localStorage.getItem('hh:focusMode') === '1' } catch { return false }
+  })
+  useEffect(() => {
+    try { localStorage.setItem('hh:focusMode', focusMode ? '1' : '0') } catch {}
+  }, [focusMode])
+
+  // Scroll-reveal: tambah .is-in saat baris masuk viewport (IntersectionObserver).
+  // Hanya berdampak visual di desktop (lihat CSS), mobile tidak berubah.
+  useEffect(() => {
+    const list = document.querySelector('.hh-list')
+    if (!list || typeof IntersectionObserver === 'undefined') return
+    const rows = list.querySelectorAll('.hh-row:not(.is-in)')
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const en of entries) {
+          if (en.isIntersecting) {
+            en.target.classList.add('is-in')
+            io.unobserve(en.target)
+          }
+        }
+      },
+      { rootMargin: '0px 0px -8% 0px', threshold: 0.08 },
+    )
+    rows.forEach((r) => io.observe(r))
+    return () => io.disconnect()
+  }, [tab, items.length, focusMode, selectedDate])
 
   // Berapa item yang sudah dicentang per tanggal (untuk badge strip & quick).
   const dayMeta = (date) => history[date]?.kotoba != null
@@ -178,12 +212,34 @@ export default function HafalanHarian({ onGoMateri, onGoRecall, level = 'a2' }) 
         </div>
       )}
 
+      {/* Kontrol tampilan hafalan desktop — Mode Fokus card lega.
+          Tombol disembunyikan di mobile/tablet via CSS (.hh-focus-toggle). */}
+      <div className="hh-viewbar no-print">
+        <span className="hh-viewbar-count">{items.length} kata</span>
+        <button
+          type="button"
+          className={`hh-focus-toggle ${focusMode ? 'on' : ''}`}
+          onClick={() => setFocusMode((v) => !v)}
+          aria-pressed={focusMode}
+          title={focusMode ? 'Matikan Mode Fokus' : 'Aktifkan Mode Fokus (card lebih lega)'}
+        >
+          <Focus size={15} />
+          <span>Mode Fokus</span>
+        </button>
+      </div>
+
       {/* Item List */}
-      <div className="hh-list" data-stagger>
+      <div
+        className={`hh-list ${focusMode ? 'has-focus' : ''}`}
+        data-stagger
+      >
         {items.map((item) => {
           const isChecked = !!checkedMap?.[item.id]
           return (
-            <div key={item.id} className={`hh-row ${isChecked ? 'checked' : ''}`}>
+            <div
+              key={item.id}
+              className={`hh-row ${isChecked ? 'checked' : ''}`}
+            >
               <span className="hh-num">{item.num}</span>
               {/* E2 fix: div → button agar keyboard accessible */}
               <button

@@ -608,6 +608,310 @@
   }
 }
 
+/* ============================================================
+   DESKTOP MODE HAFALAN (KOTOBA) — breakpoint ≥1024px
+   ------------------------------------------------------------
+   Hanya berlaku di desktop. Mobile/tablet (<1024px) memakai
+   layout lama (≥769px: 2 kolom; <769px: 1 kolom) tanpa perubahan
+   sama sekali — semua aturan di bawah terkurung dalam media query.
+   ============================================================ */
+
+/* Bar kontrol tampilan (tombol Mode Fokus) — default tersembunyi
+   di SEMUA ukuran; diaktifkan hanya di ≥1024px. Ini memastikan
+   mobile/tablet tak melihat kontrol baru sama sekali. */
+.hh-viewbar {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+
+  /* Container lebih lebar khusus desktop agar grid 3 kolom lega.
+     Mobile/tablet (<1024px) tetap memakai .stage 640px/960px. */
+  .stage {
+    max-width: 1180px;
+    padding: 0 28px 48px;
+  }
+
+  /* Container daftar hafalan lebih lebar agar grid 3–4 kolom
+     punya ruang, di-center dan dibatasi agar tidak melebar penuh
+     di layar ultrawide. (.stage global tetap 960px — di-narrow
+     ulang di bawah hanya untuk halaman hafalan.) */
+  .hh-root {
+    gap: 20px;
+  }
+
+  /* ── Bar kontrol tampilan (tombol Mode Fokus) ── */
+  .hh-viewbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: -4px;
+  }
+
+  .hh-viewbar-count {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    color: var(--page-soft);
+  }
+
+  .hh-focus-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 14px;
+    min-height: 36px;
+    border-radius: 999px;
+    border: 1px solid var(--panel-line);
+    background: var(--layer-1);
+    color: var(--page-soft);
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+  }
+
+  .hh-focus-toggle:hover {
+    color: var(--page-ink);
+    border-color: var(--layer-3);
+  }
+
+  .hh-focus-toggle.on {
+    background: var(--kin);
+    border-color: var(--kin);
+    color: var(--sumi);
+  }
+
+  /* ── Grid daftar hafalan: 3 kolom lega ── */
+  .hh-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 22px;
+  }
+
+  /* ── Card setiap kata: lega, hirarki jelas ── */
+  .hh-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      'num  num  num'
+      'main tts  check';
+    align-items: center;
+    gap: 12px 8px;
+    padding: 22px 22px 20px;
+    border-radius: 16px;
+    border-color: var(--card-line);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
+    transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s var(--ios-ease, ease);
+  }
+
+  .hh-row:hover {
+    border-color: var(--layer-3);
+  }
+
+  /* Nomor urut: kecil & redup — cuma referensi, bukan konten utama. */
+  .hh-num {
+    grid-area: num;
+    justify-self: start;
+    min-width: 0;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--card-soft);
+    opacity: 0.5;
+  }
+
+  /* Area konten (kanji + furigana + arti) */
+  .hh-content {
+    grid-area: main;
+    align-self: center;
+  }
+
+  .hh-front {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  /* Kanji utama: elemen paling dominan & paling kontras.
+     Light theme pakai emas lebih gelap (--kin-deep) supaya kontras
+     ≥3:1 (AA large text) di atas kartu washi; dark tetap --kin. */
+  .hh-jp {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--kin-deep);
+    letter-spacing: 0.01em;
+  }
+
+  html.dark-mode .hh-jp {
+    color: var(--kin);
+  }
+
+  /* Kanji sudah "checked" → jangan kalah kontras, tetap moss. */
+  .hh-row.checked .hh-jp {
+    color: var(--moss);
+  }
+
+  /* Furigana: sejajar baseline kanji, jelas tapi tidak sebesar kanji.
+     Light: opacity penuh agar kontras ≥4.5:1 (AA) di kartu washi. */
+  .hh-reading {
+    font-size: 17px;
+    color: var(--card-soft);
+    opacity: 1;
+  }
+
+  html.dark-mode .hh-reading {
+    opacity: 0.92;
+  }
+
+  /* Jarak vertikal ekstra kanji → arti (breathing room). */
+  .hh-meaning {
+    margin-top: 10px;
+    font-size: 15.5px;
+    line-height: 1.5;
+    /* Kontras WCAG AA terhadap card-face (≥4.5:1). --card-soft di tema
+       gelap #9aa79e ≈ 5.0:1; dinaikkan sedikit agar aman di terang. */
+    color: var(--card-ink);
+    opacity: 0.82;
+  }
+
+  /* Kontrol (audio + checkbox): kolom kanan card, ikon minimalis,
+     area klik tetap ≥36px. */
+  .hh-row .hh-tts-btn {
+    grid-area: tts;
+    justify-self: end;
+    align-self: center;
+    width: 36px;
+    height: 36px;
+    opacity: 0.6;
+  }
+
+  .hh-row .hh-check-btn {
+    grid-area: check;
+    justify-self: end;
+    align-self: center;
+    min-width: 36px;
+    min-height: 36px;
+    padding: 4px;
+    opacity: 0.45;
+  }
+
+  .hh-row .hh-check-btn.checked {
+    opacity: 1;
+  }
+
+  /* Bila audio disabled (tanpa tombol TTS), checkbox ambil kolom tts
+     agar tetap rapat ke kanan tanpa celah kosong. */
+  .hh-row:not(:has(.hh-tts-btn)) .hh-check-btn {
+    grid-area: tts;
+  }
+
+  .hh-row .hh-del-custom {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+  }
+
+  /* ── MODE FOKUS: card makin lega (2 kolom), elemen non-esensial
+     tersembunyi sampai hover. ── */
+  .hh-list.has-focus {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 26px;
+  }
+
+  .hh-list.has-focus .hh-row {
+    padding: 26px 28px 24px;
+  }
+
+  .hh-list.has-focus .hh-jp {
+    font-size: 40px;
+  }
+
+  .hh-list.has-focus .hh-reading {
+    font-size: 18px;
+  }
+
+  .hh-list.has-focus .hh-meaning {
+    font-size: 16px;
+    margin-top: 12px;
+  }
+
+  /* Sembunyikan nomor & kontrol sampai user hover card. */
+  .hh-list.has-focus .hh-num,
+  .hh-list.has-focus .hh-tts-btn,
+  .hh-list.has-focus .hh-check-btn {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .hh-list.has-focus .hh-row:hover .hh-num,
+  .hh-list.has-focus .hh-row:hover .hh-tts-btn,
+  .hh-list.has-focus .hh-row:hover .hh-check-btn,
+  .hh-list.has-focus .hh-check-btn.checked {
+    opacity: 0.85;
+  }
+
+  .hh-list.has-focus .hh-row:hover .hh-check-btn.checked {
+    opacity: 1;
+  }
+
+  /* ── Scroll-reveal halus saat card masuk viewport ── */
+  .hh-list .hh-row {
+    opacity: 0;
+    transform: translateY(10px);
+    transition:
+      opacity 0.42s var(--ios-ease, cubic-bezier(0.32, 0.72, 0, 1)),
+      transform 0.42s var(--ios-ease, cubic-bezier(0.32, 0.72, 0, 1)),
+      border-color 0.18s ease,
+      background 0.18s ease;
+  }
+
+  .hh-list .hh-row.is-in {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ≥1440px (layar besar/ultrawide): 4 kolom, container dibatasi
+   agar tidak terlalu melebar. */
+@media (min-width: 1440px) {
+  /* Layar besar/ultrawide: beri ruang 4 kolom, tapi tetap dibatasi
+     supaya tidak melebar penuh & mata tidak menyapu terlalu jauh. */
+  .stage {
+    max-width: 1360px;
+  }
+
+  .hh-list {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .hh-list.has-focus {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* Batasi lebar area daftar hafalan supaya baris tidak terlalu
+     panjang & mata tidak menyapu jauh kiri-kanan. */
+  .hh-root {
+    max-width: 1320px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* Hormati preferensi reduced-motion: matikan scroll-reveal. */
+@media (min-width: 1024px) and (prefers-reduced-motion: reduce) {
+  .hh-list .hh-row {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 /* ---------- Print ---------- */
 @media print {
   body {
