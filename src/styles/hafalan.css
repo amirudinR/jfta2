@@ -556,6 +556,14 @@ html.dark-mode .hh-row.checked {
   margin-top: 2px;
 }
 
+/* Wrapper tombol audio+checkbox. Di mobile/tablet wrapper ini "tembus"
+   (display:contents) sehingga kedua tombol tetap menjadi flex-item
+   langsung .hh-row — tampilan lama tidak berubah. Desktop (≥1024px)
+   meng-override menjadi flex agar menempel di dasar card. */
+.hh-row-actions {
+  display: contents;
+}
+
 .hh-check-btn {
   flex-shrink: 0;
   background: none;

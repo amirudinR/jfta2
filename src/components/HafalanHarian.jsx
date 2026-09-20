@@ -235,10 +235,13 @@ export default function HafalanHarian({ onGoMateri, onGoRecall, level = 'a2' }) 
       >
         {items.map((item) => {
           const isChecked = !!checkedMap?.[item.id]
+          // Kanji multi-item (mis. "北 / 南 / 東 / 西") → font lebih kecil
+          // supaya tidak makan banyak baris & tinggi card tetap rata.
+          const manyKanji = /[\/・、,]/.test(item.front) || [...(item.front || '')].filter((ch) => !/\s|[・\/、,]/.test(ch)).length > 3
           return (
             <div
               key={item.id}
-              className={`hh-row ${isChecked ? 'checked' : ''}`}
+              className={`hh-row ${manyKanji ? 'hh-row--many' : ''} ${isChecked ? 'checked' : ''}`}
             >
               <span className="hh-num">{item.num}</span>
               {/* E2 fix: div → button agar keyboard accessible */}
@@ -253,19 +256,24 @@ export default function HafalanHarian({ onGoMateri, onGoRecall, level = 'a2' }) 
                 </div>
                 <div className="hh-meaning">{item.meaning}</div>
               </button>
-              {canSpeak && audioRows && (
-                <button
-                  className="hh-tts-btn"
-                  onClick={() => speak(item.reading || item.front)}
-                  title="Dengarkan"
-                  aria-label={`Dengarkan ${item.front}`}
-                >
-                  <Volume2 size={18} />
+              {/* Grup kontrol: dipisah agar bisa dipasang nempel di dasar
+                  card desktop (margin-top:auto) — posisi konsisten antar
+                  card, sejajar horizontal dalam satu baris grid. */}
+              <div className="hh-row-actions">
+                {canSpeak && audioRows && (
+                  <button
+                    className="hh-tts-btn"
+                    onClick={() => speak(item.reading || item.front)}
+                    title="Dengarkan"
+                    aria-label={`Dengarkan ${item.front}`}
+                  >
+                    <Volume2 size={18} />
+                  </button>
+                )}
+                <button className={`hh-check-btn ${isChecked ? 'checked' : ''}`} onClick={() => toggle(tab, item.id)}>
+                  {isChecked ? <CheckSquare size={28} /> : <Square size={28} />}
                 </button>
-              )}
-              <button className={`hh-check-btn ${isChecked ? 'checked' : ''}`} onClick={() => toggle(tab, item.id)}>
-                {isChecked ? <CheckSquare size={28} /> : <Square size={28} />}
-              </button>
+              </div>
               {item.custom && (() => {
                 const key = `${tab}-${item.customIdx}`
                 const isConfirming = confirmDeleteKey?.key === key

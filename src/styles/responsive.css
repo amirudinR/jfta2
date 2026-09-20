@@ -689,17 +689,24 @@
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 22px;
+    /* Semua card dalam satu baris dipaksa sama tinggi (stretch) —
+       card pendek dapat ruang kosong ekstra, bukan card lain yang
+       naik-turun mengikuti yang tertinggi. */
+    align-items: stretch;
   }
 
-  /* ── Card setiap kata: lega, hirarki jelas ── */
+  .hh-list > * {
+    height: 100%;
+  }
+
+  /* ── Card setiap kata: FLEX kolom, urutan tetap & rapi ──
+     1) nomor (fixed atas) 2) konten (kanji+furigana+arti, fleksibel)
+     3) aksi (audio+checkbox, nempel dasar via margin-top:auto). */
   .hh-row {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto;
-    grid-template-areas:
-      'num  num  num'
-      'main tts  check';
-    align-items: center;
-    gap: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
     padding: 22px 22px 20px;
     border-radius: 16px;
     border-color: var(--card-line);
@@ -711,10 +718,11 @@
     border-color: var(--layer-3);
   }
 
-  /* Nomor urut: kecil & redup — cuma referensi, bukan konten utama. */
+  /* Nomor urut: kecil & redup — cuma referensi, bukan konten utama.
+     Selalu di pojok kiri atas, tidak bergeser mengikuti isi. */
   .hh-num {
-    grid-area: num;
-    justify-self: start;
+    order: 0;
+    flex: none;
     min-width: 0;
     text-align: left;
     font-size: 11px;
@@ -724,10 +732,15 @@
     opacity: 0.5;
   }
 
-  /* Area konten (kanji + furigana + arti) */
+  /* Area konten (kanji + furigana + arti) — mengisi ruang tersisa
+     sehingga blok aksi terdorong ke dasar card. */
   .hh-content {
-    grid-area: main;
-    align-self: center;
+    order: 1;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-self: stretch;
   }
 
   .hh-front {
@@ -746,6 +759,7 @@
     line-height: 1.15;
     color: var(--kin-deep);
     letter-spacing: 0.01em;
+    overflow-wrap: anywhere;
   }
 
   html.dark-mode .hh-jp {
@@ -780,21 +794,28 @@
     opacity: 0.82;
   }
 
-  /* Kontrol (audio + checkbox): kolom kanan card, ikon minimalis,
-     area klik tetap ≥36px. */
+  /* Grup aksi (audio + checkbox): SELALU nempel di dasar card,
+     sejajar horizontal antar semua card dalam satu baris. */
+  .hh-row-actions {
+    order: 2;
+    flex: none;
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+
+  /* Kontrol (audio + checkbox): ikon minimalis, area klik ≥36px. */
   .hh-row .hh-tts-btn {
-    grid-area: tts;
-    justify-self: end;
-    align-self: center;
+    flex: none;
     width: 36px;
     height: 36px;
     opacity: 0.6;
   }
 
   .hh-row .hh-check-btn {
-    grid-area: check;
-    justify-self: end;
-    align-self: center;
+    flex: none;
     min-width: 36px;
     min-height: 36px;
     padding: 4px;
@@ -805,10 +826,16 @@
     opacity: 1;
   }
 
-  /* Bila audio disabled (tanpa tombol TTS), checkbox ambil kolom tts
-     agar tetap rapat ke kanan tanpa celah kosong. */
-  .hh-row:not(:has(.hh-tts-btn)) .hh-check-btn {
-    grid-area: tts;
+  /* Kanji multi-item (mis. "北 / 南 / 東 / 西"): kecilkan sedikit agar
+     tidak makan 3+ baris dan bikin tinggi card jomplang vs yang lain.
+     Kelas .hh-row--many dipasang dari JSX. */
+  .hh-row--many .hh-jp {
+    font-size: 28px;
+    letter-spacing: -0.01em;
+  }
+
+  .hh-list.has-focus .hh-row--many .hh-jp {
+    font-size: 30px;
   }
 
   .hh-row .hh-del-custom {
