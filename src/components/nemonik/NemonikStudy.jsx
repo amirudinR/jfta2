@@ -5,6 +5,7 @@ import { speak, ttsSupported } from '../../lib/tts'
 import { SessionResult } from './NemonikSessionStats'
 import { MnemonicPanel } from './NemonikBrowse'
 import NemonikSketch from './NemonikSketch'
+import ZoomLightbox from './ZoomLightbox'
 
 // Auto-pilih "Tahu" bila user tidak menekan chip rating dalam sekian ms.
 const AUTO_RATE_MS = 3000
@@ -22,29 +23,78 @@ function speakEntry(entry) {
   if (text) speak(text)
 }
 
-function CardBody({ entry }) {
+function CardBody({ entry, onZoom }) {
   const imgBersih = imgUrl(entry.img_kanji_bersih)
   const imgKonteks = imgUrl(entry.img_kanji_nama)
   const imgSelesai = imgUrl(entry.img_selesai_potong)
   const canSpeak = ttsSupported() && !!(entry.baca_utama || entry.kanji)
 
+  // Guard: jangan buka lightbox saat kartu sedang di-drag (swipe navigasi).
+  const dragRef = useRef({ x: 0, moved: false })
+  const onTilePointerDown = (e) => { dragRef.current = { x: e.clientX, moved: false } }
+  const onTilePointerMove = (e) => {
+    if (Math.abs(e.clientX - dragRef.current.x) > 6) dragRef.current.moved = true
+  }
+  const open = (kind) => (e) => {
+    // Hentikan bubbling ke flashcard (yang punya handler swipe/flip).
+    e.stopPropagation()
+    if (dragRef.current.moved) return
+    if (kind === 'kanji' && !imgBersih) return
+    if (kind === 'mnemonic' && !imgKonteks) return
+    if (kind === 'kartu' && !imgSelesai) return
+    onZoom(kind, { imgBersih, imgKonteks, imgSelesai })
+  }
+  const onTileKey = (kind) => (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(kind)(e) }
+  }
+
   return (
     <div className="nemo-card-stack" style={{ width: '100%' }}>
       <div className="nemo-flashcard">
         <div className="nemo-flashcard-top">
-          <div className="nemo-img-left" draggable="false">
+          <div
+            className="nemo-img-left nemo-zoomable"
+            draggable="false"
+            onPointerDown={onTilePointerDown}
+            onPointerMove={onTilePointerMove}
+            onClick={open('kanji')}
+            role="button"
+            tabIndex={0}
+            aria-label={`Perbesar kartu kanji ${entry.kanji}`}
+            onKeyDown={onTileKey('kanji')}
+          >
             {imgBersih
               ? <img src={imgBersih} alt={`Kanji ${entry.kanji}`} loading="lazy" draggable="false" />
               : <div className="nemo-img-missing">Kanji tidak tersedia</div>}
           </div>
-          <div className="nemo-img-right" draggable="false">
+          <div
+            className="nemo-img-right nemo-zoomable"
+            draggable="false"
+            onPointerDown={onTilePointerDown}
+            onPointerMove={onTilePointerMove}
+            onClick={open('mnemonic')}
+            role="button"
+            tabIndex={0}
+            aria-label={`Perbesar ilustrasi mnemonic ${entry.kanji}`}
+            onKeyDown={onTileKey('mnemonic')}
+          >
             {imgKonteks
               ? <img src={imgKonteks} alt={`Mnemonic ${entry.kanji}`} loading="lazy" draggable="false" />
               : <div className="nemo-img-missing">Mnemonic tidak tersedia</div>}
           </div>
         </div>
 
-        <div className="nemo-flashcard-bottom" draggable="false">
+        <div
+          className="nemo-flashcard-bottom nemo-zoomable"
+          draggable="false"
+          onPointerDown={onTilePointerDown}
+          onPointerMove={onTilePointerMove}
+          onClick={open('kartu')}
+          role="button"
+          tabIndex={0}
+          aria-label={`Perbesar kartu kosakata ${entry.kanji}`}
+          onKeyDown={onTileKey('kartu')}
+        >
           {imgSelesai
             ? <img src={imgSelesai} alt={`Kartu lengkap ${entry.kanji}`} loading="lazy" draggable="false" />
             : <div className="nemo-img-missing">Kartu lengkap tidak tersedia</div>}
@@ -91,6 +141,8 @@ export default function NemonikStudy({ queue, onGrade, onFinish, onRepeatWeak })
   const [showMnemonic, setShowMnemonic] = useState(false)
   // Mode tampilan kartu: 'kartu' (flashcard) atau 'tulis' (sketch kanji).
   const [viewMode, setViewMode] = useState('kartu')
+  // Lightbox zoom: null = tertutup; simpan jenis + sumber gambar yang diklik.
+  const [zoom, setZoom] = useState(null) // { kind, imgBersih, imgKonteks, imgSelesai }
 
   const autoTimer = useRef(null)
   // Guard re-entrancy: cegah satu kartu dinilai 2x (mis. klik chip tepat saat
@@ -328,7 +380,10 @@ export default function NemonikStudy({ queue, onGrade, onFinish, onRepeatWeak })
               </span>
             )}
           </div>
-          <CardBody entry={entry} />
+          <CardBody
+            entry={entry}
+            onZoom={(kind, imgs) => setZoom({ kind, ...imgs })}
+          />
         </div>
       )}
 
@@ -344,7 +399,7 @@ export default function NemonikStudy({ queue, onGrade, onFinish, onRepeatWeak })
             <BookText size={15} /> {showMnemonic ? 'Sembunyikan kosakata' : 'Lihat kosakata pendukung'}
           </button>
 
-          {showMnemonic && <MnemonicPanel entry={entry} />}
+          {showMnemonic && <MnemonicPanel entry={entry} onZoom={() => setZoom({ kind: 'vocab' })} />}
 
           <p className="nemo-swipe-hint">
             Geser kiri untuk lanjut · geser kanan untuk kembali
@@ -392,6 +447,35 @@ export default function NemonikStudy({ queue, onGrade, onFinish, onRepeatWeak })
           </div>
         </div>
       )}
+
+      {/* Lightbox zoom untuk 3 elemen visual tab "Kartu":
+          kartu kanji, ilustrasi mnemonic, dan kartu kosakata (tabel). */}
+      <ZoomLightbox
+        open={!!zoom}
+        onClose={() => setZoom(null)}
+        variant={zoom?.kind === 'vocab' ? 'vocab' : undefined}
+        label={
+          zoom?.kind === 'kanji' ? `Kanji ${entry?.kanji || ''}` :
+          zoom?.kind === 'mnemonic' ? `Ilustrasi mnemonic ${entry?.kanji || ''}` :
+          zoom?.kind === 'kartu' ? `Kartu kosakata ${entry?.kanji || ''}` :
+          zoom?.kind === 'vocab' ? `Kosakata pendukung ${entry?.kanji || ''}` : 'Perbesar'
+        }
+      >
+        {zoom?.kind === 'kanji' && zoom.imgBersih ? (
+          <img className="zoom-lightbox-img" src={zoom.imgBersih} alt={`Kanji ${entry.kanji}`} draggable="false" />
+        ) : null}
+        {zoom?.kind === 'mnemonic' && zoom.imgKonteks ? (
+          <img className="zoom-lightbox-img" src={zoom.imgKonteks} alt={`Mnemonic ${entry.kanji}`} draggable="false" />
+        ) : null}
+        {zoom?.kind === 'kartu' && zoom.imgSelesai ? (
+          <img className="zoom-lightbox-img" src={zoom.imgSelesai} alt={`Kartu kosakata ${entry.kanji}`} draggable="false" />
+        ) : null}
+        {zoom?.kind === 'vocab' ? (
+          <div className="zoom-lightbox-vocab">
+            <MnemonicPanel entry={entry} />
+          </div>
+        ) : null}
+      </ZoomLightbox>
     </div>
   )
 }

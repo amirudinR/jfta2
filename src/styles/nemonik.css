@@ -324,6 +324,187 @@
   border-radius: 12px;
 }
 
+/* ── Zoomable tiles (tab Kartu) ──
+   Beri tahu user bahwa elemen bisa diklik untuk diperbesar. */
+.nemo-zoomable {
+  position: relative;
+  cursor: zoom-in;
+  transition: background 0.18s ease, transform 0.18s var(--ios-ease, ease);
+  -webkit-tap-highlight-color: transparent;
+}
+.nemo-zoomable::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 2px var(--kin);
+  opacity: 0;
+  transition: opacity 0.18s ease;
+  pointer-events: none;
+}
+.nemo-zoomable:hover {
+  background: var(--card-face);
+}
+.nemo-zoomable:hover::after {
+  opacity: 0.55;
+}
+.nemo-zoomable:hover img {
+  transform: scale(1.02);
+}
+.nemo-zoomable img {
+  transition: transform 0.18s var(--ios-ease, ease);
+}
+@media (hover: none) {
+  /* Di perangkat sentuh, highlight hover tak relevan — matikan. */
+  .nemo-zoomable:hover { background: var(--card-deep); }
+  .nemo-zoomable:hover::after { opacity: 0; }
+  .nemo-zoomable:hover img { transform: none; }
+}
+
+/* ── Zoom Lightbox ──
+   Modal perbesar elemen (kartu kanji / ilustrasi mnemonic / kartu kosakata).
+   Overlay gelap semi-transparan + panel di tengah, konten diskalakan besar
+   mempertahankan aspect ratio (object-fit: contain). */
+.zoom-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.zoom-lightbox-panel {
+  position: relative;
+  width: 85vw;
+  max-width: 1100px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--card-face);
+  border: 1px solid var(--card-line);
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.zoom-lightbox-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+}
+
+/* Gambar diskalakan penuh, tetap utuh (tidak gepeng/stretched). */
+.zoom-lightbox-img {
+  display: block;
+  max-width: 100%;
+  max-height: calc(85vh - 60px);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+.zoom-lightbox-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 3;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--card-line);
+  background: var(--card-deep);
+  color: var(--card-ink);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.18s ease, transform 0.15s ease;
+}
+.zoom-lightbox-close:hover {
+  background: var(--card-face);
+}
+.zoom-lightbox-close:active {
+  transform: scale(0.92);
+}
+
+/* Varian teks (tabel kosakata): teks membesar proporsional & beri padding
+   ekstra supaya tidak mepet ke tepi modal. Top padding lebih besar agar judul
+   panel tidak tertutup tombol close di kanan-atas. */
+.zoom-lightbox-vocab {
+  width: 100%;
+  padding: 6px 10px;
+}
+/* Modal teks: beri ruang atas agar judul tidak tertutup tombol close. */
+.zoom-lightbox-panel--vocab {
+  padding-top: 20px;
+}.zoom-lightbox-vocab .nemo-mnemonic {
+  margin-top: 0;
+  border: none;
+  background: transparent;
+  padding: 4px 2px;
+  cursor: default;
+}
+.zoom-lightbox-vocab .nemo-mnemonic-kanji {
+  font-size: 3.4rem;
+}
+.zoom-lightbox-vocab .nemo-mnemonic-readings {
+  font-size: 1.15rem;
+  gap: 6px;
+}
+.zoom-lightbox-vocab .nemo-mnemonic-readings .ttl {
+  font-size: 0.9rem;
+}
+.zoom-lightbox-vocab .nemo-mnemonic-sub {
+  font-size: 1rem;
+  margin: 18px 0 10px;
+}
+.zoom-lightbox-vocab .nemo-kosakata-list {
+  gap: 10px;
+}
+.zoom-lightbox-vocab .nemo-kosakata-item {
+  padding: 12px 14px;
+  font-size: 1.05rem;
+}
+.zoom-lightbox-vocab .nemo-kosakata-kata {
+  font-size: 1.35rem;
+}
+.zoom-lightbox-vocab .nemo-kosakata-kana,
+.zoom-lightbox-vocab .nemo-kosakata-arti {
+  font-size: 1rem;
+}
+.zoom-lightbox-vocab .nemo-kosakata-badge {
+  font-size: 0.95rem;
+}
+
+@media (max-width: 640px) {
+  .zoom-lightbox {
+    padding: 10px;
+  }
+  .zoom-lightbox-panel {
+    width: 100%;
+    max-height: 88vh;
+    padding: 12px;
+    border-radius: 16px;
+  }
+  .zoom-lightbox-img {
+    max-height: calc(88vh - 56px);
+  }
+  .zoom-lightbox-close {
+    top: 8px;
+    right: 8px;
+  }
+}
+
 .nemo-rating { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
 .nemo-rating-btn {
   display: inline-flex;

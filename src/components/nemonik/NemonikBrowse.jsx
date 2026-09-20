@@ -13,14 +13,25 @@ const STATUS_FILTERS = [
 ]
 
 // Panel mnemonic: bacaan + daftar kosakata onyomi/kunyomi sebagai pendukung.
-export function MnemonicPanel({ entry }) {
+// Bila `onZoom` diberikan (dipakai di tab Kartu), panel bisa diklik untuk
+// diperbesar ke lightbox.
+export function MnemonicPanel({ entry, onZoom }) {
   if (!entry) return null
   const kas = [
     ...(entry.kosakata_onyomi || []).map((k) => ({ ...k, jenis: 'onyomi' })),
     ...(entry.kosakata_kunyomi || []).map((k) => ({ ...k, jenis: 'kunyomi' })),
   ]
+  const zoomable = typeof onZoom === 'function'
   return (
-    <div className="nemo-mnemonic">
+    <div
+      className={`nemo-mnemonic${zoomable ? ' nemo-zoomable' : ''}`}
+      onClick={zoomable ? onZoom : undefined}
+      role={zoomable ? 'button' : undefined}
+      tabIndex={zoomable ? 0 : undefined}
+      aria-label={zoomable ? `Perbesar kosakata pendukung ${entry.kanji}` : undefined}
+      onKeyDown={zoomable ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onZoom(e) } } : undefined}
+      title={zoomable ? 'Klik untuk perbesar' : undefined}
+    >
       <div className="nemo-mnemonic-head">
         <div className="nemo-mnemonic-kanji">{entry.kanji}</div>
         <div className="nemo-mnemonic-readings">
