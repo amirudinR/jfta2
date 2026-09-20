@@ -616,10 +616,18 @@
    sama sekali — semua aturan di bawah terkurung dalam media query.
    ============================================================ */
 
-/* Bar kontrol tampilan (tombol Mode Fokus) — default tersembunyi
-   di SEMUA ukuran; diaktifkan hanya di ≥1024px. Ini memastikan
-   mobile/tablet tak melihat kontrol baru sama sekali. */
+/* Bar kontrol tampilan hafalan — selalu tampil (berisi toggle Romaji).
+   Tombol "Mode Fokus" khusus desktop disembunyikan di <1024px; yang
+   tampil di semua ukuran hanya toggle Romaji. */
 .hh-viewbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hh-focus-toggle {
+  /* Desktop-only: disembunyikan sampai ≥1024px (lihat media query). */
   display: none;
 }
 

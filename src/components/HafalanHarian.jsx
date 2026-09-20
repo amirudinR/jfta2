@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react'
 import {
   CheckSquare, Square, Plus, ChevronDown, ChevronUp,
   Trash2, Settings, Flame, BookText, ListChecks, History,
-  CheckCheck, Eraser, Volume2, Focus,
+  CheckCheck, Eraser, Volume2, Focus, Languages,
 } from 'lucide-react'
 import { useHafalan } from '../hooks/useHafalan'
 import { speak, ttsSupported } from '../lib/tts'
+import { kanaToRomaji } from '../lib/kana'
 import { Heatmap } from './hafalan/Heatmap'
 import { ProgressBar } from './ui/ProgressBar'
 import { DetailModal } from './hafalan/DetailModal'
@@ -14,7 +15,7 @@ import { AddForm } from './hafalan/AddForm'
 import { UjianHarian } from './hafalan/UjianHarian'
 import { DayStrip, dayLabel } from './hafalan/DayStrip'
 
-export default function HafalanHarian({ onGoMateri, onGoRecall, level = 'a2' }) {
+export default function HafalanHarian({ onGoMateri, onGoRecall, level = 'a2', showRomaji = false, onToggleRomaji = () => {} }) {
   const {
     hasKanji, hasBunpou, t,
     tab, setTab,
@@ -218,6 +219,16 @@ export default function HafalanHarian({ onGoMateri, onGoRecall, level = 'a2' }) 
         <span className="hh-viewbar-count">{items.length} kata</span>
         <button
           type="button"
+          className={`hh-romaji-toggle ${showRomaji ? 'on' : ''}`}
+          onClick={onToggleRomaji}
+          aria-pressed={showRomaji}
+          title={showRomaji ? 'Sembunyikan romaji' : 'Tampilkan romaji'}
+        >
+          <Languages size={15} />
+          <span>Romaji</span>
+        </button>
+        <button
+          type="button"
           className={`hh-focus-toggle ${focusMode ? 'on' : ''}`}
           onClick={() => setFocusMode((v) => !v)}
           aria-pressed={focusMode}
@@ -255,6 +266,9 @@ export default function HafalanHarian({ onGoMateri, onGoRecall, level = 'a2' }) 
                   {item.reading && <span className="hh-reading">{item.reading}</span>}
                 </div>
                 <div className="hh-meaning">{item.meaning}</div>
+                {showRomaji && (
+                  <div className="hh-romaji">{kanaToRomaji(item.reading || item.front)}</div>
+                )}
               </button>
               {/* Grup kontrol: dipisah agar bisa dipasang nempel di dasar
                   card desktop (margin-top:auto) — posisi konsisten antar

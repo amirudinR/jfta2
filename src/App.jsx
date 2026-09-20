@@ -253,9 +253,26 @@ export default function App() {
           />
         )
       case 'harian':
-        return <HafalanHarian level={level} onGoMateri={() => changeMode('materi')} onGoRecall={() => changeMode('recall')} />
+        return (
+          <HafalanHarian
+            level={level}
+            onGoMateri={() => changeMode('materi')}
+            onGoRecall={() => changeMode('recall')}
+            showRomaji={prefs.showRomaji}
+            onToggleRomaji={() => setPrefs({ showRomaji: !prefs.showRomaji })}
+          />
+        )
       case 'materi':
-        return <DaftarMateri level={level} onGoHafalan={() => changeMode('harian')} onGoKotobaLevel={() => openKotobaLevel(level)} onGoNemonik={() => changeMode('nemonik')} />
+        return (
+          <DaftarMateri
+            level={level}
+            onGoHafalan={() => changeMode('harian')}
+            onGoKotobaLevel={() => openKotobaLevel(level)}
+            onGoNemonik={() => changeMode('nemonik')}
+            showRomaji={prefs.showRomaji}
+            onToggleRomaji={() => setPrefs({ showRomaji: !prefs.showRomaji })}
+          />
+        )
       case 'kartu':
         return (
           <Kartu

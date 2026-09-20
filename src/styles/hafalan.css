@@ -1362,3 +1362,50 @@ html.dark-mode .hh-row.checked {
   border-color: var(--moss);
   color: var(--moss);
 }
+
+/* ── Romaji: baris terpisah di bawah arti + toggle tampil/sembunyi ──
+   Teks romaji ditampilkan lewat getRomaji (kanaToRomaji) di
+   HafalanHarian & DaftarMateri. Default OFF → tampilan lama tak berubah. */
+.hh-romaji {
+  margin-top: 2px;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 12px;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  color: var(--card-soft);
+  opacity: 0.85;
+  word-break: break-word;
+}
+.hh-row.checked .hh-romaji {
+  color: var(--moss);
+  opacity: 0.75;
+}
+
+/* Toggle "Romaji" — tampil di semua ukuran (mobile & desktop).
+   Gaya mirror .hh-focus-toggle milik desktop. */
+.hh-romaji-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  min-height: 36px;
+  border-radius: 999px;
+  border: 1px solid var(--panel-line);
+  background: var(--layer-1);
+  color: var(--page-soft);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.hh-romaji-toggle:hover {
+  color: var(--page-ink);
+  border-color: var(--layer-3);
+}
+.hh-romaji-toggle.on {
+  background: var(--kin);
+  border-color: var(--kin);
+  color: var(--sumi);
+}

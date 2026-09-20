@@ -1,18 +1,19 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import {
   Search, CheckSquare, Square, ChevronLeft, Filter,
-  ArrowUpDown, X, GraduationCap, Brain,
+  ArrowUpDown, X, GraduationCap, Brain, Languages,
 } from 'lucide-react'
 import {
   HAFALAN_MODES, getMastered, toggleMastered, countMastered,
 } from '../lib/hafalan-storage'
 import { buildItems } from '../lib/hafalan-items'
+import { kanaToRomaji } from '../lib/kana'
 import { ProgressBar } from './ui/ProgressBar'
 import { DetailModal } from './hafalan/DetailModal'
 
 const PAGE_SIZE = 50
 
-export default function DaftarMateri({ onGoHafalan, onGoKotobaLevel, onGoNemonik, level = 'a2' }) {
+export default function DaftarMateri({ onGoHafalan, onGoKotobaLevel, onGoNemonik, level = 'a2', showRomaji = false, onToggleRomaji = () => {} }) {
   const activeMode = level
   const [tab, setTab] = useState('kotoba')
   const [query, setQuery] = useState('')
@@ -178,6 +179,15 @@ export default function DaftarMateri({ onGoHafalan, onGoKotobaLevel, onGoNemonik
             onClick={() => setSort(s => s === 'default' ? 'alpha' : 'default')}>
             <ArrowUpDown size={12} /> {sort === 'alpha' ? 'A-Z' : '#'}
           </button>
+          <button
+            type="button"
+            className={`dm-sort-btn ${showRomaji ? 'active' : ''}`}
+            onClick={onToggleRomaji}
+            aria-pressed={showRomaji}
+            title={showRomaji ? 'Sembunyikan romaji' : 'Tampilkan romaji'}
+          >
+            <Languages size={12} /> Romaji
+          </button>
         </div>
       </div>
 
@@ -198,6 +208,9 @@ export default function DaftarMateri({ onGoHafalan, onGoKotobaLevel, onGoNemonik
                   {item.reading && <span className="hh-reading">{item.reading}</span>}
                 </div>
                 <div className="hh-meaning">{item.meaning}</div>
+                {showRomaji && (
+                  <div className="hh-romaji">{kanaToRomaji(item.reading || item.front)}</div>
+                )}
               </button>
               <button className={`hh-check-btn ${isHafal ? 'checked' : ''}`} onClick={() => doToggle(item.id)}>
                 {isHafal ? <CheckSquare size={28} /> : <Square size={28} />}
