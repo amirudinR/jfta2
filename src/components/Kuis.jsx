@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { buildOptions } from '../lib/quiz'
 import { shuffle } from '../lib/ui'
 import { materialOf } from '../data/materials'
+import { playResult } from '../lib/sfx'
 
 // Kuis pilihan ganda — murni latihan, tidak mengubah progres SRS.
 export default function Kuis({ entries, material, direction = 'jp2id' }) {
@@ -74,6 +75,7 @@ export default function Kuis({ entries, material, direction = 'jp2id' }) {
   const pick = (opt) => {
     if (choice) return
     setChoice(opt)
+    playResult(opt === label)
     if (opt === label) {
       setCorrect((c) => c + 1)
       setStreak((s) => {

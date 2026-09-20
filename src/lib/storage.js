@@ -5,7 +5,7 @@ import { publishStoreChange } from './sync-events'
 const KEY = 'hafalan-jft-a2-progress-v2'
 const KEY_V1 = 'hafalan-jft-a2-progress-v1'
 
-const DEFAULT_PREFS = { themeMode: 'system', darkMode: false, showRomaji: false, direction: 'jp2id', font: 'maru', keepAwake: false }
+const DEFAULT_PREFS = { themeMode: 'system', darkMode: false, showRomaji: false, direction: 'jp2id', font: 'maru', keepAwake: false, soundEffects: true }
 
 const emptyState = () => ({
   perMaterial: {},

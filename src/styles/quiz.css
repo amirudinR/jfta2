@@ -153,6 +153,59 @@
   font-weight: 600;
 }
 
+/* ---------- Ujian: progress visual + kartu pendukung ---------- */
+/* Mobile-first: SEMUA elemen tambahan (badge kategori, progress bar, panel
+   statistik) disembunyikan sampai breakpoint ≥1024px — agar tampilan mobile
+   tetap persis seperti sebelumnya. Lihat responsive.css untuk layout desktop. */
+.ujian-session {
+  display: block;
+}
+
+.exam-side,
+.exam-cat-badge,
+.exam-progress {
+  display: none;
+}
+
+.exam-cat-kanji {
+  font-family: var(--font-jp);
+  font-size: 12px;
+  letter-spacing: 0;
+}
+
+.exam-cat-label {
+  color: var(--card-soft);
+}
+
+/* Pemisah antara badge kategori & label grup di kartu soal. */
+.exam-card-top-group {
+  margin-left: 10px;
+}
+
+.exam-progress-track {
+  flex: 1;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--layer-1);
+  border: 1px solid var(--layer-3);
+  overflow: hidden;
+}
+
+.exam-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--kin-deep), var(--kin));
+  transition: width 0.45s var(--ios-ease, cubic-bezier(0.32, 0.72, 0, 1));
+}
+
+.exam-progress-pct {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--page-soft);
+  min-width: 34px;
+  text-align: right;
+}
+
 /* ---------- Sprint ---------- */
 .meta-bar {
   display: flex;

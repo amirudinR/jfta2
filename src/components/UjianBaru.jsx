@@ -5,6 +5,7 @@ import { shuffle } from '../lib/ui'
 import { availableDays, listDayItems } from '../lib/ujian-harian'
 import { todayStr } from '../lib/hafalan-storage'
 import { buildExamResult } from '../lib/exam-history'
+import { playResult } from '../lib/sfx'
 import ReviewSalah from './ReviewSalah'
 import UjianSetup from './ujian/UjianSetup'
 import UjianSession from './ujian/UjianSession'
@@ -84,6 +85,10 @@ export default function UjianBaru({ level, onBack, onSaveResult }) {
   const [q, setQ] = useState(0)
   const [choice, setChoice] = useState(null)
   const [score, setScore] = useState(0)
+  const [streak, setStreak] = useState(0) // jawaban benar berturut-turut
+  const [bestStreak, setBestStreak] = useState(0)
+  const [elapsed, setElapsed] = useState(0) // detik sejak sesi dimulai
+  const startedAtRef = useRef(0)
   const wrongRef = useRef([]) // track wrong answers
   const finishRan = useRef(false) // guard agar finishExam hanya dieksekusi sekali
 
@@ -106,6 +111,17 @@ export default function UjianBaru({ level, onBack, onSaveResult }) {
     else setPhase('setup')
   }, [phase, order, q])
 
+  // Timer sesi: berjalan selama fase 'scene' (hanya detik, ringan).
+  useEffect(() => {
+    if (phase !== 'scene') return
+    const id = setInterval(() => {
+      if (startedAtRef.current) {
+        setElapsed(Math.floor((Date.now() - startedAtRef.current) / 1000))
+      }
+    }, 1000)
+    return () => clearInterval(id)
+  }, [phase])
+
   const start = () => {
     const deck = shuffle(pool)
     finishRan.current = false
@@ -113,6 +129,10 @@ export default function UjianBaru({ level, onBack, onSaveResult }) {
     setQ(0)
     setChoice(null)
     setScore(0)
+    setStreak(0)
+    setBestStreak(0)
+    setElapsed(0)
+    startedAtRef.current = Date.now()
     wrongRef.current = []
     setPhase('scene')
   }
@@ -143,9 +163,16 @@ export default function UjianBaru({ level, onBack, onSaveResult }) {
     if (choice) return
     setChoice(opt)
     const { label } = opts || {}
+    playResult(opt === label)
     if (opt === label) {
       setScore((s) => s + 1)
+      setStreak((prev) => {
+        const nextStreak = prev + 1
+        setBestStreak((b) => (nextStreak > b ? nextStreak : b))
+        return nextStreak
+      })
     } else {
+      setStreak(0)
       wrongRef.current.push({
         question: entry.front,
         reading: entry.reading || entry.frontSub || '',
@@ -223,6 +250,10 @@ export default function UjianBaru({ level, onBack, onSaveResult }) {
       q={q}
       order={order}
       difficulty={difficulty}
+      category={category}
+      streak={streak}
+      bestStreak={bestStreak}
+      elapsed={elapsed}
       onPick={pick}
       onNext={next}
       DIFFICULTIES={DIFFICULTIES}

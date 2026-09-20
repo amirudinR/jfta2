@@ -18,3 +18,9 @@ nggak_kepakai/
 **/*nggak_kepakai*
 *.pdf
 jpn.traineddata
+
+# Artefak QA/screenshot lokal (bukan bagian dari app)
+shots-before/
+shots-after/
+shots-after-mobile/
+shots/

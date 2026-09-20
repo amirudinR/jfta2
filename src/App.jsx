@@ -44,6 +44,7 @@ import { useLiveSync } from './hooks/useLiveSync'
 import { useAppSettings } from './hooks/useAppSettings'
 import { useWakeLock } from './hooks/useWakeLock'
 import { useScrollHeader } from './hooks/useScrollHeader'
+import { setSfxEnabled } from './lib/sfx'
 import { saveExamResult } from './lib/cloud-sync'
 import {
   getSavedLevel, saveLevel, pickQuote,
@@ -110,6 +111,10 @@ export default function App() {
   }
   useLiveSync(user, handleCloudApplied)
   useAppSettings(prefs)
+  // Sinkronkan preferensi efek suara jawaban ke modul sfx (default: aktif).
+  useEffect(() => {
+    setSfxEnabled(prefs.soundEffects !== false)
+  }, [prefs.soundEffects])
   // Layar tetap menyala (opsional, dari Pengaturan) untuk sesi belajar panjang.
   useWakeLock(!!prefs.keepAwake)
   // Efek "large title" ala iOS: header menciut & sembunyi saat scroll ke bawah.

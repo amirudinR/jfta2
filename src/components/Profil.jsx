@@ -322,6 +322,23 @@ export default function Profil({ user, loading, onLogin, onLogout, prefs = {}, o
       {/* Pengaturan suara */}
       <div className="profil-section-title"><Volume2 size={15} /> Suara</div>
       <div className="profil-card profil-settings">
+        <button
+          className="profil-setting-row"
+          onClick={() => onPrefs({ soundEffects: !(prefs.soundEffects !== false) })}
+          aria-pressed={prefs.soundEffects !== false}
+        >
+          <span className="profil-setting-left">
+            <Volume2 size={17} />
+            <span>Efek suara jawaban</span>
+          </span>
+          <span className={`hh-switch ${prefs.soundEffects !== false ? 'on' : ''}`} aria-hidden>
+            <span className="hh-switch-knob" />
+          </span>
+        </button>
+        <p className="muted profil-voice-note profil-sfx-note">
+          Saat aktif, aplikasi membunyikan nada untuk jawaban benar/salah di ujian &amp; kuis.
+        </p>
+
         {!ttsSupported() ? (
           <p className="muted profil-voice-note">Browser ini tidak mendukung suara (TTS).</p>
         ) : voices.length === 0 ? (

@@ -910,6 +910,231 @@
     opacity: 1;
     transform: none;
   }
+
+  /* ══════════════════════════════════════════════════════════
+     UJIAN (mode ujian-baru) — layout desktop lebar & 2 kolom.
+     Hanya berlaku ≥1024px; tampilan mobile di bawah tidak diubah.
+     ══════════════════════════════════════════════════════════ */
+
+  /* Area konten ujian lebih lebar dari .stage standar (bukan 640px). */
+  .ujian-session {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    align-items: start;
+    gap: 26px;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  .ujian-session-main {
+    min-width: 0;
+  }
+
+  /* Kartu soal & pilihan melebar penuh mengikuti kolom kiri. */
+  .ujian-session .quiz-card,
+  .ujian-session .opt-grid,
+  .ujian-session .quiz-stats,
+  .ujian-session .exam-progress,
+  .ujian-session .next-row {
+    max-width: none;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  /* Kartu soal lebih tinggi & lapang di desktop. */
+  .ujian-session .quiz-card {
+    padding: 40px 32px 30px;
+    border-radius: 26px;
+  }
+
+  .ujian-session .exam-card-body {
+    padding: 22px 8px 16px !important;
+  }
+
+  .ujian-session .word {
+    font-size: clamp(2.6rem, 4.4vw, 4rem) !important;
+  }
+
+  .ujian-session .card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+  }
+
+  .ujian-session .exam-cat-kanji {
+    font-size: 15px;
+  }
+
+  /* Grid 4 jawaban → kartu besar & proporsional (mendekati persegi). */
+  .ujian-session .opt-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 18px;
+  }
+
+  .ujian-session .opt {
+    padding: 26px 20px;
+    min-height: 104px;
+    border-radius: 18px;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--layer-2);
+  }
+
+  .ujian-session .opt:hover:not(:disabled) {
+    border-color: var(--kin);
+    background: rgba(193, 148, 63, 0.1);
+    color: var(--page-ink);
+  }
+
+  .ujian-session .opt.correct,
+  .ujian-session .opt.wrong {
+    font-size: 18px;
+  }
+
+  .ujian-session .primary-btn {
+    padding: 14px 34px;
+    font-size: 15px;
+    border-radius: 14px;
+  }
+
+  .ujian-session .feedback {
+    font-size: 15px;
+    margin-top: 16px;
+  }
+
+  /* ── Kartu statistik sesi (kolom kanan) ── */
+  .exam-side {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    position: sticky;
+    top: 18px;
+  }
+
+  /* Progress bar visual di bawah statistik (kini aktif di desktop). */
+  .exam-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 4px 0 12px;
+  }
+
+  /* Badge kategori di atas kartu soal (kini aktif di desktop). */
+  .exam-cat-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--kin);
+  }
+
+  .exam-side-card {
+    border-radius: 18px;
+    border: 1px solid var(--panel-line);
+    background: var(--panel);
+    padding: 16px 16px 15px;
+    backdrop-filter: blur(6px);
+  }
+
+  .exam-side-title {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--page-soft);
+    margin-bottom: 12px;
+  }
+
+  .exam-stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .exam-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 12px 6px;
+    border-radius: 12px;
+    background: var(--layer-1);
+    border: 1px solid var(--layer-3);
+  }
+
+  .exam-stat-val {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--page-ink);
+  }
+
+  .exam-stat-label {
+    font-size: 10.5px;
+    letter-spacing: 0.02em;
+    color: var(--page-soft);
+    text-align: center;
+  }
+
+  .exam-side-cat {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .exam-side-cat-icon {
+    font-size: 26px;
+    line-height: 1;
+  }
+
+  .exam-side-cat-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--page-ink);
+  }
+
+  .exam-side-cat-sub {
+    font-family: var(--font-jp);
+    font-size: 12px;
+    color: var(--page-soft);
+  }
+
+  .exam-side-progress-track {
+    height: 9px;
+    border-radius: 999px;
+    background: var(--layer-1);
+    border: 1px solid var(--layer-3);
+    overflow: hidden;
+  }
+
+  .exam-side-progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--kin-deep), var(--kin));
+    transition: width 0.45s var(--ios-ease, cubic-bezier(0.32, 0.72, 0, 1));
+  }
+
+  .exam-side-progress-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--page-soft);
+  }
 }
 
 /* ≥1440px (layar besar/ultrawide): 4 kolom, container dibatasi
