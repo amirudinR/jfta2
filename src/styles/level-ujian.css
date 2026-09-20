@@ -203,6 +203,13 @@
   color: var(--page-soft);
 }
 
+/* Pesan "tanggal kosong" (di bawah picker tanggal). */
+.ujian-no-dates-inline {
+  display: block;
+  margin-top: 8px;
+  color: var(--shu, #c1402a);
+}
+
 /* Start row */
 .ujian-start-row {
   text-align: center;

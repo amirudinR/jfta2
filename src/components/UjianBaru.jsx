@@ -3,6 +3,7 @@ import { byMaterial } from '../data'
 import { buildOptions, buildOptionsHard } from '../lib/quiz'
 import { shuffle } from '../lib/ui'
 import { availableDays, listDayItems } from '../lib/ujian-harian'
+import { todayStr } from '../lib/hafalan-storage'
 import { buildExamResult } from '../lib/exam-history'
 import ReviewSalah from './ReviewSalah'
 import UjianSetup from './ujian/UjianSetup'
@@ -50,7 +51,7 @@ export default function UjianBaru({ level, onBack, onSaveResult }) {
   const [scope, setScope] = useState('all')
   const [selectedDates, setSelectedDates] = useState([])
 
-  const days = useMemo(() => availableDays(), [])
+  const days = useMemo(() => availableDays(level), [level])
 
   const availCats = useMemo(() => {
     const mats = LEVEL_MATERIALS[level] || LEVEL_MATERIALS.a2
@@ -62,20 +63,16 @@ export default function UjianBaru({ level, onBack, onSaveResult }) {
 
   const pool = useMemo(() => {
     if (scope === 'today' || scope === 'dates') {
-      const dates = scope === 'today' ? [days[0]?.date].filter(Boolean) : selectedDates
+      const dates = scope === 'today' ? [todayStr()].filter(Boolean) : selectedDates
       if (!dates.length) return []
       const items = []
       for (const d of dates) {
-        items.push(...listDayItems(d))
+        // Batasi persis ke level aktif → materi ujian tidak tercampur antar-level.
+        items.push(...listDayItems(d, level))
       }
       if (category !== 'mix') {
-        return items.filter((it) => {
-          const id = it.id || ''
-          if (category === 'kotoba') return id.includes(':kotoba:')
-          if (category === 'kanji') return id.includes(':kanji:')
-          if (category === 'bunpou') return id.includes(':bunpou:')
-          return true
-        })
+        // Filter pakai field eksplisit `category` (bukan parsing string id).
+        return items.filter((it) => it.category === category)
       }
       return items
     }
@@ -179,6 +176,7 @@ export default function UjianBaru({ level, onBack, onSaveResult }) {
         selectedDates={selectedDates}
         toggleDate={toggleDate}
         pool={pool}
+        level={level}
         onStart={start}
         onBack={onBack}
         DIFFICULTIES={DIFFICULTIES}

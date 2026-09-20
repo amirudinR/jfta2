@@ -1,5 +1,7 @@
 import { ArrowLeft, Settings2 } from 'lucide-react'
 import { friendlyDate } from '../../lib/ujian-harian'
+import { todayStr } from '../../lib/hafalan-storage'
+import { HAFALAN_MODES } from '../../lib/hafalan-storage'
 
 export default function UjianSetup({
   availCats,
@@ -13,11 +15,16 @@ export default function UjianSetup({
   selectedDates,
   toggleDate,
   pool,
+  level,
   onStart,
   DIFFICULTIES,
   onBack,
 }) {
   const canStart = pool.length >= 4
+  const today = todayStr()
+  const levelLabel = HAFALAN_MODES.find((m) => m.key === level)?.label || level
+  // Cakupan "Pilih tanggal" aktif & sudah ada tanggal terpilih, tapi tak ada soal.
+  const datesEmpty = scope === 'dates' && selectedDates.length > 0 && pool.length === 0
   return (
     <div className="ujian-setup">
       <button className="ujian-setup-back" onClick={onBack} title="Kembali">
@@ -86,14 +93,22 @@ export default function UjianSetup({
                   className={`ujian-date-chip ${selectedDates.includes(d.date) ? 'active' : ''}`}
                   onClick={() => toggleDate(d.date)}
                 >
-                  <span>{d.date === days[0]?.date ? 'Hari Ini' : friendlyDate(d.date)}</span>
+                  <span>{d.date === today ? 'Hari Ini' : friendlyDate(d.date)}</span>
                   <span className="ujian-date-count">{d.count}</span>
                 </button>
               ))
             ) : (
-              <p className="ujian-no-dates">Belum ada riwayat belajar.</p>
+              <p className="ujian-no-dates">
+                Belum ada riwayat belajar {levelLabel}. Pelajari dulu di menu Hafalan Harian.
+              </p>
             )}
           </div>
+        )}
+
+        {datesEmpty && (
+          <p className="ujian-no-dates ujian-no-dates-inline">
+            Tidak ada materi yang dipelajari pada tanggal ini. Pilih tanggal lain atau ubah kategori.
+          </p>
         )}
       </div>
 
@@ -101,6 +116,8 @@ export default function UjianSetup({
         <p className="ujian-pool-info">
           {canStart ? (
             <>Soal tersedia: <span className="kin-count">{pool.length}</span> soal</>
+          ) : datesEmpty ? (
+            'Tidak ada materi pada tanggal ini. Pilih tanggal/kategori lain.'
           ) : (
             'Minimal 4 soal diperlukan. Ubah filter di atas.'
           )}

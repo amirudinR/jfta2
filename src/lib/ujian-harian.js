@@ -51,10 +51,15 @@ function truthyKeys(map) {
 }
 
 // Seluruh item yang dicentang pada `date` (lintas mode).
-export function listDayItems(date) {
+// `modeKey` (opsional) membatasi hasil ke SATU mode/level saja — dipakai fitur
+// Ujian agar materi tidak tercampur antar-level (mis. level N3 hanya N3).
+// Tanpa `modeKey`, perilaku lama (gabung semua mode) tetap dipertahankan agar
+// pemakai lain tidak rusak.
+export function listDayItems(date, modeKey) {
   const today = todayStr()
+  const modes = modeKey ? HAFALAN_MODES.filter((m) => m.key === modeKey) : HAFALAN_MODES
   const pool = []
-  for (const mode of HAFALAN_MODES) {
+  for (const mode of modes) {
     let ids = null
     if (date === today) {
       const c = getChecked(mode.key)
@@ -77,6 +82,8 @@ export function listDayItems(date) {
         pool.push({
           id: `${mode.key}:${category}:${rawId}`,
           ...e,
+          mode: mode.key,
+          category,
           groupLabel: `${mode.label} · ${CAT_LABEL[category]}`,
         })
       }
@@ -85,13 +92,21 @@ export function listDayItems(date) {
   return pool
 }
 
+// Apakah ADA materi tercatat pada `date` (untuk `modeKey` bila diberikan)?
+// Dipakai UI untuk membedakan "tanggal kosong" vs "belum ada riwayat".
+export function dayHasItems(date, modeKey) {
+  return listDayItems(date, modeKey).length > 0
+}
+
 // Daftar tanggal yang punya riwayat centang (terbaru dulu), beserta jumlahnya.
-export function availableDays() {
+// `modeKey` (opsional) membatasi hitungan ke satu mode/level saja.
+export function availableDays(modeKey) {
   const today = todayStr()
+  const modes = modeKey ? HAFALAN_MODES.filter((m) => m.key === modeKey) : HAFALAN_MODES
   const counts = {}
 
   let todayLive = 0
-  for (const mode of HAFALAN_MODES) {
+  for (const mode of modes) {
     const c = getChecked(mode.key)
     todayLive += truthyKeys(c.kotoba).length + truthyKeys(c.kanji).length + truthyKeys(c.bunpou).length
     const hist = getHistory(mode.key)
