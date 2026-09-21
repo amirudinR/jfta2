@@ -206,6 +206,17 @@
   text-align: right;
 }
 
+/* Kartu tombol "Lanjut" di sidebar (desktop). Di mobile ia takkan pernah
+   tampil karena induknya `.exam-side` = display:none (lihat di atas). */
+.exam-next-card {
+  display: block;
+}
+
+/* MOBILE (default): tombol Lanjut tetap di bawah kartu soal. */
+.next-row--inline {
+  display: flex;
+}
+
 /* ---------- Sprint ---------- */
 .meta-bar {
   display: flex;

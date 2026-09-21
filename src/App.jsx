@@ -48,6 +48,7 @@ import { setSfxEnabled } from './lib/sfx'
 import { saveExamResult } from './lib/cloud-sync'
 import {
   getSavedLevel, saveLevel, pickQuote,
+  getSavedMode, saveMode,
   LATIHAN_TAB_MODES, PERMATERI_MODES,
   HIDE_LEVEL_STRIP_MODES, CONTROL_MODES,
 } from './lib/nav'
@@ -59,7 +60,9 @@ export default function App() {
   const { user, loading: authLoading, loginGoogle, logout, loginError } = useAuth()
   const [level, setLevelState] = useState(() => getSavedLevel() || 'a2')
   const [material, setMaterial] = useState('hiragana')
-  const [mode, setMode] = useState('harian')
+  // Pulihkan halaman terakhir dari localStorage → refresh tetap di halaman yang
+  // sama (mis. tengah ujian) alih-alih terlempar ke Hafalan Harian.
+  const [mode, setMode] = useState(() => getSavedMode() || 'harian')
   const [progress, setProgress] = useState(() => getProgress())
   const [prefs, setPrefsState] = useState(() => getPrefs())
   const [lessons, setLessons] = useState({})
@@ -81,6 +84,7 @@ export default function App() {
   const changeMode = (key) => {
     if (key === mode) return
     try { sessionStorage.setItem(`hh:scroll:${pageKey(mode, level)}`, String(window.scrollY)) } catch {}
+    saveMode(key) // ingat halaman agar refresh tetap di sini
     setMode(key)
   }
   useEffect(() => {
@@ -326,6 +330,8 @@ export default function App() {
             level={level}
             onBack={() => changeMode('harian')}
             onSaveResult={handleSaveExamResult}
+            prefs={prefs}
+            onPrefs={setPrefs}
           />
         )
       case 'recall':

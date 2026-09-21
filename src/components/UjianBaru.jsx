@@ -5,6 +5,13 @@ import { shuffle } from '../lib/ui'
 import { availableDays, listDayItems } from '../lib/ujian-harian'
 import { todayStr } from '../lib/hafalan-storage'
 import { buildExamResult } from '../lib/exam-history'
+import {
+  loadUjianSession,
+  saveUjianSession,
+  clearUjianSession,
+  encodeOrder,
+  decodeOrder,
+} from '../lib/ujian-session-store'
 import { playResult } from '../lib/sfx'
 import ReviewSalah from './ReviewSalah'
 import UjianSetup from './ujian/UjianSetup'
@@ -45,12 +52,24 @@ function getEntriesForExam(level, category) {
   return src ? byMaterial(src) : []
 }
 
-export default function UjianBaru({ level, onBack, onSaveResult }) {
-  const [phase, setPhase] = useState('setup') // setup | scene | summary | review
-  const [category, setCategory] = useState('mix')
-  const [difficulty, setDifficulty] = useState('biasa')
-  const [scope, setScope] = useState('all')
-  const [selectedDates, setSelectedDates] = useState([])
+// Jeda sebelum auto-next (ms). Cukup untuk melihat feedback benar/salah.
+const AUTO_NEXT_DELAY = 800
+
+export default function UjianBaru({ level, onBack, onSaveResult, prefs = {}, onPrefs = () => {} }) {
+  // Auto-next: begitu jawaban dipilih, otomatis lanjut setelah jeda singkat.
+  // Default aktif; bisa dimatikan dari halaman setup Ujian (disimpan permanen).
+  const autoNext = prefs.autoNext !== false
+  // Snapshot sesi yang tersimpan (dibaca SEKALI lewat initializer lazy).
+  // Dipakai untuk memulihkan konfigurasi + state quiz saat refresh (F5).
+  const [restored] = useState(() => loadUjianSession())
+
+  const [phase, setPhase] = useState(restored ? 'scene' : 'setup') // setup | scene | summary | review
+  const [category, setCategory] = useState(restored?.category ?? 'mix')
+  const [difficulty, setDifficulty] = useState(restored?.difficulty ?? 'biasa')
+  const [scope, setScope] = useState(restored?.scope ?? 'all')
+  const [selectedDates, setSelectedDates] = useState(
+    Array.isArray(restored?.selectedDates) ? restored.selectedDates : [],
+  )
 
   const days = useMemo(() => availableDays(level), [level])
 
@@ -82,15 +101,27 @@ export default function UjianBaru({ level, onBack, onSaveResult }) {
 
   // Quiz state
   const [order, setOrder] = useState([])
-  const [q, setQ] = useState(0)
-  const [choice, setChoice] = useState(null)
-  const [score, setScore] = useState(0)
-  const [streak, setStreak] = useState(0) // jawaban benar berturut-turut
-  const [bestStreak, setBestStreak] = useState(0)
-  const [elapsed, setElapsed] = useState(0) // detik sejak sesi dimulai
-  const startedAtRef = useRef(0)
-  const wrongRef = useRef([]) // track wrong answers
+  const [q, setQ] = useState(restored?.q ?? 0)
+  const [choice, setChoice] = useState(restored?.choice ?? null)
+  const [score, setScore] = useState(restored?.score ?? 0)
+  const [streak, setStreak] = useState(restored?.streak ?? 0) // jawaban benar berturut-turut
+  const [bestStreak, setBestStreak] = useState(restored?.bestStreak ?? 0)
+  // startedAt valid → hitung elapsed awal agar timer tak balik ke 0 saat resume.
+  const restoredStartedAt =
+    typeof restored?.startedAt === 'number' && restored.startedAt > 0
+      ? restored.startedAt
+      : 0
+  const [elapsed, setElapsed] = useState(() =>
+    restoredStartedAt ? Math.floor((Date.now() - restoredStartedAt) / 1000) : 0,
+  )
+  const startedAtRef = useRef(restoredStartedAt || Date.now())
+  const wrongRef = useRef(Array.isArray(restored?.wrong) ? restored.wrong : []) // track wrong answers
   const finishRan = useRef(false) // guard agar finishExam hanya dieksekusi sekali
+  // True selama menunggu order di-decode → cegah safety-net mem-finish dini.
+  const restoringRef = useRef(!!restored)
+  const restoreRanRef = useRef(false) // guard efek decode agar jalan sekali
+  const advanceTimerRef = useRef(null) // timeout auto-next yang sedang berjalan
+  const advancedRef = useRef(false) // cegah lanjut dobel (auto + klik manual)
 
   const entry = order[q]
   const direction = 'jp2id'
@@ -102,10 +133,67 @@ export default function UjianBaru({ level, onBack, onSaveResult }) {
     return buildOptions(entry, order, direction)
   }, [entry, order, direction, difficulty])
 
+  // Pulihkan `order` sesi tersimpan: dilakukan sekali setelah `pool` siap,
+  // karena pool bergantung pada konfigurasi yang baru saja direstorasi.
+  useEffect(() => {
+    if (restoreRanRef.current) return
+    if (!restored) return
+    if (order.length > 0) { restoreRanRef.current = true; restoringRef.current = false; return }
+    if (!pool) return // tunggu pool terbentuk
+    const decoded = decodeOrder(restored.order, pool)
+    restoreRanRef.current = true
+    if (decoded && decoded.length > 0) {
+      setOrder(decoded)
+      restoringRef.current = false
+    } else {
+      // Data berubah / level berganti → batalkan resume dengan rapi.
+      clearUjianSession()
+      restoringRef.current = false
+      setPhase('setup')
+    }
+  }, [restored, pool, order])
+
+  // Simpan progres sesi setiap state relevan berubah selama fase 'scene'.
+  // Tidak menyimpan saat non-scene → ujian selesai tak bisa di-resume.
+  useEffect(() => {
+    if (phase !== 'scene' || order.length === 0 || restoringRef.current) return
+    saveUjianSession({
+      level,
+      category,
+      difficulty,
+      scope,
+      selectedDates,
+      phase,
+      order: encodeOrder(order),
+      q,
+      choice,
+      score,
+      streak,
+      bestStreak,
+      startedAt: startedAtRef.current,
+      wrong: wrongRef.current,
+    })
+  }, [
+    phase,
+    order,
+    q,
+    choice,
+    score,
+    streak,
+    bestStreak,
+    level,
+    category,
+    difficulty,
+    scope,
+    selectedDates,
+  ])
+
   // Safety net: bila scene kehabisan kartu, selesaikan lewat efek — dilarang
   // memanggil finishExam (yang menulis hasil) saat render berlangsung.
+  // DILEWATI selama restore pending (order masih [] sementara phase='scene').
   useEffect(() => {
-    if (phase !== 'scene' || order[q] || finishRan.current) return
+    if (phase !== 'scene' || restoringRef.current || order.length === 0) return
+    if (order[q] || finishRan.current) return
     finishRan.current = true
     if (q > 0) finishExam()
     else setPhase('setup')
@@ -125,6 +213,8 @@ export default function UjianBaru({ level, onBack, onSaveResult }) {
   const start = () => {
     const deck = shuffle(pool)
     finishRan.current = false
+    // Ujian baru menimpa snapshot lama; hapus dulu agar tidak ada sisa sesi.
+    clearUjianSession()
     setOrder(deck)
     setQ(0)
     setChoice(null)
@@ -156,7 +246,26 @@ export default function UjianBaru({ level, onBack, onSaveResult }) {
         wrongCount: wrongRef.current.length,
       }))
     }
+    // Ujian selesai → snapshot scene dihapus agar tidak ikut ter-resume.
+    clearUjianSession()
     setPhase('summary')
+  }
+
+  // Kembali ke setup (retry) → pastikan tak ada snapshot scene yang tersisa.
+  const backToSetup = () => {
+    clearUjianSession()
+    setPhase('setup')
+  }
+
+  // Lanjut ke soal berikutnya (atau selesaikan ujian). Dijaga `advancedRef`
+  // agar auto-next & klik manual TIDAK pernah lanjut dua kali untuk soal sama.
+  const advance = () => {
+    if (advancedRef.current) return
+    advancedRef.current = true
+    if (advanceTimerRef.current) { clearTimeout(advanceTimerRef.current); advanceTimerRef.current = null }
+    setChoice(null)
+    if (q + 1 >= order.length) finishExam()
+    else setQ(q + 1)
   }
 
   const pick = (opt) => {
@@ -181,13 +290,25 @@ export default function UjianBaru({ level, onBack, onSaveResult }) {
         explanation: entry.backFull || '',
       })
     }
+    // Auto-next: jadwalkan lanjut otomatis setelah jeda singkat, kecuali
+    // dimatikan. Soal terakhir → langsung tampilkan hasil.
+    advancedRef.current = false
+    if (advanceTimerRef.current) { clearTimeout(advanceTimerRef.current); advanceTimerRef.current = null }
+    if (autoNext) {
+      advanceTimerRef.current = setTimeout(() => {
+        advanceTimerRef.current = null
+        advance()
+      }, AUTO_NEXT_DELAY)
+    }
   }
 
-  const next = () => {
-    setChoice(null)
-    if (q + 1 >= order.length) finishExam()
-    else setQ(q + 1)
-  }
+  // Tombol "Lanjut" manual — membatalkan timer auto-next yang tertunda.
+  const next = () => advance()
+
+  // Bersihkan timer auto-next saat unmount (cegah setState di komponen hilang).
+  useEffect(() => () => {
+    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current)
+  }, [])
 
   if (phase === 'setup') {
     return (
@@ -207,6 +328,8 @@ export default function UjianBaru({ level, onBack, onSaveResult }) {
         onStart={start}
         onBack={onBack}
         DIFFICULTIES={DIFFICULTIES}
+        autoNext={autoNext}
+        onToggleAutoNext={() => onPrefs({ autoNext: !autoNext })}
       />
     )
   }
@@ -219,7 +342,7 @@ export default function UjianBaru({ level, onBack, onSaveResult }) {
         score={score}
         total={order.length}
         difficulty={diffLabel}
-        onRetry={() => { setPhase('setup') }}
+        onRetry={backToSetup}
         onBack={onBack}
       />
     )
@@ -232,7 +355,7 @@ export default function UjianBaru({ level, onBack, onSaveResult }) {
         order={order}
         wrongRef={wrongRef}
         difficulty={difficulty}
-        onRetry={() => setPhase('setup')}
+        onRetry={backToSetup}
         onBack={onBack}
         onShowReview={() => setPhase('review')}
         DIFFICULTIES={DIFFICULTIES}

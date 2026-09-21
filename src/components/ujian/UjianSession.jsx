@@ -40,6 +40,17 @@ export default function UjianSession({
   const answered = choice ? q + 1 : q
   const accuracy = answered > 0 ? Math.round((score / answered) * 100) : 0
   const cat = CATEGORY_META[category] || CATEGORY_META.mix
+  const nextLabel = q + 1 >= order.length ? 'Lihat hasil' : 'Lanjut'
+
+  // Tombol "Lanjut" dirender di DUA lokasi (mobile: bawah kartu soal; desktop:
+  // kartu terakhir sidebar). Handler & label identik → satu sumber kebenaran.
+  // Visibilitas diatur CSS per breakpoint: salah satu SELALU display:none,
+  // sehingga tidak pernah ada dua tombol aktif sekaligus (tak ada dobel klik).
+  const nextButton = (extraClass = '') => (
+    <button className={`primary-btn ${extraClass}`.trim()} onClick={onNext}>
+      {nextLabel}
+    </button>
+  )
 
   return (
     <div className="ujian-session">
@@ -107,10 +118,10 @@ export default function UjianSession({
             <p className={`mt feedback ${choice === label ? 'feedback-ok' : 'feedback-err'}`}>
               {choice === label ? 'Benar!' : `Salah — jawaban: ${label}`}
             </p>
-            <div className="next-row no-print">
-              <button className="primary-btn" onClick={onNext}>
-                {q + 1 >= order.length ? 'Lihat hasil' : 'Lanjut'}
-              </button>
+            {/* Mobile: tombol Lanjut tetap di bawah pilihan jawaban.
+                Desktop: baris ini disembunyikan (tombol pindah ke sidebar). */}
+            <div className="next-row next-row--inline no-print">
+              {nextButton()}
             </div>
           </>
         ) : null}
@@ -163,6 +174,15 @@ export default function UjianSession({
             </div>
           </div>
         </div>
+
+        {/* Desktop: tombol Lanjut pindah ke bawah panel KEMAJUAN.
+            Card ini tak pernah tampil di mobile (induk .exam-side display:none)
+            dan tombol hanya muncul setelah user memilih jawaban. */}
+        {choice ? (
+          <div className="exam-side-card exam-next-card no-print">
+            {nextButton('primary-btn--block')}
+          </div>
+        ) : null}
       </aside>
     </div>
   )

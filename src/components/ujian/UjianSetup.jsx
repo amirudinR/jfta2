@@ -1,4 +1,4 @@
-import { ArrowLeft, Settings2 } from 'lucide-react'
+import { ArrowLeft, Settings2, Zap } from 'lucide-react'
 import { friendlyDate } from '../../lib/ujian-harian'
 import { todayStr } from '../../lib/hafalan-storage'
 import { HAFALAN_MODES } from '../../lib/hafalan-storage'
@@ -19,6 +19,8 @@ export default function UjianSetup({
   onStart,
   DIFFICULTIES,
   onBack,
+  autoNext = true,
+  onToggleAutoNext = () => {},
 }) {
   const canStart = pool.length >= 4
   const today = todayStr()
@@ -110,6 +112,32 @@ export default function UjianSetup({
             Tidak ada materi yang dipelajari pada tanggal ini. Pilih tanggal lain atau ubah kategori.
           </p>
         )}
+      </div>
+
+      <div className="ujian-section">
+        <label className="ujian-section-label">Alur Menjawab</label>
+        <button
+          type="button"
+          className={`ujian-toggle-row ${autoNext ? 'on' : ''}`}
+          onClick={onToggleAutoNext}
+          aria-pressed={autoNext}
+          title="Saat aktif, memilih jawaban otomatis lanjut ke soal berikutnya."
+        >
+          <span className="ujian-toggle-left">
+            <Zap size={18} className="ujian-toggle-icon" />
+            <span className="ujian-toggle-text">
+              <span className="ujian-toggle-title">Auto Next</span>
+              <span className="ujian-toggle-desc">
+                {autoNext
+                  ? 'Otomatis lanjut setelah menjawab'
+                  : 'Tekan tombol Lanjut untuk soal berikutnya'}
+              </span>
+            </span>
+          </span>
+          <span className={`hh-switch ${autoNext ? 'on' : ''}`} aria-hidden>
+            <span className="hh-switch-knob" />
+          </span>
+        </button>
       </div>
 
       <div className="ujian-start-row">

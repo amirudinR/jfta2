@@ -934,8 +934,7 @@
   .ujian-session .quiz-card,
   .ujian-session .opt-grid,
   .ujian-session .quiz-stats,
-  .ujian-session .exam-progress,
-  .ujian-session .next-row {
+  .ujian-session .exam-progress {
     max-width: none;
     margin-left: 0;
     margin-right: 0;
@@ -1003,6 +1002,27 @@
     padding: 14px 34px;
     font-size: 15px;
     border-radius: 14px;
+  }
+
+  /* Desktop: tombol "Lanjut" PINDAH ke sidebar (di bawah panel KEMAJUAN).
+     Sembunyikan tombol inline lama di bawah kartu soal. */
+  .ujian-session .next-row--inline {
+    display: none;
+  }
+
+  /* Kartu tombol di sidebar — konsisten dengan card SESI INI/KATEGORI/KEMAJUAN
+     (padding 16px, border-radius 18px). Tombol full-width mengikuti lebar card. */
+  .ujian-session .exam-next-card {
+    padding: 16px;
+  }
+
+  .ujian-session .primary-btn--block {
+    display: block;
+    width: 100%;
+    padding: 14px 20px;
+    font-size: 15px;
+    border-radius: 14px;
+    text-align: center;
   }
 
   .ujian-session .feedback {

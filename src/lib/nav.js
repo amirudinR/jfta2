@@ -32,6 +32,40 @@ export function saveLevel(lv) {
   lsSet(LEVEL_KEY, lv)
 }
 
+// ── Mode/halaman terakhir ──
+// Disimpan agar refresh (F5) tidak melempar user kembali ke Hafalan Harian —
+// terutama penting saat sedang di tengah ujian. Daftar mode = semua halaman
+// yang dirender App.renderBody() (lihat switch di App.jsx). Whitelist menjaga
+// nilai rusak/tak dikenal tidak lolos jadi halaman.
+export const MODE_KEY = 'ankichou-mode'
+
+const VALID_MODES = [
+  'harian', 'materi', 'kartu', 'ulangi', 'kuis', 'sprint',
+  'ujian-baru', 'recall', 'daftar', 'kemampuan', 'nemonik',
+  'kotoba-n3', 'kotoba-n2', 'kotoba-n1', 'referensi', 'profil',
+]
+
+export function getSavedMode() {
+  try {
+    const raw = localStorage.getItem(MODE_KEY)
+    if (raw == null) return null
+    let v
+    try {
+      v = JSON.parse(raw) // format JSON lewat lsSet
+    } catch {
+      v = raw // jaga-jaga: nilai mentah lama
+    }
+    return VALID_MODES.includes(v) ? v : null
+  } catch {
+    return null
+  }
+}
+
+export function saveMode(m) {
+  if (!VALID_MODES.includes(m)) return
+  lsSet(MODE_KEY, m)
+}
+
 export function pickQuote() {
   return QUOTES[Math.floor(Math.random() * QUOTES.length)]
 }
