@@ -1,10 +1,14 @@
-// Firestore sync — simpan & load progress per user.uid
-// Offline-first: localStorage tetap source of truth, Firestore = mirror
+// Firestore sync — simpan profil & merge progress per user.uid.
+// Offline-first: localStorage tetap source of truth, Firestore = mirror.
 //
 // P5: `syncToCloud`/`loadFromCloud` (jalur lama progress/main) DIHAPUS — sudah
 // tidak dipakai sejak live-sync mengambil alih (store progress/main diurus
 // live-sync via registry `legacy`). Menyisakannya hanya jadi kode mati + pintu
 // masuk read/getDoc yang tak terkontrol.
+// P6: `saveExamResult` (tulis koleksi `users/{uid}/exams/{uuid}`) DIHAPUS —
+// tidak ada pembaca apa pun (tak ada getDocs/collection/onSnapshot untuk
+// `exams`); hasil ujian sudah tersimpan di `hh/exam-history` oleh live-sync.
+// Efeknya: satu sesi ujian 2 write → 1 write.
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from './firebase'
 
@@ -21,20 +25,6 @@ export async function saveUserProfile(user) {
     }, { merge: true })
   } catch (e) {
     console.warn('Profile sync failed:', e.message)
-  }
-}
-
-// ── Save exam result ──
-export async function saveExamResult(uid, result) {
-  if (!uid) return
-  try {
-    const id = typeof crypto !== 'undefined' && crypto.randomUUID
-      ? crypto.randomUUID()
-      : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
-    const ref = doc(db, 'users', uid, 'exams', id)
-    await setDoc(ref, { ...result, createdAt: serverTimestamp() })
-  } catch (e) {
-    console.warn('Exam save failed:', e.message)
   }
 }
 

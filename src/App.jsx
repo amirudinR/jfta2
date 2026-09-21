@@ -46,7 +46,6 @@ import { useWakeLock } from './hooks/useWakeLock'
 import { useScrollHeader } from './hooks/useScrollHeader'
 import { setSfxEnabled } from './lib/sfx'
 import { setSyncLevel } from './lib/live-sync'
-import { saveExamResult } from './lib/cloud-sync'
 import {
   getSavedLevel, saveLevel, pickQuote,
   getSavedMode, saveMode,
@@ -166,10 +165,14 @@ export default function App() {
     setDeckVersion((v) => v + 1)
   }
 
-  // Simpan hasil ujian: lokal + cloud (kalau login).
+  // Simpan hasil ujian. Cukup 1 jalur: `addExamRecord` menulis riwayat lokal
+  // (`ankichou-exam-history`) yang SUDAH disinkron ke cloud oleh live-sync ke
+  // `users/{uid}/hh/exam-history`. Dulu ada write kedua ke koleksi
+  // `users/{uid}/exams/{uuid}` (P6) — dihapus karena tak ada satu pun pembaca
+  // (tak ada getDocs/collection/onSnapshot untuk `exams`), jadi murni write
+  // terbuang (1 sesi ujian = 2 write → kini 1 write).
   const handleSaveExamResult = (result) => {
     addExamRecord(result)
-    if (user) saveExamResult(user.uid, result)
   }
 
   const info = materialOf(material)
