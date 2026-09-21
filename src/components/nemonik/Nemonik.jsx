@@ -17,6 +17,8 @@ import NemonikQuiz from './NemonikQuiz'
 import NemonikBrowse from './NemonikBrowse'
 import NemonikAchievements from './NemonikAchievements'
 import { useExitAnimation } from '../../hooks/useExitAnimation'
+import { setSyncNemonik } from '../../lib/live-sync'
+import { markNemonikOpened } from '../../lib/hafalan-storage'
 
 // Nemonik Kanji — kontainer halaman (port dari nemonik/ mandiri ke React).
 // Fase internal: 'dashboard' | 'study' | 'quiz'. Layout kartu (gambar kiri/kanan)
@@ -64,6 +66,14 @@ export default function Nemonik({ onBack }) {
       })
       .catch((e) => { if (alive) setError(e.message || 'Gagal memuat data nemonik.') })
     return () => { alive = false }
+  }, [])
+
+  // Gating sinkron: begitu halaman Nemonik dibuka, tandai perangkat ini "pernah
+  // buka nemonik" dan aktifkan langganan Firestore untuk store nemonik (5 doc).
+  // Sebelumnya store nemonik tidak disubscribe → menghemat read.
+  useEffect(() => {
+    markNemonikOpened()
+    setSyncNemonik(true)
   }, [])
 
   const stats = useMemo(

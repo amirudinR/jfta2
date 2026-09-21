@@ -21,5 +21,10 @@ export function useLiveSync(user, onApplied) {
       off()
       stopLiveSync()
     }
-  }, [user])
+    // P2: deps `[user?.uid]` (string), BUKAN `[user]` (objek). Token refresh
+    // Firebase mengemit objek User BARU dengan uid sama; memakai objek sebagai
+    // dep memicu re-attach SEMUA listener tiap refresh → read berulang tanpa
+    // manfaat. uid string stabil → effect tak jalan ulang saat refresh.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.uid])
 }

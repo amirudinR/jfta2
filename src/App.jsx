@@ -45,6 +45,7 @@ import { useAppSettings } from './hooks/useAppSettings'
 import { useWakeLock } from './hooks/useWakeLock'
 import { useScrollHeader } from './hooks/useScrollHeader'
 import { setSfxEnabled } from './lib/sfx'
+import { setSyncLevel } from './lib/live-sync'
 import { saveExamResult } from './lib/cloud-sync'
 import {
   getSavedLevel, saveLevel, pickQuote,
@@ -133,6 +134,7 @@ export default function App() {
   const setLevel = (lv) => {
     setLevelState(lv)
     saveLevel(lv)
+    setSyncLevel(lv) // re-subscribe store dinamis ke level baru (race-safe)
   }
 
   const cards = progress.perMaterial[material] || {}

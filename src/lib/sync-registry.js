@@ -118,8 +118,22 @@ function mergeDays(local, cloud) {
 
 // ── Registry ──
 // Semua key localStorage yang disync. dynamic() memperluas mode a2/n3/n2/n1.
-const dynamic = (key, path, merge) =>
-  HAFALAN_MODES.map((m) => ({ key: key(m.key), path: (uid) => path(uid, m.key), merge }))
+//
+// `scope` (P3/P4) menentukan KAPAN store di-subscribe oleh live-sync:
+//   'static'  → selalu (login): progress/level/targets/mastered/recall/history/ujian
+//   'level'   → hanya untuk LEVEL AKTIF (checked/hist/custom); ganti level =
+//               re-subscribe (setSyncLevel) → hemat 3×(N-1) listener per sesi
+//   'nemonik' → hanya setelah halaman Nemonik dibuka (setSyncNemonik) → hemat 5
+//               listener bagi user yang tak memakai Nemonik.
+// Tanpa scope: dianggap 'static' (backward-safe).
+const dynamic = (key, path, merge, scope = 'static') =>
+  HAFALAN_MODES.map((m) => ({
+    key: key(m.key),
+    path: (uid) => path(uid, m.key),
+    merge,
+    scope,
+    level: m.key, // level pemilik store dinamis (dipakai gating P3)
+  }))
 
 export const SYNC_STORES = [
   // progres SRS (bentuk lama, merge lama) — diurus mergeProgress dari cloud-sync
@@ -128,39 +142,47 @@ export const SYNC_STORES = [
     path: (uid) => `users/${uid}/progress/main`,
     // handler khusus di live-sync (mergeProgress), path berbasis dokumen.
     legacy: true,
+    scope: 'static',
   },
-  { key: 'hh2-targets', path: (uid) => `users/${uid}/hh/targets`, merge: lww },
-  { key: 'hh2-mastered', path: (uid) => `users/${uid}/hh/mastered`, merge: lww },
-  { key: 'hh2-recall-queue', path: (uid) => `users/${uid}/hh/recall-queue`, merge: lww },
-  { key: 'ankichou-exam-history', path: (uid) => `users/${uid}/hh/exam-history`, merge: lww },
-  { key: 'hafalan-jft-a2-history-v1', path: (uid) => `users/${uid}/hh/study-history`, merge: lww },
-  { key: 'ankichou-level', path: (uid) => `users/${uid}/hh/level`, merge: lww },
+  { key: 'hh2-targets', path: (uid) => `users/${uid}/hh/targets`, merge: lww, scope: 'static' },
+  { key: 'hh2-mastered', path: (uid) => `users/${uid}/hh/mastered`, merge: lww, scope: 'static' },
+  { key: 'hh2-recall-queue', path: (uid) => `users/${uid}/hh/recall-queue`, merge: lww, scope: 'static' },
+  { key: 'ankichou-exam-history', path: (uid) => `users/${uid}/hh/exam-history`, merge: lww, scope: 'static' },
+  { key: 'hafalan-jft-a2-history-v1', path: (uid) => `users/${uid}/hh/study-history`, merge: lww, scope: 'static' },
+  { key: 'ankichou-level', path: (uid) => `users/${uid}/hh/level`, merge: lww, scope: 'static' },
   // Nemonik Kanji (SRS terpisah dari SRS utama) — LWW: doc dengan `updated`
   // terbaru menang (paling sering hanya 1 perangkat yang belajar nemonik).
-  { key: 'hh2-nemonik-srs', path: (uid) => `users/${uid}/hh/nemonik-srs`, merge: lww },
-  { key: 'hh2-nemonik-streak', path: (uid) => `users/${uid}/hh/nemonik-streak`, merge: lww },
+  // scope 'nemonik' → hanya disubscribe setelah halaman Nemonik dibuka (P4).
+  { key: 'hh2-nemonik-srs', path: (uid) => `users/${uid}/hh/nemonik-srs`, merge: lww, scope: 'nemonik' },
+  { key: 'hh2-nemonik-streak', path: (uid) => `users/${uid}/hh/nemonik-streak`, merge: lww, scope: 'nemonik' },
   // Log harian (union per tanggal) & riwayat sesi (daftar; sisi terbaru menang).
-  { key: 'hh2-nemonik-daily-log', path: (uid) => `users/${uid}/hh/nemonik-daily-log`, merge: mergeDays },
-  { key: 'hh2-nemonik-sessions', path: (uid) => `users/${uid}/hh/nemonik-sessions`, merge: lww },
+  { key: 'hh2-nemonik-daily-log', path: (uid) => `users/${uid}/hh/nemonik-daily-log`, merge: mergeDays, scope: 'nemonik' },
+  { key: 'hh2-nemonik-sessions', path: (uid) => `users/${uid}/hh/nemonik-sessions`, merge: lww, scope: 'nemonik' },
   // Achievement/XP Nemonik.
-  { key: 'hh2-nemonik-achievements', path: (uid) => `users/${uid}/hh/nemonik-achievements`, merge: lww },
+  { key: 'hh2-nemonik-achievements', path: (uid) => `users/${uid}/hh/nemonik-achievements`, merge: lww, scope: 'nemonik' },
   ...dynamic(
     (m) => `hh2-checked-${m}`,
     (u, mk) => `users/${u}/hh/checked-${mk}`,
     mergeChecked,
+    'level',
   ),
   ...dynamic(
     (m) => `hh2-hist-${m}`,
     (u, mk) => `users/${u}/hh/history-${mk}`,
     mergeDays,
+    'level',
   ),
   ...dynamic(
     (m) => `hh2-custom-${m}`,
     (u, mk) => `users/${u}/hh/custom-${mk}`,
     mergeCustom,
+    'level',
   ),
 ]
 
 export function storeByKey(key) {
   return SYNC_STORES.find((s) => s.key === key)
 }
+
+// Scope efektif store (default 'static' bila tak ditandai).
+export const scopeOf = (store) => store.scope || 'static'

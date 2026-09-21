@@ -84,6 +84,17 @@ export const setAudioRows = (on) => {
   try { localStorage.setItem(AUDIO_ROWS_KEY, JSON.stringify(!!on)) } catch {}
 }
 
+// P4: penanda per-device "user pernah membuka halaman Nemonik". Dipakai
+// live-sync (via kunci ini langsung) untuk memutuskan apakah store nemonik
+// perlu di-subscribe sejak login. Perangkat yang belum pernah membuka Nemonik
+// tidak ikut menanggung 5 listener-nya → hemat read.
+// (Prefix `hh1-` SENGAJA bukan `hh2-` agar TIDAK ikut terhapus oleh
+// `resetDailyProgress()` — status ini soal perangkat, bukan progres belajar.)
+const NEMONIK_OPENED_KEY = 'hh1-nemonik-opened'
+export const markNemonikOpened = () => {
+  try { localStorage.setItem(NEMONIK_OPENED_KEY, JSON.stringify(true)) } catch {}
+}
+
 export const getHistory = (mode) => lsGet(`${STORAGE_PREFIX}-hist-${mode}`, {})
 
 // Daftar tanggal valid (YYYY-MM-DD) dari riwayat, terurut menaik. Menyaring

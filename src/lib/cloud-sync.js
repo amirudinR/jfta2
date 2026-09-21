@@ -1,37 +1,12 @@
 // Firestore sync — simpan & load progress per user.uid
 // Offline-first: localStorage tetap source of truth, Firestore = mirror
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
+//
+// P5: `syncToCloud`/`loadFromCloud` (jalur lama progress/main) DIHAPUS — sudah
+// tidak dipakai sejak live-sync mengambil alih (store progress/main diurus
+// live-sync via registry `legacy`). Menyisakannya hanya jadi kode mati + pintu
+// masuk read/getDoc yang tak terkontrol.
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from './firebase'
-
-const DEBOUNCE_MS = 2000
-let timer = null
-
-// ── Save to Firestore (debounced) ──
-export function syncToCloud(uid, data) {
-  if (!uid) return
-  clearTimeout(timer)
-  timer = setTimeout(async () => {
-    try {
-      const ref = doc(db, 'users', uid, 'progress', 'main')
-      await setDoc(ref, { ...data, syncedAt: serverTimestamp() }, { merge: true })
-    } catch (e) {
-      console.warn('Cloud sync failed:', e.message)
-    }
-  }, DEBOUNCE_MS)
-}
-
-// ── Load from Firestore ──
-export async function loadFromCloud(uid) {
-  if (!uid) return null
-  try {
-    const ref = doc(db, 'users', uid, 'progress', 'main')
-    const snap = await getDoc(ref)
-    return snap.exists() ? snap.data() : null
-  } catch (e) {
-    console.warn('Cloud load failed:', e.message)
-    return null
-  }
-}
 
 // ── Save user profile on login ──
 export async function saveUserProfile(user) {

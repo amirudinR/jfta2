@@ -52,10 +52,63 @@ function cloudOf(store, snap) {
 // ── State engine (satu instance aktif) ──
 let uid = null
 let running = false
-const unsubs = new Set()
+// P3/P4: peta key→unsub agar bisa pasang/lepas SELECTIF per scope. Sebelumnya
+// `unsubs` = Set buta semua store; kini kita tahu listener mana milik store mana
+// sehingga gating level/nemonik bisa melepas tanpa mengganggu yang lain.
+const attached = new Map()
 const dirty = new Set()
 let timer = null
 let stopLocalWatch = null
+// Level dinamis yang sedang terpasang (a2/n3/n2/n1) & status listener nemonik.
+let attachedLevel = null
+let nemonikAttached = false
+
+// Baca level aktif dari localStorage tanpa import (hindari circular dep ke
+// hafalan-storage). Nilai tak dikenal → 'a2' (default app).
+function readActiveLevel() {
+  try {
+    const r = localStorage.getItem('ankichou-level')
+    const v = r ? JSON.parse(r) : null
+    return ['a2', 'n3', 'n2', 'n1'].includes(v) ? v : 'a2'
+  } catch { return 'a2' }
+}
+
+// Store ini termasuk scope yang sedang aktif? (static selalu.)
+function isStoreActive(store) {
+  const scope = store.scope || 'static'
+  if (scope === 'static') return true
+  if (scope === 'nemonik') return nemonikAttached
+  if (scope === 'level') return store.level === attachedLevel
+  return true
+}
+
+function attachStore(store) {
+  if (!running || !uid) return
+  if (attached.has(store.key)) return // sudah terpasang → jangan dobel
+  const ref = doc(db, store.path(uid))
+  const un = onSnapshot(
+    ref,
+    (snap) => applyCloud(store, cloudOf(store, snap)),
+    (err) => console.warn('[live-sync] Snapshot error:', store.key, err?.message),
+  )
+  attached.set(store.key, un)
+}
+
+function detachStore(key) {
+  const un = attached.get(key)
+  if (!un) return
+  try { un() } catch {}
+  attached.delete(key)
+}
+
+// Terapkan scope store terhadap state level/nemonik saat ini: pasang yang aktif,
+// lepas yang tidak. Dipanggil start & tiap setSyncLevel/setSyncNemonik.
+function applyScopes() {
+  for (const store of SYNC_STORES) {
+    if (isStoreActive(store)) attachStore(store)
+    else detachStore(store.key)
+  }
+}
 
 function flushNow() {
   if (dirty.size) flushDirty()
@@ -224,15 +277,12 @@ export function startLiveSync(userUid) {
   uid = userUid
   running = true
 
-  for (const store of SYNC_STORES) {
-    const ref = doc(db, store.path(uid))
-    const un = onSnapshot(
-      ref,
-      (snap) => applyCloud(store, cloudOf(store, snap)),
-      (err) => console.warn('[live-sync] Snapshot error:', store.key, err?.message),
-    )
-    unsubs.add(un)
-  }
+  // P3: default level dinamis mengikuti level tersimpan (rotasi item harian
+  // mengikuti level aktif). applyScopes lalu memasang static + level itu +
+  // (nemonik hanya bila pernah dibuka).
+  attachedLevel = readActiveLevel()
+  nemonikAttached = hasOpenedNemonikLocal()
+  applyScopes()
 
   stopLocalWatch = onStoreChanged(handleLocalChange)
 
@@ -252,8 +302,10 @@ export function stopLiveSync() {
   if (!running) return
   if (timer) clearTimeout(timer)
   timer = null
-  for (const un of unsubs) { try { un() } catch {} }
-  unsubs.clear()
+  for (const un of attached.values()) { try { un() } catch {} }
+  attached.clear()
+  attachedLevel = null
+  nemonikAttached = false
   if (stopLocalWatch) { stopLocalWatch(); stopLocalWatch = null }
   window.removeEventListener('online', onWindowOnline)
   document.removeEventListener('visibilitychange', onVisibility)
@@ -264,4 +316,30 @@ export function stopLiveSync() {
 
 export function isSyncRunning() {
   return running
+}
+
+// ── P3: gating level ──
+// Ganti level → lepas store dinamis level lama, pasang level baru. Race-safe:
+// idempoten (attached Map mencegah dobel), dan menerima level yang sama (no-op).
+// Aman dipanggil berkali-kali cepat berturut-turut: tiap panggilan menghitung
+// ulang HANYA dari store yang ada di registry + state `attachedLevel` terbaru,
+// jadi tak ada data "nyasar" ke level yang salah.
+export function setSyncLevel(level) {
+  const lv = ['a2', 'n3', 'n2', 'n1'].includes(level) ? level : 'a2'
+  attachedLevel = lv
+  if (running) applyScopes()
+}
+
+// ── P4: gating nemonik ──
+// Store nemonik hanya disubscribe setelah user pertama membuka halaman Nemonik.
+// Perangkat yang pernah membuka (flag localStorage) tetap ikut sejak awal agar
+// progress yang sudah ada tidak "tertinggal" sync — hanya perangkat baru hemat.
+export function setSyncNemonik(on) {
+  nemonikAttached = on !== false
+  if (running) applyScopes()
+}
+
+// Baca flag "pernah buka nemonik" tanpa import hafalan-storage (hindari circular).
+function hasOpenedNemonikLocal() {
+  try { return localStorage.getItem('hh1-nemonik-opened') === 'true' } catch { return false }
 }
