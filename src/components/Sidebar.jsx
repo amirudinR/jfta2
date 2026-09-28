@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import {
   CalendarCheck, GraduationCap, FlaskConical,
-  History, User, X, BarChart3, Brain,
+  History, User, X, BarChart3, Brain, BookOpenText,
 } from 'lucide-react'
 
 const NAV_ITEMS = [
@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { key: 'kartu',    label: 'Latihan',         icon: GraduationCap, desc: 'Kartu, kuis, sprint' },
   { key: 'nemonik',  label: 'Nemonik Kanji',   icon: Brain,         desc: 'Belajar kanji via gambar' },
   { key: 'ujian-baru', label: 'Ujian',         icon: FlaskConical,  desc: 'Uji kemampuanmu' },
+  { key: 'lpk',      label: 'Hafalan Kanji LPK', icon: BookOpenText, desc: '613 kanji LPK' },
   { key: 'recall',   label: 'Recall',           icon: History,       desc: 'Ulangi materi lampau' },
   { key: 'kemampuan',label: 'Kemampuan',        icon: BarChart3,     desc: 'Statistik & progres' },
   { key: 'profil',   label: 'Profil',           icon: User,          desc: 'Akun & pengaturan' },
@@ -45,8 +46,8 @@ export default function Sidebar({ open, onClose, active, onChange, user, recallD
   }
 
   const isActive = (key) => {
-    // Nemonik punya menu sendiri — jangan biarkan tab Latihan ikut aktif.
-    if (key === 'kartu') return LATIHAN_MODES.includes(active) && active !== 'nemonik'
+    // Nemonik & LPK punya menu sendiri — jangan biarkan tab Latihan ikut aktif.
+    if (key === 'kartu') return LATIHAN_MODES.includes(active) && !['nemonik', 'lpk'].includes(active)
     return active === key
   }
 

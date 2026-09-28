@@ -69,6 +69,28 @@
 }
 
 .dm-open-nemonik:hover { background: var(--shu-dark); }
+
+/* Pintu masuk Hafalan Kanji LPK (613 kanji) - warna shu seperti Nemonik,
+   hanya label yang beda supaya dua tombol mudah dibedakan. */
+.dm-open-lpk {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--ai-800);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all .18s;
+}
+
+.dm-open-lpk:hover { filter: brightness(1.15); }
+.dm-open-lpk:active { transform: scale(.98); }
+
 .dm-open-nemonik:active { transform: scale(.98); }
 
 .dm-title {

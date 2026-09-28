@@ -283,6 +283,7 @@ export default function App() {
             onGoHafalan={() => changeMode('harian')}
             onGoKotobaLevel={() => openKotobaLevel(level)}
             onGoNemonik={() => changeMode('nemonik')}
+            onGoLPK={() => changeMode('lpk')}
             showRomaji={prefs.showRomaji}
             onToggleRomaji={() => setPrefs({ showRomaji: !prefs.showRomaji })}
           />
@@ -375,6 +376,23 @@ export default function App() {
             label={mode === 'kotoba-n2' ? 'Kotoba N2' : mode === 'kotoba-n1' ? 'Kotoba N1' : 'Kotoba N3'}
             hankoText={mode.replace('kotoba-n', '').toUpperCase()}
             cards={progress.perMaterial[mode] || {}}
+            prefs={prefs}
+            onToggleRomaji={() => setPrefs({ showRomaji: !prefs.showRomaji })}
+            onGrade={handleGrade}
+            onBack={() => changeMode('harian')}
+          />
+        )
+      case 'lpk':
+        // Halaman khusus materi hafalan Kanji LPK (613 kanji, sumber
+        // KANJI_JFT_1). Pakai komponen standalone yang sama dengan
+        // halaman Kotoba-level; warnanya dibedakan lewat hanko 'LPK'.
+        return (
+          <KotobaLevel
+            material="kanji"
+            label="Kanji LPK"
+            hankoText="LPK"
+            unit="kanji"
+            cards={progress.perMaterial.kanji || {}}
             prefs={prefs}
             onToggleRomaji={() => setPrefs({ showRomaji: !prefs.showRomaji })}
             onGrade={handleGrade}

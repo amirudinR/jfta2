@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import {
   Search, CheckSquare, Square, ChevronLeft, Filter,
-  ArrowUpDown, X, GraduationCap, Brain, Languages,
+  ArrowUpDown, X, GraduationCap, Brain, Languages, BookOpenText,
 } from 'lucide-react'
 import {
   HAFALAN_MODES, getMastered, toggleMastered, countMastered,
@@ -13,7 +13,7 @@ import { DetailModal } from './hafalan/DetailModal'
 
 const PAGE_SIZE = 50
 
-export default function DaftarMateri({ onGoHafalan, onGoKotobaLevel, onGoNemonik, level = 'a2', showRomaji = false, onToggleRomaji = () => {} }) {
+export default function DaftarMateri({ onGoHafalan, onGoKotobaLevel, onGoNemonik, onGoLPK, level = 'a2', showRomaji = false, onToggleRomaji = () => {} }) {
   const activeMode = level
   const [tab, setTab] = useState('kotoba')
   const [query, setQuery] = useState('')
@@ -110,6 +110,15 @@ export default function DaftarMateri({ onGoHafalan, onGoKotobaLevel, onGoNemonik
       {onGoKotobaLevel && activeMode !== 'a2' && (
         <button className="dm-open-kotoba" onClick={onGoKotobaLevel}>
           <GraduationCap size={16} /> Latihan Kotoba {modeInfo?.label} (Kartu/Kuis)
+        </button>
+      )}
+
+      {/* Hafalan Kanji LPK: 613 kanji dari daftar LPK (KANJI_JFT_1).
+          Halaman mandiri (Kartu/Kuis/Ulangi/Daftar) - berdiri sendiri dari
+          tab Kanji di bawah, jadi progres SRS-nya tetap sama (material 'kanji'). */}
+      {onGoLPK && (
+        <button className="dm-open-lpk" onClick={onGoLPK}>
+          <BookOpenText size={16} /> Hafalan Kanji LPK (613 kanji)
         </button>
       )}
 

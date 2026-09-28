@@ -43,6 +43,7 @@ const VALID_MODES = [
   'harian', 'materi', 'kartu', 'ulangi', 'kuis', 'sprint',
   'ujian-baru', 'recall', 'daftar', 'kemampuan', 'nemonik',
   'kotoba-n3', 'kotoba-n2', 'kotoba-n1', 'referensi', 'profil',
+  'lpk',
 ]
 
 export function getSavedMode() {
@@ -80,7 +81,7 @@ export const LATIHAN_TAB_MODES = [
 export const PERMATERI_MODES = ['kartu', 'kuis', 'ulangi', 'sprint', 'daftar', 'referensi']
 
 // Mode yang menyembunyikan LevelStrip di atas konten.
-export const HIDE_LEVEL_STRIP_MODES = ['profil', 'ujian-baru', 'recall', 'kotoba-n3', 'kotoba-n2', 'kotoba-n1', 'nemonik']
+export const HIDE_LEVEL_STRIP_MODES = ['profil', 'ujian-baru', 'recall', 'kotoba-n3', 'kotoba-n2', 'kotoba-n1', 'nemonik', 'lpk']
 
 // Mode latihan kartu (Controls + ModeBar aktif).
 export const CONTROL_MODES = ['kartu', 'ulangi', 'kuis', 'sprint']

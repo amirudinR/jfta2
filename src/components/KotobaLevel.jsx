@@ -19,7 +19,7 @@ const TABS = [
   { key: 'daftar', label: 'Daftar Hafal', icon: <List size={14} /> },
 ]
 
-export default function KotobaLevel({ material, label, hankoText, cards, prefs, onToggleRomaji, onGrade, onBack }) {
+export default function KotobaLevel({ material, label, hankoText, cards, prefs, onToggleRomaji, onGrade, onBack, unit = 'kata' }) {
   const allEntries = useMemo(() => byMaterial(material), [material])
   const [tab, setTab] = useState('kartu')
   const [lessons, setLessons] = useState(null)
@@ -94,13 +94,13 @@ export default function KotobaLevel({ material, label, hankoText, cards, prefs, 
           <span className={`hanko hanko-${hankoText}`}>{hankoText}</span>
           <div>
             <div className="brand">{label}</div>
-            <div className="tagline">{label} · {allEntries.length} kata · {groups.length} pelajaran</div>
+            <div className="tagline">{label} · {allEntries.length} {unit} · {groups.length} pelajaran</div>
           </div>
         </div>
         <div className="stat-chips">
           <div className="stat">
             <span className="stat-num">{allEntries.length}</span>
-            <span className="stat-lbl">Total kata</span>
+            <span className="stat-lbl">Total {unit}</span>
           </div>
           <div className="stat">
             <span className="stat-num hafal">{hafalCount}</span>
