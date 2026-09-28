@@ -19,7 +19,7 @@ const TABS = [
   { key: 'daftar', label: 'Daftar Hafal', icon: <List size={14} /> },
 ]
 
-export default function KotobaLevel({ material, label, hankoText, cards, prefs, onToggleRomaji, onGrade, onBack, unit = 'kata' }) {
+export default function KotobaLevel({ material, label, hankoText, cards, prefs, onToggleRomaji, onGrade, onBack, unit = 'kata', sequential = false }) {
   const allEntries = useMemo(() => byMaterial(material), [material])
   const [tab, setTab] = useState('kartu')
   const [lessons, setLessons] = useState(null)
@@ -75,7 +75,7 @@ export default function KotobaLevel({ material, label, hankoText, cards, prefs, 
         return <DaftarHafal entries={allEntries} cards={cards} />
       default:
         return (
-          <Kartu {...common} onGrade={grade} onReshuffle={() => setDeckVersion((v) => v + 1)} deckKey={deckVersion} onToggleRomaji={onToggleRomaji} />
+          <Kartu {...common} onGrade={grade} onReshuffle={() => setDeckVersion((v) => v + 1)} deckKey={deckVersion} onToggleRomaji={onToggleRomaji} sequential={sequential} />
         )
     }
   }

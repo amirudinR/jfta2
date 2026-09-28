@@ -392,6 +392,7 @@ export default function App() {
             label="Kanji LPK"
             hankoText="LPK"
             unit="kanji"
+            sequential
             cards={progress.perMaterial.kanji || {}}
             prefs={prefs}
             onToggleRomaji={() => setPrefs({ showRomaji: !prefs.showRomaji })}

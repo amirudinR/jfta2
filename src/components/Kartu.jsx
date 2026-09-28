@@ -25,6 +25,9 @@ export default function Kartu({
   onToggleRomaji = () => {},
   deckKey = 0,
   onlyLearning = false,
+  // sequential:deck TIDAK dikocok, mengikuti urutan data sumber (mis. no 1..613
+  // pada daftar LPK). Kartu lain tetap diacak seperti sebelumnya.
+  sequential = false,
 }) {
   const deck = useMemo(() => {
     const list = onlyLearning
@@ -33,10 +36,10 @@ export default function Kartu({
           return c && !isMastered(c)
         })
       : entries
-    return shuffle(list)
+    return sequential ? list : shuffle(list)
     // cards sengaja tidak di-depend: deck stabil selama sesi.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entries, onlyLearning, deckKey])
+  }, [entries, onlyLearning, deckKey, sequential])
 
   const [idx, setIdx] = useState(0)
   const [flipped, setFlipped] = useState(false)
@@ -127,9 +130,15 @@ export default function Kartu({
           <span className="kin-count">{session.belum}</span> perlu diulang
         </p>
         <div className="row mt no-print">
-          <button className="primary-btn" onClick={onReshuffle}>
-            Kocok ulang deck
-          </button>
+          {sequential ? (
+            <button className="primary-btn" onClick={onReshuffle}>
+              Ulangi dari awal
+            </button>
+          ) : (
+            <button className="primary-btn" onClick={onReshuffle}>
+              Kocok ulang deck
+            </button>
+          )}
         </div>
       </div>
     )
@@ -224,6 +233,7 @@ export default function Kartu({
         </div>
         <span className="plabel">
           {Math.min(idx + 1, deck.length)} / {deck.length}
+          {sequential ? ` · No. ${Number(entry.id) + 1}` : ''}
         </span>
         <button className="nav-chev" onClick={() => nav(1)} title="Berikutnya (→)" aria-label="Kartu berikutnya">
           ›
